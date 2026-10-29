@@ -384,42 +384,62 @@ function toolWall(len = 3.0, seed = 1) {
 }
 function laptop(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.018, 0.24, C(0x2f3337, { metalness: 0.5 }), 0, 0, 0); const sc = new THREE.Group(); sc.position.set(0, 0.018, -0.12); sc.rotation.x = -0.25; g.add(sc); B(sc, 0.34, 0.22, 0.01, C(0x2f3337, { metalness: 0.5 }), 0, 0, 0); screen(sc, 0.31, 0.19, seed % 2 ? 'diag' : 'code', seed, 0, 0.015, 0.006); return g; }
 // Dinamică – după imaginea concept: punte completă pe platformă (suspensii coilover), cușcă de încercare pneuri, turn de încercare amortizoare
-function halfCarRig() {
-  const g = new THREE.Group();
-  B(g, 2.7, 0.08, 1.7, C(0x5d6a75, { metalness: 0.5 }), 0, 0, 0); for (const z of [-0.6, 0.6]) B(g, 2.5, 0.1, 0.12, C(0x434c55, { metalness: 0.5 }), 0, 0.08, z);
-  B(g, 0.6, 0.25, 0.4, C(0xa3aab0, { metalness: 0.7 }), 0, 0.42, 0);                                // carter diferențial / subcadru
-  for (const z of [-0.25, 0.25]) Cy(g, 0.04, 2.0, MAT.dark, 0, 0.5, z, 'x');
+// roată reală (anvelopă + jantă din aliaj) preluată din modelul 3D al autoturismului; axa roții = axa locală z
+function realWheel(parent, x, y, z, ry = 0, scale = 1) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.scale.setScalar(scale); parent.add(g);
+  CAR_MODEL.then(src => { if (!src) return; const w = src.getObjectByName('wheel_FL'); if (!w) return; const c = w.clone(true); c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.traverse(o => { if (o.isMesh) { o.castShadow = true; if (CARMAT[o.material.name]) o.material = CARMAT[o.material.name](); } }); g.add(c); });
+  return g;
+}
+function halfCarRig() {   // punte completă pe platformă de încercări (după imaginea concept „Dinamică”)
+  const g = new THREE.Group(); const fr = C(0x6b747c, { metalness: 0.55, roughness: 0.35 }), dark = C(0x2a2e33, { metalness: 0.5 });
+  B(g, 2.8, 0.06, 1.6, C(0x8a9399, { metalness: 0.5, roughness: 0.4 }), 0, 0, 0);
+  for (const z of [-0.7, 0.7]) B(g, 2.8, 0.12, 0.1, fr, 0, 0.06, z); for (const x of [-1.3, 0, 1.3]) B(g, 0.1, 0.12, 1.5, fr, x, 0.06, 0);
+  B(g, 0.5, 0.22, 0.42, ALU2, 0, 0.36, 0); B(g, 0.9, 0.08, 0.3, dark, 0, 0.3, 0);                   // subcadru + carter
   for (const xs of [-1, 1]) {
-    const t = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.1, 14, 32), MAT.rubber); t.rotation.y = Math.PI / 2; t.position.set(xs * 1.15, 0.43, 0); t.scale.z = 1.3; g.add(t);
-    Cy(g, 0.21, 0.2, C(0xb9bdc2, { metalness: 0.85, roughness: 0.25 }), xs * 1.15, 0.43, 0, 'x', 24);
-    B(g, 0.35, 0.05, 0.35, C(0x2f3438), xs * 1.15, 0.08, 0);                                         // platformă excitatoare
-    Cy(g, 0.03, 0.55, C(0x1f4fa8), xs * 0.8, 0.75, 0, 'y'); 
-    const sp = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.012, 6, 16), C(0x1f4fa8)); for (let i = 0; i < 7; i++) { const s2 = sp.clone(); s2.rotation.x = Math.PI / 2; s2.position.set(xs * 0.8, 0.62 + i * 0.05, 0); g.add(s2); }
-    B(g, 0.6, 0.05, 0.08, MAT.dark, xs * 0.55, 0.45, 0.15); B(g, 0.6, 0.05, 0.08, MAT.dark, xs * 0.55, 0.45, -0.15);   // brațe
+    B(g, 0.44, 0.06, 0.44, dark, xs * 1.12, 0.06, 0); Cy(g, 0.06, 0.12, C(0x1f4fa8), xs * 1.12, 0.12, 0);   // platformă excitatoare + actuator
+    realWheel(g, xs * 1.12, 0.33 + 0.18, 0, xs > 0 ? Math.PI / 2 : -Math.PI / 2);
+    Cy(g, 0.06, 0.08, GEARM, xs * 0.98, 0.51, 0, 'x', 18);                                           // butuc / fuzetă
+    tube(g, [xs * 0.95, 0.4, 0.14], [xs * 0.25, 0.36, 0.17], 0.025, dark); tube(g, [xs * 0.95, 0.4, -0.14], [xs * 0.25, 0.36, -0.17], 0.025, dark);   // brațe inferioare
+    tube(g, [xs * 0.95, 0.6, 0], [xs * 0.3, 0.55, 0.12], 0.02, dark);                               // braț superior
+    Cy(g, 0.025, 0.42, C(0x1a1c1f, { metalness: 0.5 }), xs * 0.78, 0.45, 0); Cy(g, 0.012, 0.22, GEARM, xs * 0.78, 0.87, 0);   // amortizor
+    helix(g, 0.06, 0.34, 7, 0.009, C(0x1f4fa8, { metalness: 0.4, roughness: 0.4 }), xs * 0.78, 0.55, 0);   // arc coilover albastru
+    Cy(g, 0.075, 0.02, C(0xb3261e), xs * 0.78, 0.54, 0); Cy(g, 0.075, 0.02, C(0xb3261e), xs * 0.78, 0.9, 0);
+    tube(g, [xs * 0.78, 1.08, 0], [xs * 0.4, 0.62, 0], 0.03, fr);                                   // turn de prindere
   }
-  plate(g, 'Stand suspensie – punte completă', 'excitație verticală · confort · ținută de drum', 0.9, 0, 0.2, 0.86, 0, '#1d2b3a');
+  for (const x of [-0.35, 0.35]) tube(g, [x, 0.62, 0], [x * 2.0, 1.08, 0], 0.03, fr);
+  B(g, 1.7, 0.06, 0.08, fr, 0, 1.08, 0);
+  for (let i = 0; i < 4; i++) tube(g, [-0.2 + i * 0.12, 0.47, 0.18], [-0.6 + i * 0.3, 0.06, 0.75], 0.006, C(0xd32f2f));   // cabluri traductoare
+  plate(g, 'Stand suspensie – punte completă', 'excitație verticală · confort · ținută de drum', 0.9, 0, 0.2, 0.81, 0, '#1d2b3a');
   return g;
 }
-function tireCage() {
-  const g = new THREE.Group(); const blue = C(0x1f3f78, { metalness: 0.3 });
+function tireCage() {   // stand de încercare a pneurilor: dulap albastru pe roți, cușcă din plasă, roată reală
+  const g = new THREE.Group(); const blue = C(0x1f3f78, { metalness: 0.3, roughness: 0.45 }), fr = C(0xc9cdd1, { metalness: 0.75, roughness: 0.3 });
   B(g, 1.2, 0.85, 0.9, blue, 0, 0.12, 0); for (const [x, z] of [[-0.55, -0.4], [0.55, -0.4], [-0.55, 0.4], [0.55, 0.4]]) Cy(g, 0.05, 0.04, MAT.rubber, x, 0.02, z, 'x', 12);
-  B(g, 0.08, 0.08, 0.03, MAT.yellow, 0.4, 0.8, 0.46); Cy(g, 0.03, 0.03, MAT.red, 0.4, 0.84, 0.48, 'z', 16);
-  B(g, 1.25, 0.04, 0.95, MAT.steel, 0, 0.97, 0);
-  const t = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.13, 16, 36), MAT.rubber); t.rotation.y = Math.PI / 2; t.position.set(-0.15, 1.45, 0); t.scale.z = 1.4; g.add(t);
-  Cy(g, 0.26, 0.24, C(0x9ca3a8, { metalness: 0.8 }), -0.15, 1.45, 0, 'x', 24);
-  const mesh = new THREE.MeshStandardMaterial({ map: T.pegboard([3, 3]), color: 0xd0d4d8, metalness: 0.6, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
-  for (const [w, h, d, x, y, z] of [[1.2, 0.9, 0.01, 0, 1.01, 0.45], [1.2, 0.9, 0.01, 0, 1.01, -0.45], [0.01, 0.9, 0.9, 0.6, 1.01, 0], [0.01, 0.9, 0.9, -0.6, 1.01, 0], [1.2, 0.01, 0.9, 0, 1.9, 0]]) B(g, w, h, d, mesh, x, y, z);
-  for (const [x, z] of [[-0.6, -0.45], [0.6, -0.45], [-0.6, 0.45], [0.6, 0.45]]) B(g, 0.03, 0.92, 0.03, MAT.steel, x, 1.0, z);
-  plate(g, 'Stand încercare pneuri', 'rigiditate · rezistență la rulare', 0.6, 0, 0.55, 0.456, 0, '#1f3f78');
+  for (const [w, h, x, y] of [[0.4, 0.5, -0.3, 0.3], [0.4, 0.5, 0.25, 0.3]]) B(g, w, h, 0.01, C(0x2a4f8f, { metalness: 0.3 }), x, y, 0.455);
+  B(g, 0.08, 0.08, 0.03, MAT.yellow, 0.45, 0.82, 0.46); Cy(g, 0.03, 0.03, MAT.red, 0.45, 0.86, 0.48, 'z', 16);
+  B(g, 1.25, 0.04, 0.95, fr, 0, 0.97, 0);
+  realWheel(g, -0.1, 1.33, 0, Math.PI / 2, 1.0);
+  Cy(g, 0.12, 0.35, GEARM, -0.1, 1.07, 0, 'x', 24);                                                   // tambur de încărcare
+  const meshM = new THREE.MeshStandardMaterial({ map: T.perfAlu([6, 6]), metalness: 0.5, roughness: 0.4, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false });
+  for (const [w, h, d, x, y, z] of [[1.2, 0.95, 0.01, 0, 1.01, 0.45], [1.2, 0.95, 0.01, 0, 1.01, -0.45], [0.01, 0.95, 0.9, 0.6, 1.01, 0], [0.01, 0.95, 0.9, -0.6, 1.01, 0], [1.2, 0.01, 0.9, 0, 1.96, 0]]) B(g, w, h, d, meshM, x, y, z);
+  for (const [x, z] of [[-0.6, -0.45], [0.6, -0.45], [-0.6, 0.45], [0.6, 0.45]]) B(g, 0.035, 0.97, 0.035, fr, x, 1.0, z);
+  for (const y of [1.48, 1.96]) for (const z of [-0.45, 0.45]) B(g, 1.2, 0.03, 0.03, fr, 0, y, z);
+  plate(g, 'Stand încercare pneuri', 'rigiditate · rezistență la rulare', 0.6, 0, 0.62, 0.462, 0, '#1f3f78');
   return g;
 }
-function shockTower() {
-  const g = new THREE.Group(); const fr = C(0xb4bbc1, { metalness: 0.7, roughness: 0.3 });
-  B(g, 0.9, 0.08, 0.7, C(0x434c55, { metalness: 0.5 }), 0, 0, 0);
-  for (const x of [-0.38, 0.38]) B(g, 0.06, 1.9, 0.06, fr, x, 0.08, 0); B(g, 0.82, 0.08, 0.1, fr, 0, 1.95, 0); B(g, 0.76, 0.06, 0.12, fr, 0, 1.25, 0);
-  Cy(g, 0.03, 0.55, MAT.dark, 0, 0.6, 0); const sp = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.013, 6, 16), MAT.red); for (let i = 0; i < 8; i++) { const s2 = sp.clone(); s2.rotation.x = Math.PI / 2; s2.position.y = 0.7 + i * 0.05; g.add(s2); }
-  Cy(g, 0.08, 0.35, MAT.blue, 0, 0.2, 0); B(g, 0.3, 0.22, 0.2, C(0xe6e9ea), 0.6, 0.85, 0); screen(g, 0.2, 0.12, 'scope', 61, 0.6, 0.95, 0.105);
-  plate(g, 'Stand încercare amortizoare', 'diagramă forță–deplasare', 0.6, 0, 0.3, 0.36, 0, '#1d2b3a');
+function shockTower() {   // mașină de încercat amortizoare (turn cu traversă, actuator, celulă de forță)
+  const g = new THREE.Group(); const fr = C(0xc9cdd1, { metalness: 0.75, roughness: 0.3 });
+  B(g, 0.9, 0.1, 0.7, C(0x434c55, { metalness: 0.5 }), 0, 0, 0);
+  for (const x of [-0.36, 0.36]) Cy(g, 0.035, 1.9, fr, x, 0.1, 0, 'y', 16);
+  B(g, 0.86, 0.12, 0.16, C(0x1f3f78, { metalness: 0.4 }), 0, 1.95, 0); B(g, 0.8, 0.08, 0.14, fr, 0, 1.3, 0);
+  Cy(g, 0.06, 0.08, C(0x9aa0a6, { metalness: 0.8 }), 0, 1.22, 0);                                      // celulă de forță
+  Cy(g, 0.022, 0.5, C(0x1a1c1f, { metalness: 0.5 }), 0, 0.5, 0); Cy(g, 0.011, 0.25, GEARM, 0, 0.98, 0);
+  helix(g, 0.065, 0.38, 8, 0.01, C(0xc0392b, { roughness: 0.4, metalness: 0.3 }), 0, 0.62, 0);        // arc roșu
+  Cy(g, 0.08, 0.02, MAT.dark, 0, 0.6, 0); Cy(g, 0.08, 0.02, MAT.dark, 0, 1.0, 0);
+  Cy(g, 0.08, 0.38, C(0x1f4fa8, { metalness: 0.4 }), 0, 0.1, 0);                                       // actuator hidraulic
+  B(g, 0.32, 0.24, 0.22, C(0xe6e9ea), 0.68, 0.8, 0); screen(g, 0.2, 0.12, 'scope', 61, 0.68, 0.9, 0.115);
+  tube(g, [0.52, 0.9, 0], [0.05, 1.2, 0], 0.006, C(0x111111));
+  plate(g, 'Stand încercare amortizoare', 'diagramă forță–deplasare', 0.6, 0, 0.35, 0.36, 0, '#1d2b3a');
   return g;
 }
 function electricalPanel() { const g = new THREE.Group(); B(g, 0.8, 1.8, 0.3, C(0xd5d8da, { metalness: 0.3 }), 0, 0.1, 0); B(g, 0.01, 0.4, 0.02, MAT.dark, 0.32, 1.0, 0.16); plate(g, 'TABLOU ELECTRIC GENERAL', '⚡ 400/230 V', 0.6, 0, 1.6, 0.155, 0, '#d32f2f'); return g; }
@@ -451,7 +471,7 @@ function displayTable(items, title) {
 function stool() { const g = new THREE.Group(); Cy(g, 0.17, 0.04, MAT.wood, 0, 0.62, 0, 'y', 24); for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.78; tube(g, [Math.cos(a) * 0.13, 0.62, Math.sin(a) * 0.13], [Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2], 0.014, MAT.dark); } Cy(g, 0.16, 0.015, MAT.dark, 0, 0.25, 0, 'y', 20); for (const [x, z] of [[0.2, 0], [-0.2, 0], [0, 0.2], [0, -0.2]]) Cy(g, 0.025, 0.02, MAT.rubber, x, 0.0, z); return g; }
 function steeringRack() { const g = new THREE.Group(); Cy(g, 0.035, 1.1, MAT.steel, 0, 0.08, 0, 'x'); Cy(g, 0.05, 0.25, MAT.dark, -0.2, 0.08, 0, 'x'); Cy(g, 0.015, 0.3, MAT.steel, -0.2, 0.08, 0, 'y'); return g; }
 function wheelScales() { const g = new THREE.Group(); for (const [x, z] of [[-1.25, -0.75], [1.25, -0.75], [-1.25, 0.75], [1.25, 0.75]]) { B(g, 0.5, 0.06, 0.5, C(0x2f3b45, { metalness: 0.5 }), x, 0, z); B(g, 0.46, 0.006, 0.46, MAT.yellow, x, 0.06, z); } B(g, 0.3, 0.2, 0.08, C(0xeeeeee), 0, 0, -1.3); plate(g, 'Cântare roți', 'centru de greutate · sarcini pe punți', 0.6, 0, 0.5, -1.25, 0, '#1d2b3a'); return g; }
-function tireRack() { const g = new THREE.Group(); for (const x of [-0.7, 0.7]) B(g, 0.05, 1.3, 0.5, MAT.grey, x, 0, 0); for (let i = 0; i < 5; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.1, 10, 24), MAT.rubber); t.position.set(-0.5 + i * 0.25, 0.4, 0); t.rotation.y = Math.PI / 2 - 0.2; g.add(t); } B(g, 1.4, 0.04, 0.5, MAT.grey, 0, 0.0, 0); return g; }
+function tireRack() { const g = new THREE.Group(); const fr = C(0x6b747c, { metalness: 0.55 }); for (const x of [-0.75, 0.75]) B(g, 0.05, 1.6, 0.5, fr, x, 0, 0); for (const y of [0.06, 0.76]) B(g, 1.5, 0.04, 0.5, fr, 0, y, 0); for (const y of [0.42, 1.12]) for (const x of [-0.45, 0.0, 0.45]) realWheel(g, x, y, 0, Math.PI / 2 - 0.3, 1); return g; }
 function brakeHydStand() {
   const g = new THREE.Group(); B(g, 1.6, 0.06, 0.6, MAT.steel, 0, 0.9, 0); B(g, 1.6, 0.9, 0.6, C(0x34495e, { metalness: 0.3 }), 0, 0, 0);
   B(g, 0.05, 0.4, 0.06, MAT.dark, -0.7, 0.95, 0.2); Cy(g, 0.05, 0.3, MAT.alu, -0.45, 1.1, 0.0, 'x'); Cy(g, 0.12, 0.1, MAT.dark, -0.15, 1.1, 0.0, 'x');

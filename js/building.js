@@ -313,6 +313,10 @@ export function buildBuilding(scene) {
   for (let i = 0; i < 7; i++) for (let j = 0; j < 4; j++) {
     const g = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.04, 3.4), pv); g.position.set(2.2 + i * 3.1, ROOF + 0.45, -(2.6 + j * 4.2)); g.rotation.x = 0.18; g.castShadow = true; root.add(g);
   }
+  // echipamente pe acoperiș (vizibile din exterior): centrală de tratare a aerului, guri de ventilație, coș
+  const roofEq = new THREE.MeshStandardMaterial({ color: 0xc9ced2, metalness: 0.6, roughness: 0.4 });
+  boxXY(9.0, 14.5, 13.0, 16.5, ROOF, ROOF + 1.3, roofEq); for (const x of [9.6, 10.6, 11.6, 12.4]) { const f = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05, 24), new THREE.MeshStandardMaterial({ color: 0x3a3f44 })); f.position.set(x, ROOF + 1.33, -15.5); root.add(f); }
+  for (const [x, y] of [[3, 3], [17, 4], [22, 12], [6, 15]]) { const v = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.7, 16), roofEq); v.position.set(x, ROOF + 0.35, -y); v.castShadow = true; root.add(v); const c = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.2, 16), roofEq); c.position.set(x, ROOF + 0.8, -y); root.add(c); }
   // bandă dintre niveluri pe fațade
   for (const [x0, y0, x1, y1] of [[-0.03, -0.03, BW + 0.03, 0.03], [-0.03, BD - 0.03, BW + 0.03, BD + 0.03]]) boxXY(x0, y0, x1, y1, 4.5, 4.8, m.facadeAnth, false);
   for (const [x0, y0, x1, y1] of [[-0.03, 0, 0.03, BD], [BW - 0.03, 0, BW + 0.03, BD]]) boxXY(x0, y0, x1, y1, 4.5, 4.8, m.facadeAnth, false);
@@ -346,6 +350,15 @@ export function buildBuilding(scene) {
     const st = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.28, run), m.stair); st.position.set(x, h0 + 1.05, -(y0 + 2.1)); st.rotation.x = ang; st.position.y = h0 + 1.2 - 0.14; add(st);
     const hr = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, run), m.alu); hr.position.set(x + (x < 26 ? 0 : 0), h0 + 1.2 + 0.9, -(y0 + 2.1)); hr.rotation.x = ang; add(hr);
     for (let i = 0; i <= 4; i++) { const t = i / 4; boxXY(x - 0.015, y0 + 4.2 * t - 0.015, x + 0.015, y0 + 4.2 * t + 0.015, h0 + 2.4 * t, h0 + 2.4 * t + 1.0, m.alu, false); }
+  }
+  // plasă de protecție pe balustrade (ca în imaginea concept: balustradă metalică cu plasă)
+  const railMesh = new THREE.MeshStandardMaterial({ map: T.perfAlu([8, 2]), metalness: 0.5, roughness: 0.4, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false });
+  for (const [y0, h0] of [[-0.9, 0], [4.8, 2.4]]) {
+    const geo = new THREE.PlaneGeometry(4.2, 0.85); const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) pos.setY(i, pos.getY(i) + pos.getX(i) / 4.2 * 2.4);       // panou înclinat după rampă
+    geo.computeVertexNormals();
+    const pm = new THREE.Mesh(geo, railMesh); pm.position.set(STAIR.lane1 + 0.045, h0 + 1.2 + 0.55, -(y0 + 2.1)); pm.rotation.y = Math.PI / 2;
+    add(pm, false, false);
   }
   for (const [y0, y1, h] of [[3.3, 4.8, 2.4], [9.0, 11.1, 4.8]]) { boxXY(26.82, y0, 26.86, y1, h + 0.95, h + 1.0, m.alu, false); for (let y = y0; y <= y1; y += 0.5) boxXY(26.82, y, 26.86, y + 0.03, h, h + 1.0, m.alu, false); }
   boxXY(24.95, -1.0, 26.95, 11.2, 7.55, 7.65, new THREE.MeshStandardMaterial({ color: 0x2b333b, roughness: 0.5, metalness: 0.5 }));   // acoperire
