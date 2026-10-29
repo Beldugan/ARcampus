@@ -82,7 +82,7 @@ export const WALLS = [
 export const ROOMS = [
   { id: 'P01', name: 'P01 · Linie ITP', sign: ['STAȚIE ITP', 'linie de inspecție tehnică'], lvl: 0, r: [0.2, 0.2, 6.32, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
   { id: 'P02', name: 'P02 · Service student', sign: ['SERVICE STUDENT', 'ateliere – posturi de lucru'], lvl: 0, r: [6.47, 0.2, 14.0, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
-  { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI)', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [14.15, 0.2, 19.85, 19.8], floor: 'vinyl', ceil: 'tiles', h: 3.6 },
+  { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI)', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [14.15, 0.2, 19.85, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
   { id: 'P04', name: 'P04 · Hol de intrare', sign: ['HOL INTRARE', 'Corp Campus AR'], hall: true, lvl: 0, r: [20.0, 0.2, 24.8, 6.0], floor: 'stone', ceil: 'tiles', h: 3.0 },
   { id: 'P09', name: 'P09 · Coridor anexe', hall: true, lvl: 0, r: [20.0, 6.0, 21.6, 19.8], floor: 'stone', ceil: 'tiles', h: 2.8 },
   { id: 'P10', name: 'P10 · Vestiar studenți', sign: ['VESTIAR', 'studenți'], lvl: 0, r: [21.75, 6.15, 24.8, 10.0], floor: 'tile', ceil: 'tiles', h: 2.8 },
@@ -179,7 +179,7 @@ export function buildBuilding(scene) {
   boxXY(0, 0, BW, BD, 4.50, 4.80, m.slab);
   boxXY(0, 0, BW, BD, ROOF - 0.30, ROOF, m.slab);
   // tavan hală ITP + service: tablă cutată + grinzi + corpuri high-bay
-  for (const [x0, x1, y1] of [[0.2, 6.32, 19.8], [6.47, 14.0, 19.8]]) {
+  for (const [x0, x1, y1] of [[0.2, 6.32, 19.8], [6.47, 14.0, 19.8], [14.15, 19.85, 19.8]]) {
     const d = y1 - 0.2; const deck = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, d), m.deck); deck.rotation.x = Math.PI / 2; deck.position.set((x0 + x1) / 2, 4.49, -(0.2 + y1) / 2); add(deck, false);
     for (let y = 0.2 + 0.9; y < y1; y += 1.0) boxXY(x0, y, x1, y + 0.06, 4.40, 4.49, m.steel, false);
     for (let y = 2.5; y < y1 - 1; y += 4.5) { boxXY(x0, y - 0.1, x1, y + 0.1, 4.05, 4.49, m.steel); }

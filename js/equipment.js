@@ -207,21 +207,12 @@ function batteryTester() { const g = new THREE.Group(); B(g, 0.5, 0.03, 0.4, MAT
 function engineStand(kind = 'MPI') {
   const g = new THREE.Group(); const blue = kind === 'dCi';
   // cadru pe roți
-  for (const z of [-0.45, 0.45]) { B(g, 1.6, 0.06, 0.06, MAT.dark, 0, 0.18, z); B(g, 1.6, 0.06, 0.06, MAT.dark, 0, 0.75, z); }
-  for (const x of [-0.78, 0.78]) for (const z of [-0.45, 0.45]) { B(g, 0.06, 0.6, 0.06, MAT.dark, x, 0.18, z); Cy(g, 0.07, 0.05, MAT.rubber, x, 0.07, z, 'z', 12); }
-  // motor
-  B(g, 0.62, 0.42, 0.48, MAT.engine, -0.05, 0.8, 0);                               // bloc
-  B(g, 0.6, 0.18, 0.45, C(0x777c80, { metalness: 0.6 }), -0.05, 1.22, 0);           // chiulasă
-  B(g, 0.58, 0.1, 0.36, blue ? C(0x22313f) : C(0x8b1a1a), -0.05, 1.4, 0);            // capac culbutori
-  B(g, 0.3, 0.12, 0.4, C(0x3a3f44, { metalness: 0.6 }), -0.05, 0.68, 0);            // baie ulei
-  for (let i = 0; i < 4; i++) Cy(g, 0.03, 0.25, MAT.dark, -0.28 + i * 0.15, 1.15, 0.31, 'z', 10);   // galerie admisie
-  B(g, 0.55, 0.12, 0.12, MAT.dark, -0.05, 1.2, 0.38);
-  for (let i = 0; i < 4; i++) Cy(g, 0.03, 0.2, C(0x8a5a3a, { metalness: 0.7 }), -0.28 + i * 0.15, 1.05, -0.32, 'z', 10); // evacuare
-  Cy(g, 0.05, 0.9, C(0x8a5a3a, { metalness: 0.7 }), 0.4, 1.0, -0.4, 'x');
-  Cy(g, 0.18, 0.06, MAT.dark, 0.32, 0.92, 0.05, 'x');                              // volantă
-  B(g, 0.06, 0.5, 0.6, C(0x6f7a83, { metalness: 0.5 }), -0.72, 0.78, 0);            // radiator
-  Cy(g, 0.18, 0.04, MAT.dark, -0.67, 1.03, 0, 'x');
-  if (blue) { Cy(g, 0.1, 0.12, C(0x9aa3a8, { metalness: 0.7 }), 0.12, 1.02, -0.38, 'z'); B(g, 0.2, 0.1, 0.12, C(0x4d5a63), -0.2, 1.48, 0.1); }
+  const SF = C(0x1f4fa8, { metalness: 0.35, roughness: 0.45 });
+  for (const z of [-0.45, 0.45]) { B(g, 1.6, 0.06, 0.06, SF, 0, 0.18, z); B(g, 1.6, 0.06, 0.06, SF, 0, 0.75, z); }
+  for (const x of [-0.78, 0.78]) for (const z of [-0.45, 0.45]) { B(g, 0.06, 0.6, 0.06, SF, x, 0.18, z); Cy(g, 0.07, 0.05, MAT.rubber, x, 0.07, z, 'z', 12); }
+  for (const x of [-0.3, 0.2]) B(g, 0.08, 0.06, 0.96, SF, x, 0.75, 0);
+  // motor secționat (detaliat)
+  const em = engineModel(kind === 'dCi' ? 'dCi' : 'MPI'); em.scale.setScalar(1.25); em.position.set(-0.08, 0.81, 0); g.add(em);
   // panou de comandă + rezervor + baterie
   B(g, 0.05, 0.55, 0.65, MAT.dark, 0.78, 0.78, 0); plate(g, kind === 'dCi' ? 'Stand Diesel 1.5 dCi' : kind === 'MPI' ? 'Stand Otto 1.4 MPI' : 'Stand 1.6 8V', kind === 'dCi' ? 'common rail · turbo' : 'injecție multipunct', 0.55, 0.81, 1.48, 0, Math.PI / 2);
   for (let i = 0; i < 3; i++) Cy(g, 0.05, 0.02, C(0xeeeeee), 0.81, 1.15 - i * 0.0, -0.2 + i * 0.2, 'x', 16);
@@ -429,17 +420,13 @@ function injectorStand() {
 }
 
 // ------------------------------------------------------------------ CCA / dinamică / caroserii / HeV
-function gearboxCut() { const g = new THREE.Group(); B(g, 0.55, 0.38, 0.35, C(0x9aa3a8, { metalness: 0.7 }), 0, 0, 0); for (let i = 0; i < 5; i++) Cy(g, 0.06 + (i % 3) * 0.025, 0.04, MAT.steel, -0.2 + i * 0.1, 0.25, 0.18, 'x'); Cy(g, 0.02, 0.6, MAT.steel, 0, 0.25, 0.18, 'x'); return g; }
-function clutch() { const g = new THREE.Group(); Cy(g, 0.12, 0.03, MAT.steel, 0, 0.12, 0, 'z'); Cy(g, 0.11, 0.02, C(0x6b4f3a), 0, 0.12, 0.03, 'z'); Cy(g, 0.12, 0.04, MAT.dark, 0, 0.12, -0.04, 'z'); return g; }
-function strut() { const g = new THREE.Group(); Cy(g, 0.03, 0.55, MAT.steel, 0, 0.0, 0); const sp = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.012, 6, 16), MAT.red); for (let i = 0; i < 6; i++) { const s = sp.clone(); s.rotation.x = Math.PI / 2; s.position.y = 0.3 + i * 0.05; g.add(s); } Cy(g, 0.1, 0.02, MAT.steel, 0, 0.6, 0); return g; }
 function displayTable(items, title) {
-  const g = new THREE.Group(); B(g, 2.0, 0.05, 0.9, MAT.wood, 0, 0.82, 0); for (const [x, z] of [[-0.95, -0.4], [0.95, -0.4], [-0.95, 0.4], [0.95, 0.4]]) B(g, 0.05, 0.82, 0.05, MAT.grey, x, 0, z);
-  items.forEach((f, i) => { const o = f(); o.position.set(-0.65 + i * (1.3 / Math.max(1, items.length - 1)), 0.87, 0); g.add(o); });
-  plate(g, title, '', 0.7, 0, 0.6, 0.455, 0, '#1d2b3a'); return g;
+  const g = steelTable(2.0, 0.9, 0.85); B(g, 2.0, 0.012, 0.9, C(0x1e2226, { roughness: 0.6 }), 0, 0.85, 0);
+  items.forEach((f, i) => { const o = f(); o.scale.setScalar(1.35); o.position.set(-0.6 + i * (1.2 / Math.max(1, items.length - 1)), 0.862, 0); g.add(o); });
+  plate(g, title, '', 0.7, 0, 0.55, 0.455, 0, '#1d2b3a'); return g;
 }
-function axle() { const g = new THREE.Group(); Cy(g, 0.04, 1.4, MAT.steel, 0, 0.18, 0, 'x'); Cy(g, 0.14, 0.18, C(0x5a6066, { metalness: 0.6 }), 0, 0.18, 0, 'x'); for (const x of [-0.7, 0.7]) Cy(g, 0.13, 0.03, C(0x8a8f93, { metalness: 0.7 }), x, 0.18, 0, 'x'); return g; }
+function stool() { const g = new THREE.Group(); Cy(g, 0.17, 0.04, MAT.wood, 0, 0.62, 0, 'y', 24); for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.78; tube(g, [Math.cos(a) * 0.13, 0.62, Math.sin(a) * 0.13], [Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2], 0.014, MAT.dark); } Cy(g, 0.16, 0.015, MAT.dark, 0, 0.25, 0, 'y', 20); for (const [x, z] of [[0.2, 0], [-0.2, 0], [0, 0.2], [0, -0.2]]) Cy(g, 0.025, 0.02, MAT.rubber, x, 0.0, z); return g; }
 function steeringRack() { const g = new THREE.Group(); Cy(g, 0.035, 1.1, MAT.steel, 0, 0.08, 0, 'x'); Cy(g, 0.05, 0.25, MAT.dark, -0.2, 0.08, 0, 'x'); Cy(g, 0.015, 0.3, MAT.steel, -0.2, 0.08, 0, 'y'); return g; }
-function brakeKit() { const g = new THREE.Group(); Cy(g, 0.14, 0.025, C(0x8f8f8f, { metalness: 0.8 }), 0, 0.15, 0, 'z'); B(g, 0.08, 0.12, 0.08, MAT.red, 0.1, 0.15, 0); Cy(g, 0.03, 0.2, MAT.alu, -0.25, 0.1, 0, 'x'); Cy(g, 0.04, 0.08, C(0x2266aa), -0.25, 0.15, 0); return g; }
 function wheelScales() { const g = new THREE.Group(); for (const [x, z] of [[-1.25, -0.75], [1.25, -0.75], [-1.25, 0.75], [1.25, 0.75]]) { B(g, 0.5, 0.06, 0.5, C(0x2f3b45, { metalness: 0.5 }), x, 0, z); B(g, 0.46, 0.006, 0.46, MAT.yellow, x, 0.06, z); } B(g, 0.3, 0.2, 0.08, C(0xeeeeee), 0, 0, -1.3); plate(g, 'Cântare roți', 'centru de greutate · sarcini pe punți', 0.6, 0, 0.5, -1.25, 0, '#1d2b3a'); return g; }
 function tireRack() { const g = new THREE.Group(); for (const x of [-0.7, 0.7]) B(g, 0.05, 1.3, 0.5, MAT.grey, x, 0, 0); for (let i = 0; i < 5; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.1, 10, 24), MAT.rubber); t.position.set(-0.5 + i * 0.25, 0.4, 0); t.rotation.y = Math.PI / 2 - 0.2; g.add(t); } B(g, 1.4, 0.04, 0.5, MAT.grey, 0, 0.0, 0); return g; }
 function brakeHydStand() {
@@ -449,17 +436,182 @@ function brakeHydStand() {
   for (const x of [0.0, 0.25]) Cy(g, 0.06, 0.02, C(0xffffff), x, 1.35, 0.25, 'z');
   plate(g, 'Stand frânare hidraulică instrumentat', 'pedală · pompă tandem · servofrână · etrier', 0.9, 0, 0.55, 0.305, 0, '#2c3e50'); return g;
 }
-function biwFrame() {
-  const g = new THREE.Group(); const tm = C(0x9aa4ab, { metalness: 0.7, roughness: 0.35 });
-  const tube = (a, b, r = 0.025) => { const p = new THREE.Vector3(...a), q = new THREE.Vector3(...b); const len = p.distanceTo(q); const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), tm); m.position.copy(p).add(q).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), q.clone().sub(p).normalize()); m.castShadow = true; g.add(m); };
-  for (const z of [-0.75, 0.75]) { tube([-1.9, 0.35, z], [1.9, 0.35, z], 0.04); tube([-1.9, 0.35, z], [-1.8, 0.9, z]); tube([1.9, 0.35, z], [1.85, 0.85, z]); tube([-1.8, 0.9, z], [-0.95, 0.95, z]); tube([1.85, 0.85, z], [1.0, 0.95, z]); tube([-0.95, 0.95, z], [-0.5, 1.4, z]); tube([1.0, 0.95, z], [0.75, 1.42, z]); tube([-0.5, 1.4, z], [0.75, 1.42, z]); tube([0.1, 0.35, z], [0.12, 1.41, z]); }
-  for (const x of [-1.9, -0.5, 0.75, 1.9, 0.1]) tube([x, x === -0.5 || x === 0.75 ? 1.41 : 0.35, -0.75], [x, x === -0.5 || x === 0.75 ? 1.41 : 0.35, 0.75]);
-  B(g, 4.2, 0.3, 0.2, MAT.dark, 0, 0, -0.5); B(g, 4.2, 0.3, 0.2, MAT.dark, 0, 0, 0.5);
-  plate(g, 'Caroserie în alb (machetă)', 'structură portantă · zone de deformare', 0.9, 0, 1.75, 0.8, 0, '#1d2b3a'); return g;
-}
-function doorStand() { const g = new THREE.Group(); B(g, 0.05, 1.1, 0.95, new THREE.MeshPhysicalMaterial({ color: 0x9b1c1c, roughness: 0.3, metalness: 0.5, clearcoat: 1 }), 0, 0.35, 0); B(g, 0.06, 0.4, 0.85, MAT.glass, 0, 1.0, 0); B(g, 0.6, 0.05, 0.6, MAT.dark, 0, 0, 0); B(g, 0.05, 0.4, 0.05, MAT.grey, 0, 0.05, 0); return g; }
 function crashBoxes() { const g = new THREE.Group(); for (let i = 0; i < 4; i++) B(g, 0.12, 0.3 - i * 0.05, 0.12, C(0xb0b7bd, { metalness: 0.7 }), -0.3 + i * 0.2, 0, 0); return g; }
 function measureArm() { const g = new THREE.Group(); Cy(g, 0.15, 0.1, MAT.dark, 0, 0, 0); Cy(g, 0.03, 0.6, MAT.alu, 0, 0.1, 0); const a = B(g, 0.6, 0.04, 0.04, MAT.alu, 0.3, 0.7, 0); a.rotation.z = 0.4; return g; }
+
+// ------------------------------------------------------------------ piese mecanice detaliate (etapa 2: CCA, motoare, caroserii)
+const CUT = C(0xb3261e, { roughness: 0.45, metalness: 0.2 });           // fețe de secțiune vopsite roșu (machete secționate)
+const IRON = C(0x6d7378, { roughness: 0.55, metalness: 0.55 });        // fontă
+const ALU2 = C(0xb9bec3, { roughness: 0.35, metalness: 0.8 });         // aluminiu turnat
+const GEARM = C(0xc9cdd1, { roughness: 0.25, metalness: 0.9 });        // oțel prelucrat
+const gearCache = new Map();
+function gearGeo(r, teeth, w, hole = 0.25) {
+  const k = [r, teeth, w, hole].join('|'); if (gearCache.has(k)) return gearCache.get(k);
+  const sh = new THREE.Shape(), h = r * 0.12, n = teeth * 4;
+  for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, rr = (i % 4 === 0 || i % 4 === 1) ? r + h / 2 : r - h / 2; i ? sh.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : sh.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); }
+  const hp = new THREE.Path(); hp.absarc(0, 0, r * hole, 0, Math.PI * 2, true); sh.holes.push(hp);
+  const geo = new THREE.ExtrudeGeometry(sh, { depth: w, bevelEnabled: false, curveSegments: 4 }); geo.translate(0, 0, -w / 2); gearCache.set(k, geo); return geo;
+}
+function gear(g, r, teeth, w, x, y, z, axis = 'x', mat = GEARM) { const m = new THREE.Mesh(gearGeo(r, teeth, w), mat); m.position.set(x, y, z); if (axis === 'x') m.rotation.y = Math.PI / 2; m.castShadow = true; g.add(m); return m; }
+function helix(g, r, len, turns, wire, mat, x = 0, y = 0, z = 0) {
+  const pts = []; for (let i = 0; i <= turns * 24; i++) { const a = i / 24 * Math.PI * 2; pts.push(new THREE.Vector3(Math.cos(a) * r, i / (turns * 24) * len, Math.sin(a) * r)); }
+  const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), turns * 24, wire, 6), mat); m.position.set(x, y, z); m.castShadow = true; g.add(m); return m;
+}
+function tube(g, a, b, r, mat) { const p = new THREE.Vector3(...a), q = new THREE.Vector3(...b); const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, p.distanceTo(q), 10), mat); m.position.copy(p).add(q).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), q.clone().sub(p).normalize()); m.castShadow = true; g.add(m); return m; }
+// planșe tehnice pe pereți (desen în linii, chenar și indicator)
+function posterTex(kind) {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 720; const x = c.getContext('2d');
+  x.fillStyle = '#fbfbf8'; x.fillRect(0, 0, 1024, 720); x.strokeStyle = '#1d2b3a'; x.lineWidth = 4; x.strokeRect(20, 20, 984, 680);
+  x.strokeRect(700, 600, 304, 100); x.font = 'bold 26px Arial'; x.fillStyle = '#1d2b3a'; x.fillText('FIMIM · AR', 715, 640); x.font = '20px Arial';
+  x.fillText({ car: 'Caroserie – vedere laterală', chassis: 'Structură portantă', gear: 'Cutie de viteze – schemă', engine: 'Mecanism bielă-manivelă', dyn: 'Caracteristica dinamică', susp: 'Suspensie McPherson' }[kind] || kind, 715, 675);
+  x.lineWidth = 3; x.strokeStyle = '#2a4d7a';
+  const dim = (x0, y0, x1, y1, t) => { x.save(); x.strokeStyle = '#7a8a99'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke(); x.fillStyle = '#56606a'; x.font = '18px Arial'; x.fillText(t, (x0 + x1) / 2 - 20, (y0 + y1) / 2 - 8); x.restore(); };
+  if (kind === 'car' || kind === 'chassis') {
+    x.beginPath(); x.moveTo(110, 430); x.bezierCurveTo(120, 370, 180, 350, 280, 345); x.lineTo(390, 260); x.bezierCurveTo(470, 215, 650, 215, 720, 265); x.lineTo(820, 330); x.bezierCurveTo(890, 340, 910, 380, 905, 430); x.lineTo(110, 430); x.stroke();
+    for (const cx of [250, 770]) { x.beginPath(); x.arc(cx, 440, 62, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.arc(cx, 440, 38, 0, Math.PI * 2); x.stroke(); }
+    if (kind === 'chassis') { x.strokeStyle = '#b3261e'; for (const [a, b] of [[300, 345], [520, 228], [700, 262]]) { x.beginPath(); x.moveTo(a, b); x.lineTo(a + 20, 430); x.stroke(); } }
+    dim(110, 540, 905, 540, '4260'); dim(250, 520, 770, 520, '2650'); dim(960, 220, 960, 500, '1460');
+  } else if (kind === 'gear') {
+    for (const [cx, cy, r] of [[300, 300, 110], [300, 520, 70], [520, 300, 70], [520, 520, 110], [720, 300, 90], [720, 520, 90]]) { x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.arc(cx, cy, 14, 0, Math.PI * 2); x.stroke(); }
+    x.beginPath(); x.moveTo(140, 300); x.lineTo(880, 300); x.moveTo(140, 520); x.lineTo(880, 520); x.stroke();
+  } else if (kind === 'engine') {
+    x.strokeRect(380, 120, 260, 230); x.strokeRect(410, 230, 200, 110); x.beginPath(); x.moveTo(510, 340); x.lineTo(450, 520); x.stroke(); x.beginPath(); x.arc(510, 520, 70, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.arc(450, 520, 16, 0, Math.PI * 2); x.stroke();
+    dim(380, 90, 640, 90, 'Ø 79,5'); dim(680, 450, 680, 590, 'r = 40');
+  } else if (kind === 'dyn') {
+    x.beginPath(); x.moveTo(120, 560); x.lineTo(900, 560); x.moveTo(120, 560); x.lineTo(120, 100); x.stroke();
+    for (const [col, k] of [['#b3261e', 0.9], ['#2a4d7a', 0.65], ['#2e7d32', 0.45]]) { x.strokeStyle = col; x.beginPath(); for (let i = 0; i <= 100; i++) { const t = i / 100; const yy = 560 - 420 * k * Math.sin(Math.PI * t) * (1 - 0.3 * t); i ? x.lineTo(120 + t * 760, yy) : x.moveTo(120, yy); } x.stroke(); }
+  } else if (kind === 'susp') {
+    x.beginPath(); x.moveTo(500, 100); x.lineTo(500, 420); x.stroke(); for (let i = 0; i < 9; i++) { x.beginPath(); x.ellipse(500, 160 + i * 26, 60, 10, 0, 0, Math.PI * 2); x.stroke(); }
+    x.beginPath(); x.arc(560, 470, 90, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.moveTo(300, 500); x.lineTo(480, 480); x.stroke();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
+}
+function poster(kind, w = 1.2) { const g = new THREE.Group(); B(g, w + 0.04, w * 0.703 + 0.04, 0.015, MAT.alu, 0, 1.25, 0); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.703), new THREE.MeshStandardMaterial({ map: posterTex(kind), roughness: 0.7 })); m.position.set(0, 1.25 + (w * 0.703 + 0.04) / 2, 0.009); g.add(m); return g; }
+
+// ---- motor cu ardere internă, secționat pe fața din față (+z): bloc, pistoane, biele, arbore cotit, chiulasă cu axe cu came, distribuție, fulii, galerii
+function engineModel(kind = 'MPI', cyl = 4) {
+  const g = new THREE.Group(); const L = 0.09 * cyl + 0.16, diesel = kind === 'dCi';
+  const blk = diesel ? C(0x5d6266, { metalness: 0.55, roughness: 0.5 }) : IRON;
+  B(g, L, 0.36, 0.2, blk, 0, 0.12, -0.1);                                 // jumătatea din spate a blocului
+  B(g, L, 0.36, 0.004, C(0x24272a, { roughness: 0.8 }), 0, 0.12, -0.002);      // interiorul blocului (cavități)
+  for (let i = 0; i <= cyl; i++) B(g, 0.022, 0.24, 0.008, CUT, -L / 2 + 0.035 + i * 0.09, 0.24, 0.0);   // pereții dintre cilindri (secțiune roșie)
+  B(g, L, 0.025, 0.008, CUT, 0, 0.455, 0.0); B(g, L, 0.025, 0.008, CUT, 0, 0.12, 0.0);
+  B(g, L, 0.12, 0.42, C(0x3a3f44, { metalness: 0.5 }), 0, 0.0, 0);         // baie de ulei
+  for (let i = 0; i < cyl; i++) {
+    const x = -L / 2 + 0.08 + i * 0.09 + 0.005, up = (i === 0 || i === cyl - 1) ? 0.07 : 0.0;
+    Cy(g, 0.04, 0.012, C(0x15171a), x, 0.33, 0.004, 'z', 20);              // alezaj (umbră)
+    Cy(g, 0.038, 0.055, ALU2, x, 0.27 + up, 0.03, 'y', 24);                 // piston
+    for (let k = 0; k < 3; k++) Cy(g, 0.0385, 0.004, C(0x2a2d30), x, 0.31 + up - k * 0.012, 0.03, 'y', 24);   // segmenți
+    tube(g, [x, 0.27 + up, 0.03], [x, 0.12 + up * 0.3, 0.03], 0.012, GEARM); // bielă
+    B(g, 0.05, 0.05, 0.03, GEARM, x, 0.075 + up * 0.3, 0.015);               // cap bielă
+    B(g, 0.07, 0.08, 0.02, IRON, x + 0.04, 0.04, 0.02);                      // contragreutate
+  }
+  Cy(g, 0.018, L, GEARM, 0, 0.1, 0.02, 'x', 14);                            // arbore cotit
+  // chiulasă + capac culbutori + ax cu came
+  B(g, L, 0.12, 0.2, ALU2, 0, 0.48, -0.1); B(g, L, 0.02, 0.008, CUT, 0, 0.48, 0.0); B(g, L, 0.02, 0.008, CUT, 0, 0.58, 0.0);
+  Cy(g, 0.016, L, GEARM, 0, 0.56, 0.03, 'x', 12); for (let i = 0; i < cyl * 2; i++) B(g, 0.012, 0.04, 0.02, GEARM, -L / 2 + 0.06 + i * 0.045, 0.5, 0.025);   // came + supape
+  B(g, L, 0.07, 0.3, diesel ? C(0x22313f) : C(0x8b1a1a, { roughness: 0.35, metalness: 0.4 }), 0, 0.6, -0.06);   // capac culbutori
+  // distribuție la capătul -x: capac + fulii + curea
+  B(g, 0.03, 0.55, 0.34, C(0x1b1c1e, { roughness: 0.6 }), -L / 2 - 0.03, 0.08, -0.05);
+  const pul = (y, z, r) => { Cy(g, r, 0.03, C(0x2b2f33, { metalness: 0.6 }), -L / 2 - 0.08, y, z, 'x', 24); return [y, z, r]; };
+  const P1 = pul(0.1, 0.02, 0.07), P2 = pul(0.32, 0.15, 0.05), P3 = pul(0.28, -0.12, 0.045), P4 = pul(0.5, 0.0, 0.035);
+  const beltPts = [[P1[0] - P1[2], P1[1]], [P2[0], P2[1] + P2[2]], [P4[0] + P4[2], P4[1]], [P3[0], P3[1] - P3[2]]].map(([y, z]) => new THREE.Vector3(-L / 2 - 0.08, y, z));
+  const belt = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(beltPts, true), 48, 0.008, 6, true), C(0x0d0d0d, { roughness: 0.9 })); g.add(belt);
+  Cy(g, 0.06, 0.12, C(0x9aa0a6, { metalness: 0.7 }), -L / 2 + 0.05, 0.32, 0.22, 'x', 20);            // alternator
+  // galerie admisie (spate) + evacuare (pe partea secționată, sus)
+  for (let i = 0; i < cyl; i++) { const x = -L / 2 + 0.085 + i * 0.09; const c = new THREE.CatmullRomCurve3([new THREE.Vector3(x, 0.5, -0.2), new THREE.Vector3(x, 0.58, -0.3), new THREE.Vector3(x, 0.5, -0.38), new THREE.Vector3(x * 0.6, 0.38, -0.38)]); const m = new THREE.Mesh(new THREE.TubeGeometry(c, 16, 0.022, 10), diesel ? C(0x2a2d30, { metalness: 0.5 }) : C(0x1c1e20, { roughness: 0.4 })); m.castShadow = true; g.add(m); }
+  B(g, L * 0.8, 0.12, 0.1, diesel ? ALU2 : C(0x1c1e20), 0, 0.28, -0.42);       // plenum
+  for (let i = 0; i < cyl; i++) { const x = -L / 2 + 0.085 + i * 0.09; tube(g, [x, 0.46, 0.0], [x * 0.5, 0.3, 0.12], 0.018, C(0x8a5a3a, { metalness: 0.7, roughness: 0.5 })); }
+  if (diesel) { Cy(g, 0.075, 0.1, C(0x9aa3a8, { metalness: 0.8 }), L / 2 - 0.05, 0.32, 0.17, 'z', 24); Cy(g, 0.06, 0.08, C(0x6e5a3a, { metalness: 0.7 }), L / 2 - 0.05, 0.32, 0.25, 'z', 20); for (let i = 0; i < cyl; i++) Cy(g, 0.008, 0.08, C(0xc9cdd1, { metalness: 0.9 }), -L / 2 + 0.085 + i * 0.09, 0.62, -0.02); tube(g, [-L / 2, 0.66, -0.12], [L / 2, 0.66, -0.12], 0.012, GEARM); }   // turbo + injectoare + rampă comună
+  else for (let i = 0; i < cyl; i++) B(g, 0.03, 0.06, 0.03, C(0x111111), -L / 2 + 0.085 + i * 0.09, 0.63, -0.05);   // bobine
+  Cy(g, 0.04, 0.09, diesel ? C(0x1f4fa8) : C(0xf3f3f1), L / 4, 0.08, -0.24, 'z', 18);                  // filtru ulei
+  Cy(g, 0.17, 0.03, C(0x3a3f44, { metalness: 0.7 }), L / 2 + 0.03, 0.12, 0.0, 'x', 40);               // volantă
+  gear(g, 0.175, 60, 0.02, L / 2 + 0.03, 0.12, 0.0, 'x', C(0x55595e, { metalness: 0.8 }));
+  B(g, 0.12, 0.08, 0.08, C(0x2b2f33), L / 2 - 0.05, 0.0, 0.2);                                       // demaror
+  return g;
+}
+// banc cu piese de motor (ca în imaginea concept PCMAI + CCMAI): arbore cotit, pistoane cu biele, chiulasă, ax cu came
+function enginePartsBench(len = 2.2) {
+  const g = new THREE.Group(); const blue = C(0x1f4fa8, { metalness: 0.35, roughness: 0.45 });
+  B(g, len, 0.06, 0.8, MAT.wood, 0, 0.86, 0); B(g, len, 0.82, 0.74, blue, 0, 0.04, 0);
+  for (let c = 0; c < 3; c++) for (let r = 0; r < 4; r++) { const x = -len / 2 + (c + 0.5) * len / 3; B(g, len / 3 - 0.04, 0.17, 0.012, C(0x2a5bb5, { metalness: 0.35 }), x, 0.1 + r * 0.19, 0.375); B(g, 0.2, 0.015, 0.02, MAT.steel, x, 0.22 + r * 0.19, 0.385); }
+  const T0 = 0.92;
+  // arbore cotit
+  Cy(g, 0.022, 0.62, GEARM, -0.6, T0 + 0.08, 0.05, 'x', 16);
+  for (let i = 0; i < 4; i++) { B(g, 0.03, 0.12, 0.06, IRON, -0.84 + i * 0.16, T0 + 0.02, 0.05); B(g, 0.03, 0.12, 0.06, IRON, -0.79 + i * 0.16, T0 + 0.02, 0.05); }
+  for (const x of [-0.95, -0.25]) B(g, 0.06, 0.06, 0.12, MAT.wood, x, T0, 0.05);
+  // pistoane cu biele (în picioare)
+  for (let i = 0; i < 4; i++) { const x = -0.1 + i * 0.13; Cy(g, 0.039, 0.065, ALU2, x, T0 + 0.24, -0.2, 'y', 24); tube(g, [x, T0 + 0.24, -0.2], [x, T0 + 0.03, -0.2], 0.011, GEARM); Cy(g, 0.035, 0.03, GEARM, x, T0 + 0.02, -0.2, 'z', 18); }
+  // chiulasă (cu camere de ardere vizibile) + ax cu came
+  B(g, 0.46, 0.1, 0.2, ALU2, 0.65, T0, 0.1); for (let i = 0; i < 4; i++) Cy(g, 0.032, 0.012, C(0x3a3f44), 0.48 + i * 0.11, T0 + 0.1, 0.1, 'y', 20);
+  Cy(g, 0.014, 0.5, GEARM, 0.65, T0 + 0.03, -0.18, 'x', 12); for (let i = 0; i < 8; i++) B(g, 0.016, 0.035, 0.028, GEARM, 0.43 + i * 0.06, T0 + 0.01, -0.18);
+  return g;
+}
+// ---- CCA: carcasă secționată cu arbori și roți dințate vizibile
+function gearboxCut() {
+  const g = new THREE.Group();
+  B(g, 0.6, 0.42, 0.2, ALU2, 0, 0.02, -0.12);                                              // jumătatea din spate a carcasei
+  for (const [w, h, x, y] of [[0.6, 0.03, 0, 0.42], [0.6, 0.03, 0, 0.02], [0.03, 0.42, -0.3, 0.02], [0.03, 0.42, 0.3, 0.02]]) B(g, w, h, 0.03, CUT, x, y, -0.01);   // margini secționate
+  Cy(g, 0.016, 0.72, GEARM, 0, 0.32, 0.03, 'x', 12); Cy(g, 0.016, 0.62, GEARM, 0, 0.14, 0.03, 'x', 12);   // arbore primar / secundar
+  const pairs = [[0.03, 0.065, 0.11], [0.045, 0.058, 0.05], [0.06, 0.05, -0.02], [0.072, 0.04, -0.09], [0.085, 0.03, -0.17]];
+  for (const [r1, r2, x] of pairs) { gear(g, r1, Math.round(r1 * 300), 0.03, x, 0.32, 0.03); gear(g, r2 + 0.03, Math.round((r2 + 0.03) * 300), 0.03, x, 0.14, 0.03); }
+  for (const x of [0.08, -0.06]) Cy(g, 0.06, 0.02, C(0xd4a017, { metalness: 0.8 }), x, 0.14, 0.03, 'x', 24);   // sincronizatoare
+  Cy(g, 0.09, 0.12, ALU2, -0.36, 0.32, -0.05, 'x', 28); B(g, 0.03, 0.1, 0.03, MAT.dark, 0.1, 0.44, -0.1);
+  return g;
+}
+function clutch() { const g = new THREE.Group(); Cy(g, 0.12, 0.03, GEARM, 0, 0.13, 0, 'z', 32); Cy(g, 0.105, 0.012, C(0x6b4f3a, { roughness: 0.9 }), 0, 0.13, 0.022, 'z', 32); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; Cy(g, 0.012, 0.01, C(0x9aa0a6), Math.cos(a) * 0.06, 0.13 + Math.sin(a) * 0.06, 0.03, 'z', 8); } Cy(g, 0.13, 0.05, C(0x3a3f44, { metalness: 0.7 }), 0, 0.13, -0.035, 'z', 32); return g; }
+function axle() {
+  const g = new THREE.Group();
+  Cy(g, 0.03, 1.3, GEARM, 0, 0.2, 0, 'x', 14);
+  B(g, 0.32, 0.3, 0.14, IRON, 0, 0.06, -0.1); B(g, 0.32, 0.3, 0.006, CUT, 0, 0.06, -0.03);    // carcasă diferențial secționată
+  gear(g, 0.13, 41, 0.025, 0.05, 0.2, 0.0, 'x', C(0xd4a017, { metalness: 0.8, roughness: 0.3 }));   // coroană
+  Cy(g, 0.035, 0.18, GEARM, 0.0, 0.2, 0.12, 'z', 12); gear(g, 0.04, 11, 0.04, 0.0, 0.2, 0.06, 'z');   // pinion de atac
+  for (const x of [-0.6, 0.6]) { Cy(g, 0.12, 0.02, C(0x8f9397, { metalness: 0.8 }), x, 0.2, 0, 'x', 32); Cy(g, 0.06, 0.06, IRON, x * 0.92, 0.2, 0, 'x', 20); }
+  return g;
+}
+function strut() {
+  const g = new THREE.Group();
+  Cy(g, 0.022, 0.42, MAT.dark, 0, 0.02, 0); Cy(g, 0.012, 0.25, GEARM, 0, 0.44, 0);
+  helix(g, 0.06, 0.32, 6, 0.008, C(0x1f4fa8, { metalness: 0.4 }), 0, 0.2, 0);                 // arc elicoidal
+  Cy(g, 0.075, 0.015, GEARM, 0, 0.2, 0); Cy(g, 0.075, 0.015, GEARM, 0, 0.52, 0);
+  Cy(g, 0.12, 0.018, C(0x8f9397, { metalness: 0.8, roughness: 0.4 }), 0.0, 0.1, 0.07, 'z', 32); // disc de frână
+  B(g, 0.06, 0.1, 0.05, MAT.red, 0.08, 0.1, 0.07); Cy(g, 0.04, 0.05, GEARM, 0, 0.1, 0.1, 'z', 16);   // etrier + butuc
+  return g;
+}
+function brakeKit() { const g = new THREE.Group(); Cy(g, 0.14, 0.022, C(0x8f9397, { metalness: 0.8, roughness: 0.4 }), 0, 0.15, 0, 'z', 32); Cy(g, 0.06, 0.03, GEARM, 0, 0.15, 0.02, 'z', 20); B(g, 0.07, 0.13, 0.07, MAT.red, 0.11, 0.15, 0); Cy(g, 0.03, 0.2, MAT.alu, -0.25, 0.1, 0, 'x'); Cy(g, 0.045, 0.09, C(0x2266aa), -0.25, 0.15, 0); tube(g, [-0.2, 0.12, 0], [0.08, 0.15, 0.02], 0.004, C(0x111111)); return g; }
+// ---- caroserie în alb: tabla modelului 3D real, fără geamuri, interior, roți și ornamente, zincată, pe cadru cu roți
+function biwShell() {
+  const g = new THREE.Group(); const fr = C(0x1f3f78, { metalness: 0.4, roughness: 0.45 });
+  for (const z of [-0.55, 0.55]) { B(g, 3.4, 0.08, 0.08, fr, 0, 0.12, z); for (const x of [-1.5, 1.5]) Cy(g, 0.06, 0.04, MAT.rubber, x, 0.06, z, 'z', 14); }
+  for (const x of [-1.4, -0.5, 0.5, 1.4]) { B(g, 0.08, 0.08, 1.18, fr, x, 0.12, 0); B(g, 0.06, 0.32, 0.06, fr, x, 0.2, -0.45); B(g, 0.06, 0.32, 0.06, fr, x, 0.2, 0.45); }
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.5, 1.8), new THREE.MeshBasicMaterial()); proxy.position.y = 1.1; proxy.visible = false; g.add(proxy);
+  const zinc = new THREE.MeshPhysicalMaterial({ color: 0xc3c8cc, metalness: 0.85, roughness: 0.38, clearcoat: 0.3, side: THREE.DoubleSide });
+  CAR_MODEL.then(src => {
+    if (!src) return; const m = src.clone(true);
+    const hide = [];
+    m.traverse(o => { if (/^wheel_/.test(o.name)) hide.push(o); if (o.isMesh) { if (o.material.name === 'Paint') { o.material = zinc; o.castShadow = true; o.receiveShadow = true; } else hide.push(o); } });
+    hide.forEach(o => o.visible = false);
+    m.position.y = 0.33; g.add(m);
+  });
+  return g;
+}
+function doorStand() {
+  const g = new THREE.Group(); const fr = C(0x3a3f44, { metalness: 0.45 }); const zinc = new THREE.MeshPhysicalMaterial({ color: 0xc3c8cc, metalness: 0.85, roughness: 0.38, side: THREE.DoubleSide });
+  B(g, 0.7, 0.05, 0.6, fr, 0, 0.1, 0); for (const [x, z] of [[-0.3, -0.25], [0.3, -0.25], [-0.3, 0.25], [0.3, 0.25]]) Cy(g, 0.04, 0.03, MAT.rubber, x, 0.05, z, 'z', 12);
+  for (const z of [-0.5, 0.5]) B(g, 0.04, 1.5, 0.04, fr, 0, 0.15, z); B(g, 0.04, 0.04, 1.04, fr, 0, 1.63, 0);
+  const sh = new THREE.Shape(); sh.moveTo(-0.5, 0); sh.lineTo(0.48, 0); sh.lineTo(0.5, 0.55); sh.lineTo(0.42, 0.62); sh.lineTo(0.15, 1.02); sh.lineTo(-0.48, 1.02); sh.lineTo(-0.5, 0.6); sh.closePath();
+  const hole = new THREE.Path(); hole.moveTo(-0.44, 0.64); hole.lineTo(0.36, 0.64); hole.lineTo(0.12, 0.96); hole.lineTo(-0.42, 0.96); hole.closePath(); sh.holes.push(hole);
+  const d = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.1, bevelEnabled: true, bevelSize: 0.01, bevelThickness: 0.01, bevelSegments: 2 }), zinc); d.rotation.y = Math.PI / 2; d.position.set(-0.05, 0.42, 0); d.castShadow = true; g.add(d);
+  B(g, 0.02, 0.2, 0.9, C(0x9aa0a6, { metalness: 0.7 }), 0.03, 0.62, 0);                // bară anti-intruziune
+  return g;
+}
+function sheetParts() {   // table de piese din tablă (lonjeroane, suporți, întărituri) pe masa de lucru
+  const g = steelTable(1.8, 0.8, 0.85); const z = C(0xc3c8cc, { metalness: 0.85, roughness: 0.35 });
+  for (const [w, h, d, x, zz, ry] of [[0.5, 0.05, 0.12, -0.55, -0.15, 0.2], [0.3, 0.12, 0.18, -0.1, 0.2, -0.4], [0.42, 0.03, 0.25, 0.4, -0.1, 0.1], [0.22, 0.08, 0.12, 0.65, 0.22, 0.6], [0.35, 0.06, 0.1, 0.05, -0.22, 0.0]]) { const m = B(g, w, h, d, z, x, 0.85, zz); m.rotation.y = ry; }
+  B(g, 0.3, 0.03, 0.04, C(0x2b2f33), 0.3, 0.86, 0.28); Cy(g, 0.02, 0.25, C(0xd4a017), -0.4, 0.88, 0.25, 'x', 8);   // ciocan / dorn
+  return g;
+}
+
 // HeV – după imaginea concept: masă cu cadru de oțel, carcasă de policarbonat transparentă, module de celule, bare și cabluri HV portocalii
 function steelTable(w, d, h = 0.85) {
   const g = new THREE.Group(); const fr = C(0x6b747c, { metalness: 0.6, roughness: 0.35 });
@@ -595,6 +747,8 @@ export function buildEquipment(scene) {
   put(studentDesk(1.8), 16.1, 6.4, 0, 0, info('Loc de lucru studenți (10 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Caiet de sarcini: „locuri de lucru pentru 10 studenți”; DXF A01'));
   put(studentDesk(1.8), 18.7, 6.4, 0, 0, null);
   put(studentDesk(1.8), 16.1, 8.4, 0, 0, null); put(studentDesk(1.8), 18.7, 8.4, 0, 0, null);
+  put(enginePartsBench(2.2), 18.9, 10.9, -90, 0, info('Banc cu piese de motor: arbore cotit, pistoane cu biele, chiulasă, ax cu came', D.CCMAI + ' · ' + D.PCMAI, ['CCMAI – identificarea și măsurarea pieselor mecanismului bielă-manivelă', 'Proiect – dimensiuni principale (alezaj, cursă, bielă)'], 'Imagine concept „PCMAI + CCMAI”; caiet de sarcini Laborator Motoare (Fig. 2)'));
+  put(poster('engine', 1.2), 14.17, 4.3, 90, 0, null, false);
   put(workbench(1.7), 14.6, 13.8, 90, 0, info('Masă de lucru cu scule (demontare / asamblare)', D.CCMAI + ' · ' + D.SAA, ['CCMAI – piston, bielă, segmenți (identificare, măsurare)', 'SAA – demontare demaror, pompă de apă'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 2)'));
   for (const x of [15.9, 18.5]) put(extractionReel(2.2), x, 16.8, 0, 0, info('Sistem de evacuare a gazelor de eșapament', 'Siguranță laborator motoare', ['Obligatoriu la funcționarea standurilor de motor'], 'Caiet de sarcini: „sistem profesional de evacuare a gazelor”'), false, 3.4);
   put(whiteboard(2.4), 19.8, 8.0, -90, 0, null, false);
@@ -631,11 +785,13 @@ export function buildEquipment(scene) {
   put(whiteboard(2.2), 3.4, 0.25, 0, 1, null, false);
 
   // ===================== E02 CCA (x 6.78–13.22, y 0.2–8.8)
-  put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 2.6, 0, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));
-  put(displayTable([axle], 'Punte motoare · diferențial'), 11.6, 2.6, 0, 1, info('Punte motoare cu diferențial', D.CCA, ['Transmisia principală și diferențialul'], 'Fișa CCA'));
-  put(displayTable([strut, strut, steeringRack], 'Suspensie · direcție'), 8.4, 5.6, 0, 1, info('Mecanisme de ghidare, suspensie McPherson, casetă de direcție', D.CCA, ['Mecanisme de ghidare a roților', 'Suspensie – elemente elastice și amortizoare', 'Sisteme de direcție'], 'Fișa CCA II (Mitroi) – lucrările 1–4'));
-  put(displayTable([brakeKit, brakeKit], 'Frâne hidraulice · pneumatice'), 11.6, 5.6, 0, 1, info('Sisteme de frânare hidraulice și pneumatice', D.CCA, ['Frânare cu acționare hidraulică', 'Frânare cu acționare pneumatică (autocamion)'], 'Fișa CCA II – lucrările 5–6'));
+  put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 2.6, 180, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));
+  put(displayTable([axle], 'Punte motoare · diferențial'), 11.6, 2.6, 180, 1, info('Punte motoare cu diferențial', D.CCA, ['Transmisia principală și diferențialul'], 'Fișa CCA'));
+  put(displayTable([strut, strut, steeringRack], 'Suspensie · direcție'), 8.4, 5.6, 180, 1, info('Mecanisme de ghidare, suspensie McPherson, casetă de direcție', D.CCA, ['Mecanisme de ghidare a roților', 'Suspensie – elemente elastice și amortizoare', 'Sisteme de direcție'], 'Fișa CCA II (Mitroi) – lucrările 1–4'));
+  put(displayTable([brakeKit, brakeKit], 'Frâne hidraulice · pneumatice'), 11.6, 5.6, 180, 1, info('Sisteme de frânare hidraulice și pneumatice', D.CCA, ['Frânare cu acționare hidraulică', 'Frânare cu acționare pneumatică (autocamion)'], 'Fișa CCA II – lucrările 5–6'));
   put(studentDesk(1.6), 8.4, 7.8, 0, 1, null); put(studentDesk(1.6), 11.6, 7.8, 0, 1, null);
+  for (const [x, y] of [[7.6, 3.5], [9.4, 3.5], [10.8, 3.5], [12.4, 3.5], [7.6, 6.5], [9.3, 6.5]]) put(stool(), x, y, 0, 1, null);
+  put(poster('gear', 1.2), 10.6, 8.77, 0, 1, null, false); put(poster('susp', 1.2), 12.2, 8.77, 0, 1, null, false);
   put(whiteboard(2.4), 10.0, 0.25, 0, 1, null, false);
 
   // ===================== E03 DINAMICĂ (x 13.37–19.8, y 0.2–8.8) – amenajare după imaginea concept
@@ -645,14 +801,17 @@ export function buildEquipment(scene) {
   put(wheelScales(), 16.3, 7.3, 0, 1, info('Set cântare de roți (4 platforme)', D.DIN, ['Organizarea generală și caracteristici dimensional-masice', 'Poziția centrului de greutate, sarcinile pe punți'], 'Fișa Dinamica autovehiculelor I – lucrări'), false);
   put(tireRack(), 14.1, 6.6, 90, 1, info('Raft cu pneuri și jante (secțiuni)', D.DIN, ['Caracteristici geometrice și constructive ale pneului', 'Raza de rulare a roții'], 'Fișa Dinamica autovehiculelor I'));
   put(brakeHydStand(), 19.4, 6.6, -90, 1, info('Stand de frânare hidraulică instrumentat', D.DIN + ' · ' + D.MF + ' · ' + D.DA, ['Mecanica fluidelor L3 – legea lui Pascal', 'Diagnosticare L6 – ABS', 'Dinamica – frânare'], 'Îndrumar Mecanica fluidelor 2026-2027 (Fig. 3.1); Standuri diplomă nr. 5'));
+  put(poster('dyn', 1.2), 16.8, 8.77, 0, 1, null, false); put(poster('car', 1.2), 18.4, 8.77, 0, 1, null, false);
   put(pcDesk('cad', 31), 14.4, 1.2, 0, 1, info('Post de simulare dinamică', D.DIN, ['Vitezele pe trepte, momentele la roți, proiect Dinamica II'], 'Fișe Dinamica I–II'));
   put(pcDesk('scope', 32), 15.9, 1.2, 0, 1, null);
   put(pcDesk('cad', 33), 17.3, 1.2, 0, 1, null);
 
   // ===================== E04 CAROSERII (x 0.2–7.6, y 11.1–19.8)
-  put(biwFrame(), 3.9, 15.6, 0, 1, info('Caroserie în alb – machetă structurală', D.CAR, ['Parametri dimensionali și masici ai caroseriei', 'Spațiul postului de conducere, habitaclu, portbagaj', 'Structuri portante, zone de deformare'], 'Fișa Caroserii și structuri portante (proiect)'));
+  put(biwShell(), 3.4, 15.3, 90, 1, info('Caroserie în alb – machetă structurală', D.CAR, ['Parametri dimensionali și masici ai caroseriei', 'Spațiul postului de conducere, habitaclu, portbagaj', 'Structuri portante, zone de deformare'], 'Fișa Caroserii și structuri portante (proiect)'));
   put(doorStand(), 1.2, 12.3, 0, 1, info('Ușă pe stand (structură + mecanisme)', D.CAR, ['Elemente de caroserie, etanșări, mecanisme'], 'Concept A02 „Machete / subansamble de caroserie”'));
   put(crashBoxes(), 6.6, 12.3, 0, 1, info('Absorbanți de impact deformați (crash-box)', D.CAR, ['Siguranță pasivă – zone de deformare programată'], 'Fișa CCA II – „Caroserii. Sisteme de siguranță pasivă”'), true, 0.0);
+  put(sheetParts(), 6.75, 15.3, 90, 1, info('Masă cu piese din tablă (lonjeroane, suporți, întărituri)', D.CAR, ['Elemente ale structurii portante, îmbinări prin puncte de sudură'], 'Imagine concept „Caroserii”'));
+  put(poster('car', 1.3), 7.58, 13.2, -90, 1, null, false); put(poster('chassis', 1.3), 7.58, 17.6, -90, 1, null, false);
   put(measureArm(), 6.9, 18.6, 0, 1, info('Braț de măsurare portabil', D.CAR + ' · ' + D.FRA, ['Determinarea dimensiunilor caroseriei', 'Expertiză după accident – cote de control'], 'Fișa Încercarea și omologarea – dimensiuni caroserie'));
   put(pcDesk('cad', 41), 1.4, 18.9, 180, 1, info('Post CAD caroserie (CATIA / AutoCAD)', D.CAR + ' · ' + D.CAD, ['Proiect caroserii – forma și dimensiunile exterioare'], 'Fișa Caroserii și structuri portante – 5.2 rețea de calculatoare'));
   put(pcDesk('cad', 42), 3.0, 18.9, 180, 1, null);
