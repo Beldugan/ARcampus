@@ -336,4 +336,4 @@ if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawD
   });
 }
 // acces pentru testare automată (fără efect în utilizare)
-window.APP = { player, keys, update, setPose, camera };
+window.APP = { player, keys, update, setPose, camera, blocked, ROOMS };

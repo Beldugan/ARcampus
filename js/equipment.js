@@ -259,12 +259,35 @@ function chair() {
   for (const [x, z] of [[-0.19, -0.18], [0.19, -0.18], [-0.19, 0.18], [0.19, 0.18]]) B(g, 0.025, 0.45, 0.025, MAT.steel, x, 0, z);
   return g;
 }
-function pcDesk(kind = 'cad', seed = 1) {
-  const g = new THREE.Group(); B(g, 1.4, 0.04, 0.7, MAT.wood, 0, 0.73, 0); for (const x of [-0.66, 0.66]) B(g, 0.05, 0.73, 0.65, MAT.grey, x, 0, 0);
-  screen(g, 0.58, 0.34, kind, seed, 0, 0.82, -0.18); B(g, 0.05, 0.08, 0.05, MAT.dark, 0, 0.75, -0.2);
-  B(g, 0.45, 0.02, 0.15, MAT.dark, 0, 0.77, 0.08); B(g, 0.06, 0.02, 0.1, MAT.dark, 0.32, 0.77, 0.1); B(g, 0.2, 0.42, 0.45, MAT.dark, 0.5, 0, -0.08);
-  const c = chair(); c.position.set(0, 0, 0.6); c.rotation.y = Math.PI; g.add(c); return g;
+function officeChair() {   // scaun de birou rotativ: bază cu 5 brațe și role, piston, șezut și spătar tapițate
+  const g = new THREE.Group(); const fab = C(0x262b31, { roughness: 0.9 }), pl = C(0x1a1c1f, { roughness: 0.5 });
+  for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; const arm = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.03, 0.045), pl); arm.position.set(Math.cos(a) * 0.15, 0.07, Math.sin(a) * 0.15); arm.rotation.y = -a; g.add(arm); Cy(g, 0.025, 0.03, pl, Math.cos(a) * 0.29, 0.0, Math.sin(a) * 0.29, 'z', 10); }
+  Cy(g, 0.025, 0.36, C(0x8a9399, { metalness: 0.8, roughness: 0.3 }), 0, 0.08, 0, 'y', 12);
+  const seat = B(g, 0.48, 0.07, 0.46, fab, 0, 0.44, 0); seat.geometry.translate(0, 0, 0);
+  B(g, 0.44, 0.5, 0.06, fab, 0, 0.58, -0.25).rotation.x = -0.12; B(g, 0.06, 0.25, 0.04, pl, 0, 0.47, -0.24);
+  for (const x of [-0.25, 0.25]) { B(g, 0.04, 0.2, 0.04, pl, x, 0.47, -0.05); B(g, 0.06, 0.03, 0.26, pl, x, 0.66, -0.05); }
+  return g;
 }
+function monitor(g, kind, seed, x, y, z, ry = 0) {   // monitor 24″: ramă subțire, spate gri închis, braț și talpă
+  const m = new THREE.Group(); m.position.set(x, y, z); m.rotation.y = ry; g.add(m);
+  const back = C(0x2a2d31, { roughness: 0.5, metalness: 0.2 });
+  B(m, 0.56, 0.33, 0.025, back, 0, 0.13, 0); B(m, 0.2, 0.18, 0.03, back, 0, 0.2, -0.025);
+  B(m, 0.05, 0.16, 0.025, C(0x9aa0a6, { metalness: 0.7 }), 0, 0.0, -0.05); B(m, 0.22, 0.012, 0.16, C(0x9aa0a6, { metalness: 0.7 }), 0, 0.0, -0.03);
+  const sc = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.305), scr(kind, seed)); sc.position.set(0, 0.13 + 0.165, 0.0131); m.add(sc);
+  return m;
+}
+function pcDesk(kind = 'cad', seed = 1) {
+  const g = new THREE.Group(); B(g, 1.4, 0.035, 0.75, MAT.wood, 0, 0.73, 0);
+  for (const x of [-0.67, 0.67]) { B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, -0.33); B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, 0.33); B(g, 0.05, 0.02, 0.7, MAT.grey, x, 0.0, 0); }
+  B(g, 1.3, 0.35, 0.015, C(0x9aa3aa, { metalness: 0.3 }), 0, 0.36, -0.33);                        // panou frontal
+  monitor(g, kind, seed, 0, 0.765, -0.2);
+  B(g, 0.44, 0.018, 0.14, C(0x2a2d31), 0, 0.765, 0.1); B(g, 0.06, 0.02, 0.1, C(0x2a2d31), 0.32, 0.765, 0.12);   // tastatură + mouse
+  B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), 0.48, 0, -0.1); Cy(g, 0.006, 0.01, C(0x3b82f6, { emissive: 0x3b82f6, emissiveIntensity: 1 }), 0.48, 0.38, 0.12, 'z', 8);   // unitate PC
+  const c = officeChair(); c.position.set(0, 0, 0.62); c.rotation.y = Math.PI; g.add(c); return g;
+}
+function labScope(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.17, 0.13, C(0xd9dcdf, { roughness: 0.5 }), 0, 0, 0); screen(g, 0.17, 0.11, 'scope', seed, -0.06, 0.03, 0.066); for (let i = 0; i < 6; i++) Cy(g, 0.01, 0.01, C(0x333), 0.07 + (i % 2) * 0.05, 0.04 + Math.floor(i / 2) * 0.04, 0.07, 'z', 10); for (let i = 0; i < 4; i++) Cy(g, 0.007, 0.012, [MAT.yellow, C(0x22aaee), C(0xdd44aa), MAT.green][i], -0.12 + i * 0.045, 0.015, 0.07, 'z', 10); return g; }
+function benchPSU() { const g = new THREE.Group(); B(g, 0.22, 0.13, 0.25, C(0x2b2f33), 0, 0, 0); B(g, 0.09, 0.04, 0.005, C(0x0a0a0a), -0.05, 0.08, 0.126); plate(g, '12.00 V', '', 0.08, -0.05, 0.1, 0.13, 0, '#300'); Cy(g, 0.008, 0.012, MAT.red, 0.06, 0.03, 0.13, 'z', 8); Cy(g, 0.008, 0.012, MAT.black, 0.085, 0.03, 0.13, 'z', 8); return g; }
+function tvDisplay(w = 1.9, kind = 'cad', seed = 90) { const g = new THREE.Group(); B(g, w, w * 0.57, 0.05, C(0x111214), 0, 1.0, 0); const sc = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.04, w * 0.57 - 0.04), scr(kind, seed)); sc.position.set(0, 1.0 + w * 0.285, 0.026); g.add(sc); return g; }
 function whiteboard(w = 3) { const g = new THREE.Group(); B(g, w, 1.2, 0.03, C(0xfafafa, { roughness: 0.15 }), 0, 0.9, 0); B(g, w, 0.05, 0.1, MAT.alu, 0, 0.88, 0.05); return g; }
 function projectorScreen(w = 2.4) { const g = new THREE.Group(); B(g, w + 0.1, 0.1, 0.1, MAT.white, 0, 2.6, 0); B(g, w, 1.5, 0.005, C(0xffffff, { emissive: 0x111111 }), 0, 1.1, 0.04); return g; }
 
@@ -724,7 +747,7 @@ export function buildEquipment(scene) {
   put(workbench(2.2), 10.4, 19.4, 180, 0, info('Banc de lucru', D.FRA, ['Recondiționări, verificări'], 'DXF concept A01'));
   put(toolCabinet(), 12.6, 19.45, 180, 0, info('Dulap de scule pe roți', D.FRA + ' · ' + D.PRA, ['Scule de mână, chei dinamometrice'], 'Dotare service'));
   put(toolCabinet(MAT.blue), 13.4, 13.8, -90, 0, info('Dulap de scule (post 2)', D.PRA, [], 'Dotare service'));
-  put(x431(), 13.3, 6.0, -90, 0, info('Tester de diagnoză Launch X431 (VCI)', D.DA + ' · ' + D.SAA, ['Diagnosticare L1–L7: coduri, date live, teste active', 'SAA: date live presiune supraalimentare, datalog'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
+  put(x431(), 10.6, 4.3, 0, 0, info('Tester de diagnoză Launch X431 (VCI)', D.DA + ' · ' + D.SAA, ['Diagnosticare L1–L7: coduri, date live, teste active', 'SAA: date live presiune supraalimentare, datalog'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
   put(toolWall(3.6, 1), 6.49, 3.6, 90, 0, info('Perete de scule (panou perforat)', D.PRA + ' · ' + D.FRA, ['Chei fixe/inelare, șurubelnițe, clești – la îndemâna posturilor'], 'Imagine concept „Service didactic · bancuri și scule”'), false);
   put(workbench(2.6), 6.85, 3.6, 90, 0, null);
   put(toolCabinet(), 13.6, 4.0, -90, 0, null);
@@ -732,7 +755,7 @@ export function buildEquipment(scene) {
   put(wheelBalancer(), 7.2, 11.4, 90, 0, info('Mașină de echilibrat roți', D.PRA + ' · ' + D.DIN, ['Practică – echilibrare', 'Dinamica – dezechilibru roată'], 'Dotare service'));
   put(oilDrainer(), 10.2, 5.5, 0, 0, info('Colector ulei uzat', D.PRA + ' · ' + D.SAA, ['SAA L4 – sistemul de ungere'], 'Dotare service'));
   put(jack(), 13.4, 3.0, 0, 0, info('Cric hidraulic tip crocodil', D.PRA, [], 'Dotare service'));
-  put(batteryTester(), 13.3, 10.8, -90, 0, info('Tester baterii', D.SAA + ' · ' + D.DA, ['SAA L7 – pornirea cu demaror (test baterie, CCA)'], 'Îndrumar SAA 2026-2027'), true, 0);
+  put(batteryTester(), 12.6, 16.6, 180, 0, info('Tester baterii', D.SAA + ' · ' + D.DA, ['SAA L7 – pornirea cu demaror (test baterie, CCA)'], 'Îndrumar SAA 2026-2027'), true, 0);
   put(compressor(), 13.4, 15.2, -90, 0, info('Compresor aer', 'Utilități atelier', ['Alimentare scule pneumatice, umflare roți'], 'Dotare service'));
   put(hoseReel(), 6.65, 4.0, 90, 0, null, false, 3.0);
   for (const [x, y] of [[10.25, 6.0], [13.55, 9.8]]) put(extractionReel(2.3, MAT.dark), x, y, 0, 0, info('Furtun de evacuare a gazelor (post de lucru)', D.PRA + ' · ' + D.DA, ['Lucru cu motorul pornit la posturile service'], 'Imagini concept – service didactic'), false, 4.2);
@@ -781,7 +804,7 @@ export function buildEquipment(scene) {
   put(standMobil('diag', 5), 6.05, 3.6, -90, 1, info('Stand mobil diagnoză – ECU + breakout OBD (proiect propriu)', D.DA, ['L2 Metode de diagnosticare a senzorilor', 'L3 Diagnosticarea actuatorilor', 'L7 Magistrala CAN (pini 6/14, 120 Ω)'], SRC_ST + '; Lista dezmembrări Diagnosticare/MAM I'));
   put(canBoard(), 0.25, 3.6, 90, 1, info('Rețea CAN didactică cu 3–4 noduri și gateway OBD-II', D.MAM1 + ' · ' + D.DA, ['Mecatronică L10', 'Diagnosticare L7 – magistrala de date CAN (terminare 120 Ω)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 12'), false);
   put(injectorStand(), 6.1, 6.2, -90, 1, info('Stand verificare injectoare benzină', D.DA, ['Diagnosticare L4 – presiune, debit, menținerea presiunii', 'L2 – semnalul injectorului pe osciloscop'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 2'));
-  for (const [x, y] of [[1.9, 1.9], [4.3, 1.9], [1.9, 3.9], [4.3, 3.9]]) { put(studentDesk(1.8), x, y, 0, 1, null); for (const dx of [-0.45, 0.45]) put(laptop(Math.round(x * 3 + y + dx * 4)), x + dx, y + 0.05, 180, 1, null, false, 0.75); }
+  for (const [x, y] of [[1.5, 1.6], [4.2, 1.6], [1.5, 3.8], [4.2, 3.8]]) { put(studentDesk(1.6), x, y, 0, 1, null); put(labScope(Math.round(x * 7 + y)), x - 0.15, y + 0.2, 0, 1, null, false, 0.77); put(benchPSU(), x + 0.25, y + 0.2, 0, 1, null, false, 0.77); for (const dx of [-0.4, 0.4]) put(laptop(Math.round(x * 3 + y + dx * 4)), x + dx, y + 0.05, 180, 1, null, false, 0.75); }
   put(whiteboard(2.2), 3.4, 0.25, 0, 1, null, false);
 
   // ===================== E02 CCA (x 6.78–13.22, y 0.2–8.8)
@@ -789,8 +812,8 @@ export function buildEquipment(scene) {
   put(displayTable([axle], 'Punte motoare · diferențial'), 11.6, 2.6, 180, 1, info('Punte motoare cu diferențial', D.CCA, ['Transmisia principală și diferențialul'], 'Fișa CCA'));
   put(displayTable([strut, strut, steeringRack], 'Suspensie · direcție'), 8.4, 5.6, 180, 1, info('Mecanisme de ghidare, suspensie McPherson, casetă de direcție', D.CCA, ['Mecanisme de ghidare a roților', 'Suspensie – elemente elastice și amortizoare', 'Sisteme de direcție'], 'Fișa CCA II (Mitroi) – lucrările 1–4'));
   put(displayTable([brakeKit, brakeKit], 'Frâne hidraulice · pneumatice'), 11.6, 5.6, 180, 1, info('Sisteme de frânare hidraulice și pneumatice', D.CCA, ['Frânare cu acționare hidraulică', 'Frânare cu acționare pneumatică (autocamion)'], 'Fișa CCA II – lucrările 5–6'));
-  put(studentDesk(1.6), 8.4, 7.8, 0, 1, null); put(studentDesk(1.6), 11.6, 7.8, 0, 1, null);
-  for (const [x, y] of [[7.6, 3.5], [9.4, 3.5], [10.8, 3.5], [12.4, 3.5], [7.6, 6.5], [9.3, 6.5]]) put(stool(), x, y, 0, 1, null);
+  put(studentDesk(1.6), 11.8, 7.9, 0, 1, null);
+  for (const [x, y] of [[7.6, 3.5], [9.4, 3.5], [10.8, 3.5], [12.4, 3.5], [10.8, 6.6], [12.4, 6.6]]) put(stool(), x, y, 0, 1, null);
   put(poster('gear', 1.2), 10.6, 8.77, 0, 1, null, false); put(poster('susp', 1.2), 12.2, 8.77, 0, 1, null, false);
   put(whiteboard(2.4), 10.0, 0.25, 0, 1, null, false);
 
@@ -829,8 +852,8 @@ export function buildEquipment(scene) {
 
   // ===================== E12 SALĂ CAD / SEMINAR (x 19.95–24.8, y 0.2–8.8)
   let sd = 70;
-  for (const y of [2.2, 4.0, 5.8]) for (const x of [20.9, 22.4, 23.9]) put(pcDesk('cad', sd++), x, y, 0, 1, sd === 71 ? info('Sală CAD / seminar – 9 posturi', D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'], 'Imagine concept „sală cu posturi PC”; norme ARACIS 2,5 m²/loc') : null);
-  put(projectorScreen(1.8), 23.6, 8.72, 180, 1, null, false);
+  for (const y of [1.6, 3.9, 6.2]) for (const x of [20.9, 22.35]) put(pcDesk('cad', sd++), x, y, 0, 1, sd === 71 ? info('Sală CAD / seminar – 6 posturi (culoar de acces 1,8 m)', D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'], 'Imagine concept „sală cu posturi PC”; norme ARACIS 2,5 m²/loc') : null);
+  put(tvDisplay(1.9, 'cad', 91), 23.6, 8.76, 180, 1, info('Ecran interactiv 86″', D.CAD, ['Prezentări, proiecte, demonstrații CAD'], 'Imagine concept „sală cu posturi PC”'), false);
   // ===================== E13 ATELIER PROIECTE – STANDURI DIDACTICE (x 19.95–24.8, y 11.1–19.8)
   [20.85, 22.05, 23.25].forEach((x, i) => put(standMobil(i === 1 ? 'meca' : 'diag', 6 + i), x, 14.6, 0, 1, info('Stand mobil în lucru – lucrare de diplomă ' + (i + 1), 'Lucrări de diplomă AR IV · ' + D.DA, ['Montare componente pe tabla perforată', 'Cablare 12 V, cutie electrică IP54, E-stop'], SRC_ST + '; Standuri_lucrari_diploma_AR_IV_2026-2027.pdf')));
   put(standMobil('meca', 9, true), 24.1, 17.2, -90, 1, info('Cadru stand mobil (în execuție)', 'Lucrări de diplomă AR IV', ['Cadru sudat 40×40×2, contrafișe 30×30, roți Ø100 cu frână'], SRC_ST));
