@@ -1115,7 +1115,7 @@ function hybridCut() {
   // suport de prezentare (cadru gri) + etichete pe componente
   for (const x of [-0.25, 0.25]) { B(g, 0.05, 0.05, 0.3, C(0x2b2f33), x, 0.0, 0.02); B(g, 0.04, y0 - 0.2, 0.04, C(0x2b2f33), x, 0.0, -0.05); }
   for (const [t, x, y] of [['MG1', -0.18, y0 + 0.2], ['MG2', 0.16, y0 + 0.21], ['PLANETAR', -0.03, y0 + 0.11], ['DIFERENȚIAL', 0.05, y0 - 0.48]]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.11, 0.028), new THREE.MeshBasicMaterial({ map: labelTex([t], { w: 256, h: 64, bg: '#f2f1ec', fg: '#1d2b3a', font: 'bold 40px Arial' }) })); m.position.set(x, y, 0.21); g.add(m); }
-  g.position.y = 0.3; const w = new THREE.Group(); w.add(g); return w;
+  g.position.y = 0.22; g.scale.setScalar(0.72); const w = new THREE.Group(); w.add(g); return w;
 }
 
 // ------------------------------------------------------------------ dotări generale
@@ -1287,13 +1287,13 @@ export function buildEquipment(scene) {
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
   // ===================== E05 HeV (x 12.4–19.8, y 11.1–19.8)
-  put(batteryMockup(), 13.45, 12.3, 0, 1, info('Machetă baterie de tracțiune ≤ 60 V cu BMS', D.HEV + ' · ' + D.DA, ['Diagnoza sistemului de stocare – fără expunere la înaltă tensiune', 'Diagnosticare L7 (demonstrativ)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 4'));
-  put(emotorBench(), 18.25, 12.3, 0, 1, info('Banc motor electric + invertor', D.HEV + ' · ' + 'Proiect PCMAI – propulsie electrică', ['Caracteristica cuplu–turație, randament', 'Îndrumar proiect sisteme de propulsie electrice'], 'Concept A02 „Bancuri hibride / electrice”; îndrumare proiect PCMAI electrice/hibride'));
-  put(displayTable([hybridCut], 'Transmisie hibridă (secționată)'), 13.7, 13.95, 0, 1, info('Transmisie hibridă power-split (secționată)', D.HEV, ['Concepe strategii de operare hibride', 'Îndrumar proiect sisteme de propulsie hibride (simHEV)'], 'Îndrumar proiect – propulsie hibridă, ed. I'));
+  put(batteryMockup(), 13.45, 12.3, 180, 1, info('Machetă baterie de tracțiune ≤ 60 V cu BMS', D.HEV + ' · ' + D.DA, ['Diagnoza sistemului de stocare – fără expunere la înaltă tensiune', 'Diagnosticare L7 (demonstrativ)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 4'));
+  put(emotorBench(), 18.25, 12.3, 180, 1, info('Banc motor electric + invertor', D.HEV + ' · ' + 'Proiect PCMAI – propulsie electrică', ['Caracteristica cuplu–turație, randament', 'Îndrumar proiect sisteme de propulsie electrice'], 'Concept A02 „Bancuri hibride / electrice”; îndrumare proiect PCMAI electrice/hibride'));
+  put(displayTable([hybridCut], 'Transmisie hibridă (secționată)'), 13.7, 13.95, 180, 1, info('Transmisie hibridă power-split (secționată)', D.HEV, ['Concepe strategii de operare hibride', 'Îndrumar proiect sisteme de propulsie hibride (simHEV)'], 'Îndrumar proiect – propulsie hibridă, ed. I'));
   put(wallbox(), 19.7, 15.5, -90, 1, info('Stație de încărcare AC (demo)', D.HEV, ['Încărcarea vehiculelor electrice, protocoale'], 'Program HeV'), false);
   put(hvCabinet(), 19.55, 13.95, -90, 1, info('Dulap echipament de protecție HV', D.HEV + ' · ' + D.DA, ['Lucru în siguranță: mănuși electroizolante, ecran facial, aparatură CAT III 1000 V'], 'Îndrumar Diagnosticare 2026-2027 – lucrul la vehicule HV'));
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
-  put(hvToolMat(), 17.6, 13.95, 0, 1, null, false, 0.85); put(steelTable(1.2, 0.7, 0.85), 17.6, 13.95, 0, 1, info('Scule izolate VDE 1000 V, multimetru CAT III, mănuși electroizolante', D.HEV + ' · ' + D.DA, ['Lucru în siguranță la sisteme de înaltă tensiune'], 'Imagine concept „HeV”; îndrumar Diagnosticare – vehicule HV'), false, 0.77);
+  put(hvToolMat(), 17.6, 13.95, 0, 1, null, false, 0.85); put(steelTable(1.2, 0.7, 0.85), 17.6, 13.95, 180, 1, info('Scule izolate VDE 1000 V, multimetru CAT III, mănuși electroizolante', D.HEV + ' · ' + D.DA, ['Lucru în siguranță la sisteme de înaltă tensiune'], 'Imagine concept „HeV”; îndrumar Diagnosticare – vehicule HV'), false, 0.77);
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
