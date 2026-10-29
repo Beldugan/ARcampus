@@ -118,12 +118,8 @@ function setPose(p) {
 }
 setPose(START);
 
-const overlay = document.getElementById('overlay');
-document.getElementById('enter').addEventListener('click', () => { try { controls.lock(); } catch (e) { startFree(); } });
-document.getElementById('enterFree').addEventListener('click', startFree);
-function startFree() { overlay.classList.add('hidden'); lockMode = false; document.body.classList.add('free'); }
-controls.addEventListener('lock', () => { overlay.classList.add('hidden'); lockMode = true; });
-controls.addEventListener('unlock', () => { if (lockMode) { overlay.classList.remove('hidden'); lockMode = false; } });
+const overlay = null;   // fără ecran de start: turul pornește direct, privirea se face cu clic + tragere
+document.body.classList.add('free');
 renderer.domElement.addEventListener('mousedown', e => { if (!lockMode) { dragLook = true; lastX = e.clientX; lastY = e.clientY; } });
 addEventListener('mouseup', () => dragLook = false);
 addEventListener('mousemove', e => {
@@ -136,7 +132,7 @@ addEventListener('keydown', e => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
   if (e.code === 'KeyE') useLift();
   if (e.code === 'KeyM') document.getElementById('minimap').classList.toggle('hidden');
-  if (e.code === 'KeyH') document.getElementById('help').classList.toggle('hidden');
+  if (e.code === 'KeyH') document.getElementById('keys').classList.toggle('hidden');
   const n = parseInt(e.key, 10); if (!isNaN(n) && TP[n - 1]) teleport(TP[n - 1]);
 });
 addEventListener('keyup', e => keys[e.code] = false);
@@ -320,7 +316,7 @@ addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; cam
 addEventListener('keydown', e => { if (e.code === 'KeyQ') { HQ = !HQ; flash(HQ ? 'Calitate înaltă (umbre de contact)' : 'Calitate rapidă'); } });
 if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawDeg,pitchDeg
   const [x, y, h, yw, pt] = qs.get('cam').split(',').map(Number);
-  overlay.classList.add('hidden'); setPose({ x, y, h, yawDeg: yw, pitch: THREE.MathUtils.degToRad(pt || 0) });
+  setPose({ x, y, h, yawDeg: yw, pitch: THREE.MathUtils.degToRad(pt || 0) });
   document.body.classList.add('capture'); card.style.display = 'none';
   Promise.all([CAR_MODEL, SKY]).then(() => { const p = player; updateEnv(p.x > 0 && p.x < BW && p.y > 0 && p.y < BD); placeLights(); draw(); window.READY = true; });
 } else {

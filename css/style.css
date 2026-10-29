@@ -43,3 +43,10 @@ body.free #crosshair{opacity:.6}
 body.capture #concept{display:none}
 #help{left:332px}
 @media (max-width:700px){#concept{width:160px}#concept.big{width:calc(100vw - 32px)}}
+
+#keys{position:fixed;right:268px;bottom:16px;width:290px;background:rgba(22,45,60,.85);color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.75;pointer-events:none}
+#keys .kh{color:#9fd3da;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+#keys .kf{color:#c9d6dd;font-size:11px;margin-top:3px}
+#keys kbd{background:#eef3f5;color:#1d2b3a;border-color:#9fb0ba;font-size:11px;padding:0 4px;min-width:18px}
+body.capture #keys{display:none}
+@media (max-width:900px){#keys{display:none}}

@@ -14,12 +14,12 @@ Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (25 × 20 
 | Tastă / mouse | Acțiune |
 |---|---|
 | Săgeți ↑ ↓ ← → sau W A S D | deplasare (← → rotesc privirea) |
-| Mouse | privire (clic pe „Intră” blochează cursorul; Esc îl eliberează) |
+| Clic + trage cu mouse-ul | privire |
 | Shift | mers rapid |
 | Clic / privire pe un echipament | fișa echipamentului: disciplina, lucrările, sursa |
 | E | liftul (parter ↔ etaj) |
 | 1 – 9 | teleport în încăperi (lista din dreapta) |
-| M | harta mică · H ajutor |
+| M | harta mică · H ascunde panoul cu taste |
 | C / N | mărește imaginea concept a încăperii / trece la următoarea |
 | Q | comută între calitate înaltă (ocluzie ambientală, antialiasing) și calitate rapidă |
 
