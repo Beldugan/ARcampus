@@ -299,7 +299,7 @@ function labDesk(seed = 0) {   // masă de laborator: blat laminat deschis, cadr
   B(g, 0.08, 0.035, 0.15, MAT.yellow, 0.05, 0.775, 0.05);                                              // multimetru
   for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.03]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.1 + dx, 0.79, -0.1), new THREE.Vector3(0.2 + dx, 0.8, 0.1), new THREE.Vector3(0.6 + dx, 0.76, 0.33), new THREE.Vector3(0.65 + dx, 0.3, 0.36), new THREE.Vector3(0.4 + dx, 0.05, 0.3)]); const m = new THREE.Mesh(new THREE.TubeGeometry(cv, 24, 0.004, 6), c); g.add(m); }
   B(g, 0.1, 0.05, 0.07, C(0x222222), -0.65, 0.775, -0.2);                                              // adaptor USB-CAN / interfață
-  for (const x of [-0.4, 0.4]) { const c = officeChair(); c.position.set(x, 0, 0.62); c.rotation.y = Math.PI; g.add(c); }
+  for (const x of [-0.4, 0.4]) { const c = labChair(); c.position.set(x, 0, 0.6); c.rotation.y = Math.PI; g.add(c); }
   return g;
 }
 function instrumentTable() { const g = steelTable(1.2, 0.6, 0.8); const box = (w, h, d, x, z, col, sk, sd) => { B(g, w, h, d, C(col, { roughness: 0.5 }), x, 0.8, z); if (sk) screen(g, w * 0.45, h * 0.45, sk, sd, x - w * 0.18, 0.8 + h * 0.3, z + d / 2 + 0.002); }; box(0.32, 0.2, 0.3, -0.35, 0, 0xd9dcdf, 'scope', 71); box(0.28, 0.14, 0.28, 0.0, 0, 0x2b6cb0, 'diag', 72); box(0.3, 0.16, 0.28, 0.38, 0, 0xe6e9ea, 'scope', 73); return g; }
@@ -375,6 +375,7 @@ function standMobil(kind = 'meca', seed = 1, bare = false) {
     for (let i = 0; i < 3; i++) Cy(g, 0.01, 0.4, C(0x111111), -0.15 + i * 0.03, 1.0, zp + 0.03, 'y', 8);   // fascicul cabluri
     B(g, 0.25, 0.16, 0.05, C(0xd1d4d4), -0.25, 0.8, zp + 0.025);                                     // cutie relee
     plate(g, 'Stand diagnoză', 'ECU · breakout OBD · senzori', 0.5, 0, 1.75, zm, 0, '#2e6fb0');
+    standDetails(g, zp, seed);
   } else {
     B(g, 0.14, 0.012, 0.075, MAT.blue, -0.3, 1.3, zp + 0.012).rotation.x = Math.PI / 2;            // Arduino
     B(g, 0.12, 0.012, 0.06, MAT.pcb, -0.12, 1.32, zp + 0.012).rotation.x = Math.PI / 2;            // STM32
@@ -384,6 +385,7 @@ function standMobil(kind = 'meca', seed = 1, bare = false) {
     bnc.forEach((m, i) => Cy(g, 0.012, 0.03, m, 0.05 + i * 0.05, 0.98, zp + 0.03, 'z', 12));
     B(g, 0.12, 0.09, 0.08, C(0x2a2a2a), 0.25, 1.12, zp + 0.04);                                     // clapetă / senzor
     plate(g, 'Stand mecatronică ' + seed, 'Arduino · STM32F103 · senzori', 0.5, 0, 1.75, zm, 0, '#2e6fb0');
+    standDetails(g, zp, seed);
   }
   return g;
 }
@@ -398,6 +400,27 @@ function toolWall(len = 3.0, seed = 1) {
   for (let x = -len / 2 + 0.3; x < len / 2 - 0.2; x += 0.55) B(g, 0.3, 0.08, 0.14, rnd() > 0.5 ? C(0x1f5fa8) : C(0x333a40), x, 0.55, 0.07);   // cutii trusă
   return g;
 }
+// componente suplimentare pe tabla perforată (ca în fotografia de referință): afișaje, module, senzori, borne și cabluri de legătură atârnând
+function standDetails(g, zp, seed) {
+  let r = seed * 7919 % 9973; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+  const mods = [C(0xd9dcdf), C(0x1a1c1f), C(0x2b6cb0), C(0x13612e), C(0xe8e8e3)];
+  for (let i = 0; i < 7; i++) { const x = -0.4 + rnd() * 0.8, y = 0.62 + rnd() * 0.9, w = 0.06 + rnd() * 0.08, h = 0.05 + rnd() * 0.07; B(g, w, h, 0.02 + rnd() * 0.03, mods[i % 5], x, y, zp + 0.015); }
+  for (let i = 0; i < 2; i++) screen(g, 0.1, 0.07, i ? 'diag' : 'bms', seed * 3 + i, -0.3 + i * 0.5, 1.48, zp + 0.012);
+  for (let i = 0; i < 8; i++) Cy(g, 0.009, 0.02, [MAT.red, MAT.black][i % 2], -0.35 + i * 0.1, 0.56, zp + 0.012, 'z', 8);   // șir de borne 4 mm
+  for (let i = 0; i < 6; i++) {   // cabluri de măsură roșu/negru care atârnă de pe panou
+    const x0 = -0.38 + rnd() * 0.76, y0 = 0.7 + rnd() * 0.75, x1 = -0.35 + rnd() * 0.7;
+    const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(x0, y0, zp + 0.02), new THREE.Vector3(x0 + (x1 - x0) * 0.3, y0 - 0.2, zp + 0.07), new THREE.Vector3(x1, 0.42, zp + 0.06), new THREE.Vector3((x0 + x1) / 2, 0.35, zp + 0.03), new THREE.Vector3(x0 * 0.5, 0.56, zp + 0.015)]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 30, 0.0045, 6), i % 2 ? MAT.red : C(0x111111)));
+  }
+}
+function labChair() {   // scaun din polipropilenă neagră, picioare cromate (ca în fotografie)
+  const g = new THREE.Group(); const pp = C(0x1b1d20, { roughness: 0.55 }), cr = C(0xc9cdd1, { metalness: 0.9, roughness: 0.2 });
+  B(g, 0.44, 0.04, 0.42, pp, 0, 0.45, 0.02); const back = B(g, 0.42, 0.36, 0.03, pp, 0, 0.52, -0.2); back.rotation.x = -0.12;
+  for (const [x, z] of [[-0.19, -0.17], [0.19, -0.17], [-0.19, 0.19], [0.19, 0.19]]) { tube(g, [x, 0.45, z], [x * 1.1, 0.0, z * 1.1], 0.011, cr); }
+  tube(g, [-0.2, 0.47, -0.18], [-0.2, 0.62, -0.22], 0.01, cr); tube(g, [0.2, 0.47, -0.18], [0.2, 0.62, -0.22], 0.01, cr);
+  return g;
+}
+function rackCabinet() { const g = new THREE.Group(); B(g, 0.6, 1.8, 0.6, C(0x3a3f44, { metalness: 0.4 }), 0, 0, 0); B(g, 0.5, 1.6, 0.01, C(0x24282c), 0, 0.1, 0.305); for (let i = 0; i < 5; i++) { B(g, 0.46, 0.08, 0.01, C(0x111), 0, 0.35 + i * 0.25, 0.31); Cy(g, 0.006, 0.01, C(0x22c55e, { emissive: 0x16a34a, emissiveIntensity: 1 }), 0.18, 0.39 + i * 0.25, 0.316, 'z', 8); } return g; }
 function laptop(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.018, 0.24, C(0x2f3337, { metalness: 0.5 }), 0, 0, 0); const sc = new THREE.Group(); sc.position.set(0, 0.018, -0.12); sc.rotation.x = -0.25; g.add(sc); B(sc, 0.34, 0.22, 0.01, C(0x2f3337, { metalness: 0.5 }), 0, 0, 0); screen(sc, 0.31, 0.19, seed % 2 ? 'diag' : 'code', seed, 0, 0.015, 0.006); return g; }
 // Dinamică – după imaginea concept: punte completă pe platformă (suspensii coilover), cușcă de încercare pneuri, turn de încercare amortizoare
 // roată reală (anvelopă + jantă din aliaj) preluată din modelul 3D al autoturismului; axa roții = axa locală z
@@ -860,9 +883,10 @@ export function buildEquipment(scene) {
   // peretele de panouri: cele 4 standuri mobile (proiect propriu) aliniate la fundul sălii, cu fața spre mese
   [0.85, 2.0, 3.15, 4.3].forEach((x, i) => put(standMobil('meca', i + 1), x, 8.25, 0, 1, info('Stand mobil mecatronică nr. ' + (i + 1) + ' (proiect propriu)', D.MAM1 + ' · ' + D.MAM2, MECA[i], SRC_ST, 'Platformă dedicată Arduino + STM32F103 pe tabla perforată; 12 V pe panou, 230 V doar în cutia IP54 de pe poliță; E-stop la 1600 mm.')));
   // motor pe stand albastru pentru diagnoză (colțul din dreapta), dulap de scule albastru, tablă albă
-  put(engineStand('8V'), 5.95, 6.75, -90, 1, info('Stand motor 1.6 8V (K7J) cu senzoristică – diagnoză', D.DA, ['Diagnosticare L2 – metode de diagnosticare a senzorilor', 'L3 – diagnosticarea actuatorilor', 'L4 – etanșeitatea camerei de ardere'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente; imagine concept'));
+  put(engineRotStand('MPI'), 6.05, 6.5, -90, 1, info('Stand motor 1.6 8V (K7J) cu senzoristică – diagnoză', D.DA, ['Diagnosticare L2 – metode de diagnosticare a senzorilor', 'L3 – diagnosticarea actuatorilor', 'L4 – etanșeitatea camerei de ardere'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente; imagine concept'));
   put(toolCabinet(MAT.blue), 6.3, 4.9, -90, 1, info('Dulap de scule (diagnoză)', D.DA, ['Sonde, adaptoare, cabluri de măsură'], 'Imagine concept'));
   put(whiteboard(2.0), 6.6, 2.6, -90, 1, null, false);
+  put(rackCabinet(), 0.55, 7.6, 90, 1, info('Dulap rack (rețea, server de laborator)', D.DA + ' · ' + D.MAM1, ['Rețea locală pentru posturi și standuri'], 'Fotografie de referință'));
   put(standMobil('diag', 5), 0.75, 6.3, 90, 1, info('Stand mobil diagnoză – ECU + breakout OBD (proiect propriu)', D.DA, ['L2 Metode de diagnosticare a senzorilor', 'L3 Diagnosticarea actuatorilor', 'L7 Magistrala CAN (pini 6/14, 120 Ω)'], SRC_ST + '; Lista dezmembrări Diagnosticare/MAM I'));
   put(canBoard(), 0.25, 3.0, 90, 1, info('Rețea CAN didactică cu 3–4 noduri și gateway OBD-II', D.MAM1 + ' · ' + D.DA, ['Mecatronică L10', 'Diagnosticare L7 – magistrala de date CAN (terminare 120 Ω)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 12'), false);
   put(instrumentTable(), 5.3, 0.7, 0, 1, info('Masă cu aparate: generator de semnal, sursă dublă, osciloscop de rezervă', D.DA + ' · ' + D.MAM1, ['Generarea semnalelor de test pentru senzori'], 'Imagine concept'));

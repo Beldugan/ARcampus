@@ -30,7 +30,7 @@ export const T = {
     const r = rnd(9); for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(40,40,40,${r() * 0.05})`; g.beginPath(); g.ellipse(r() * w, r() * h, 20 + r() * 60, 10 + r() * 40, r() * 3, 0, 7); g.fill(); }
   }, rep),
   vinyl: (rep) => canvasTex('vinyl', 512, 512, (g, w, h) => {
-    noise(g, w, h, '#c9ccc8', 0.10, 14000, 5, 1.6);
+    noise(g, w, h, '#b9bdbd', 0.14, 22000, 5, 1.4);
     g.strokeStyle = 'rgba(0,0,0,0.06)'; g.lineWidth = 2; g.strokeRect(0, 0, w, h);
   }, rep),
   tiles: (rep, color = '#e6e4df') => canvasTex('tiles' + color, 512, 512, (g, w, h) => {
