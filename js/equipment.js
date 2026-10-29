@@ -5,7 +5,7 @@ import { LEVEL_H } from './building.js';
 import { GLTFLoader } from 'three/addons/GLTFLoader.js';
 import * as BGU from 'three/addons/BufferGeometryUtils.js';
 import { MeshoptDecoder } from 'three/addons/meshopt_decoder.module.js';
-import { engineStandF1C, seatedStudent } from './detail.js';
+import { engineStandF1C, seatedStudent, workshopBench } from './detail.js';
 
 const C = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.6, metalness: 0.1 }, o));
 const MAT = {
@@ -179,17 +179,7 @@ function twoPostLift(withCar = true, carColor = 0xe6e9ec) {
   if (withCar) { const c = car(carColor); c.position.y = lift - 0.19; g.add(c); }   // pragul caroseriei (y≈0,19 în model) pe tampoane
   return g;
 }
-function workbench(len = 2.0) {
-  const g = new THREE.Group(); const cab = C(0x50575e, { metalness: 0.4, roughness: 0.45 }), fr = C(0x60686f, { metalness: 0.4, roughness: 0.4 });
-  B(g, len, 0.05, 0.75, MAT.wood, 0, 0.88, 0); B(g, len, 0.83, 0.7, cab, 0, 0.05, 0.0); B(g, len, 0.05, 0.66, MAT.dark, 0, 0.0, 0);
-  const nc = Math.max(2, Math.round(len / 0.6));
-  for (let c = 0; c < nc; c++) for (let r = 0; r < 4; r++) { const x = -len / 2 + (c + 0.5) * len / nc; B(g, len / nc - 0.03, 0.18, 0.012, fr, x, 0.1 + r * 0.2, 0.356); B(g, len / nc * 0.5, 0.018, 0.02, MAT.steel, x, 0.24 + r * 0.2, 0.364); }
-  B(g, len, 1.1, 0.03, new THREE.MeshStandardMaterial({ map: T.pegboard([len, 1]), color: 0x6b7680, roughness: 0.7 }), 0, 0.95, -0.36);
-  for (let i = 0; i < Math.floor(len * 6); i++) { const x = -len / 2 + 0.12 + i * (len - 0.24) / Math.floor(len * 6); B(g, 0.025, 0.16 + (i % 4) * 0.05, 0.012, MAT.steel, x, 1.55 - (i % 4) * 0.05, -0.335); }
-  for (let i = 0; i < Math.floor(len * 4); i++) { const x = -len / 2 + 0.15 + i * (len - 0.3) / Math.floor(len * 4); B(g, 0.03, 0.11, 0.03, MAT.red, x, 1.22, -0.33); B(g, 0.008, 0.12, 0.008, MAT.steel, x, 1.1, -0.33); }
-  B(g, 0.18, 0.12, 0.14, C(0x9b1c1c), len / 2 - 0.25, 0.93, 0.15); B(g, 0.06, 0.06, 0.22, MAT.steel, len / 2 - 0.25, 0.97, 0.18); // menghină
-  return g;
-}
+function workbench(len = 2.0, panelLen = len) { return workshopBench(len, panelLen, Math.round(len * 10)); }   // banc de atelier realist – vezi detail.js
 function toolCabinet(color = MAT.red) {
   const g = new THREE.Group(); B(g, 0.75, 1.0, 0.48, color, 0, 0.08, 0);
   for (let i = 0; i < 7; i++) { B(g, 0.7, 0.115, 0.01, color, 0, 0.12 + i * 0.13, 0.245); B(g, 0.4, 0.015, 0.02, MAT.steel, 0, 0.18 + i * 0.13, 0.255); }
@@ -974,8 +964,7 @@ export function buildEquipment(scene) {
   put(toolCabinet(), 14.45, 16.4, -90, 0, info('Dulap de scule pe roți', D.FRA + ' · ' + D.PRA, ['Scule de mână, chei dinamometrice'], 'Dotare service'));
   put(toolCabinet(MAT.blue), 6.6, 17.8, 90, 0, info('Dulap de scule (post 2)', D.PRA, [], 'Dotare service'));
   put(x431(), 10.55, 11.0, 0, 0, info('Tester de diagnoză Launch X431 (VCI)', D.DA + ' · ' + D.SAA, ['Diagnosticare L1–L7: coduri, date live, teste active', 'SAA: date live presiune supraalimentare, datalog'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
-  put(toolWall(3.6, 1), 6.18, 11.0, 90, 0, info('Perete de scule (panou perforat)', D.PRA + ' · ' + D.FRA, ['Chei fixe/inelare, șurubelnițe, clești – la îndemâna posturilor'], 'Imagine concept „Service didactic · bancuri și scule”'), false);
-  put(workbench(2.6), 6.55, 11.0, 90, 0, null);
+  put(workbench(2.6, 3.0), 6.55, 9.8, 90, 0, info('Banc de lucru cu dulapuri, menghină și panou de scule', D.PRA + ' · ' + D.FRA, ['Chei combinate 8–19, șurubelnițe, clești, ciocane, clichet și tubulare, cheie dinamometrică – la îndemâna posturilor', 'Demontări / montări subansamble la menghină'], 'Imagine concept „Service didactic · bancuri și scule”'));
   put(toolCabinet(), 14.45, 7.2, -90, 0, null);
   put(tireChanger(), 14.4, 13.4, -90, 0, info('Mașină de demontat anvelope', D.PRA, ['Practică – întreținere roți'], 'Dotare service'));
   put(wheelBalancer(), 14.4, 11.5, -90, 0, info('Mașină de echilibrat roți', D.PRA + ' · ' + D.DIN, ['Practică – echilibrare', 'Dinamica – dezechilibru roată'], 'Dotare service'));

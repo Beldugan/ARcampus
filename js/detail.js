@@ -294,3 +294,121 @@ export function seatedStudent(v = 0) {
   }
   return g;
 }
+
+// ------------------------------------------------------------------ banc de lucru de atelier (modular, ca în service-urile reale)
+// dulapuri din tablă cu sertare pe glisiere și mânere din aluminiu pe toată lățimea, blat multistrat de fag 40 mm, menghină paralelă,
+// panou perforat din tablă RAL 7035 cu scule pe cârlige (chei combinate 8–19, șurubelnițe, clești, ciocane, clichet cu tubulare pe șină,
+// chei hexagonale, cheie dinamometrică), raft cu cutii de piese, lampă LED sub copertina panoului.
+function shapeMesh(shape, depth, mat) { const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: depth * 0.25, bevelSize: depth * 0.25, bevelSegments: 2, curveSegments: 14 }); geo.translate(0, 0, -depth / 2); const m = new THREE.Mesh(geo, mat); m.castShadow = true; return m; }
+function wrenchShape(L) {   // cheie combinată: cap fix (fălci) sus, inel jos, tijă îngustă; L = lungimea totală
+  const jaw = L * 0.11, ring = L * 0.085, sw = L * 0.035, s = new THREE.Shape();
+  s.moveTo(-sw, -L / 2 + ring * 1.6); s.lineTo(-sw * 1.2, L / 2 - jaw * 1.7);
+  s.quadraticCurveTo(-jaw * 1.05, L / 2 - jaw * 1.3, -jaw, L / 2 - jaw * 0.35); s.lineTo(-jaw * 0.42, L / 2 + jaw * 0.05); s.lineTo(-jaw * 0.32, L / 2 - jaw * 0.55);
+  s.lineTo(jaw * 0.32, L / 2 - jaw * 0.55); s.lineTo(jaw * 0.42, L / 2 + jaw * 0.05); s.lineTo(jaw, L / 2 - jaw * 0.35);
+  s.quadraticCurveTo(jaw * 1.05, L / 2 - jaw * 1.3, sw * 1.2, L / 2 - jaw * 1.7); s.lineTo(sw, -L / 2 + ring * 1.6);
+  s.absarc(0, -L / 2 + ring, ring, Math.PI * 0.3, Math.PI * 2.7, true);   // inel
+  const h = new THREE.Path(); h.absarc(0, -L / 2 + ring, ring * 0.55, 0, Math.PI * 2, false); s.holes.push(h); return s;
+}
+function pliersShape(L, nose = 'comb') {   // jumătate de clește (o falcă + un mâner), oglindită pentru cealaltă
+  const s = new THREE.Shape(), jl = nose === 'long' ? L * 0.42 : L * 0.27, jw = nose === 'long' ? L * 0.025 : L * 0.05;
+  s.moveTo(0, L * 0.5); s.lineTo(jw, L * 0.5 - jl * 0.15); s.lineTo(jw * 1.5, L * 0.5 - jl); s.lineTo(L * 0.06, L * 0.5 - jl - L * 0.07);
+  s.quadraticCurveTo(L * 0.075, -L * 0.1, L * 0.11, -L * 0.5); s.lineTo(L * 0.07, -L * 0.5); s.quadraticCurveTo(L * 0.035, -L * 0.1, L * 0.005, L * 0.5 - jl - L * 0.06); s.lineTo(0, L * 0.5);
+  return s;
+}
+export function workshopBench(len = 2.2, panelLen = len, seed = 1) {
+  const g = new THREE.Group(); let r = seed * 7919 % 9973; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+  const body = M(0x3b4148, { metalness: 0.35, roughness: 0.45 }), front = M(0x4a525a, { metalness: 0.35, roughness: 0.42 }), alu = M(0xc9ced2, { metalness: 0.85, roughness: 0.3 }), plinth = M(0x1c1e20, { roughness: 0.7 });
+  const beech = new THREE.MeshStandardMaterial({ color: 0xc8a16e, roughness: 0.55 }), beechEdge = M(0xb89262, { roughness: 0.6 });
+  const D = 0.7, topY = 0.9;
+  // dulapuri: corp, soclu, sertare cu mânere (înălțimi diferite: 3 mici, 2 medii, 1 mare), un dulap cu ușă la capăt
+  box(g, len, 0.07, D - 0.06, plinth, 0, 0.035, 0.0);
+  box(g, len, topY - 0.11, D - 0.04, body, 0, 0.07 + (topY - 0.11) / 2, -0.01);
+  const nc = Math.max(2, Math.round(len / 0.72)), cw = len / nc, hs = [0.1, 0.1, 0.1, 0.15, 0.15, 0.2];
+  for (let c = 0; c < nc; c++) {
+    const xc = -len / 2 + (c + 0.5) * cw;
+    box(g, 0.012, topY - 0.11, 0.01, M(0x2a2f34, { metalness: 0.4 }), -len / 2 + c * cw + 0.006, 0.07 + (topY - 0.11) / 2, D / 2 - 0.025);   // montant între module
+    if (c === nc - 1 && nc > 2) {   // dulap cu ușă + încuietoare
+      box(g, cw - 0.025, topY - 0.14, 0.018, front, xc, 0.085 + (topY - 0.14) / 2, D / 2 - 0.02); box(g, 0.018, 0.22, 0.025, alu, xc + cw / 2 - 0.06, 0.5, D / 2 - 0.004); cyl(g, 0.01, 0.012, M(0x222222), xc + cw / 2 - 0.06, 0.66, D / 2 - 0.002, 'z', 12);
+      continue;
+    }
+    let y = topY - 0.035;
+    for (const h of hs) { y -= h; const fy = y + h / 2; box(g, cw - 0.025, h - 0.012, 0.018, front, xc, fy, D / 2 - 0.02); box(g, cw - 0.07, 0.018, 0.022, alu, xc, fy + h / 2 - 0.028, D / 2 - 0.003); box(g, 0.06, 0.016, 0.003, M(0xf2f2ee), xc - cw / 2 + 0.07, fy - 0.005, D / 2 - 0.01); }   // front, mâner, etichetă
+    cyl(g, 0.009, 0.012, M(0x222222), xc + cw / 2 - 0.05, topY - 0.07, D / 2 - 0.003, 'z', 12);   // încuietoare centrală
+  }
+  // blat fag multistrat 40 mm (lamele vizibile în cant)
+  box(g, len + 0.02, 0.04, D + 0.02, beech, 0, topY + 0.02, 0);
+  for (let i = 0; i < 9; i++) box(g, len + 0.022, 0.002, 0.004, beechEdge, 0, topY + 0.004 + i * 0.0045, D / 2 + 0.012);
+  // menghină paralelă (corp turnat albastru-închis, fălci zimțate, ax + manetă) pe colțul din dreapta
+  const vs = new THREE.Group(); vs.position.set(len / 2 - 0.22, topY + 0.04, D / 2 - 0.1); g.add(vs);
+  const vc = M(0x23415f, { metalness: 0.4, roughness: 0.45 });
+  rbox(vs, 0.16, 0.025, 0.2, 0.01, vc, 0, 0.0125, -0.02); cyl(vs, 0.075, 0.02, vc, 0, 0.01, -0.02, 'y', 24);   // talpă rotativă
+  rbox(vs, 0.14, 0.11, 0.09, 0.012, vc, 0, 0.08, -0.07); rbox(vs, 0.14, 0.1, 0.07, 0.012, vc, 0, 0.075, 0.05);   // falcă fixă + mobilă
+  for (const z of [-0.024, 0.014]) box(vs, 0.13, 0.04, 0.008, M(0x8b9096, { metalness: 0.9, roughness: 0.4 }), 0, 0.11, z);
+  box(vs, 0.05, 0.03, 0.16, vc, 0, 0.04, 0.0); cyl(vs, 0.009, 0.16, alu, 0, 0.05, 0.13, 'z', 10); cyl(vs, 0.006, 0.2, alu, 0, 0.05, 0.2, 'x', 8);
+  for (const sx of [-1, 1]) cyl(vs, 0.012, 0.03, M(0x222222), sx * 0.1, 0.05, 0.2, 'x', 10);
+  box(vs, 0.12, 0.05, 0.08, M(0xa3abb3, { metalness: 0.8, roughness: 0.3 }), 0, 0.16, 0.0);   // piesă prinsă
+  // pe blat: trusă de tubulare deschisă, tavă magnetică, rolă de șervete pe suport
+  const kit = new THREE.Group(); kit.position.set(-len / 2 + 0.45, topY + 0.04, 0.05); kit.rotation.y = 0.12; g.add(kit);
+  rbox(kit, 0.42, 0.06, 0.26, 0.012, M(0x1d4f9c, { roughness: 0.5 }), 0, 0.03, 0); box(kit, 0.4, 0.004, 0.24, M(0x101112), 0, 0.062, 0);
+  for (let i = 0; i < 13; i++) cyl(kit, 0.007 + i * 0.0006, 0.03 + i * 0.001, M(0xcdd2d6, { metalness: 0.95, roughness: 0.2 }), -0.18 + i * 0.03, 0.07, 0.07, 'y', 12);
+  for (let i = 0; i < 10; i++) cyl(kit, 0.01 + i * 0.0009, 0.04, M(0xcdd2d6, { metalness: 0.95, roughness: 0.2 }), -0.17 + i * 0.035, 0.065, -0.02, 'y', 12);
+  const rk = new THREE.Group(); rk.position.set(0.05, 0.07, -0.09); kit.add(rk); box(rk, 0.18, 0.012, 0.03, M(0xcdd2d6, { metalness: 0.95, roughness: 0.2 }), 0, 0, 0); cyl(rk, 0.02, 0.016, M(0xcdd2d6, { metalness: 0.95, roughness: 0.2 }), 0.1, 0, 0, 'y', 16);
+  cyl(g, 0.065, 0.012, M(0x9aa0a6, { metalness: 0.8, roughness: 0.3 }), 0.1, topY + 0.046, 0.12, 'y', 28);
+  for (let i = 0; i < 5; i++) cyl(g, 0.005, 0.016, M(0xc7cbcf, { metalness: 0.9 }), 0.08 + i * 0.012, topY + 0.058, 0.1 + (i % 2) * 0.02, 'y', 6);   // tavă magnetică cu șuruburi
+  // ---- panou perforat pe perete (tablă vopsită RAL 7035, perforații pătrate 10×10 la pas 38 mm), copertină cu LED
+  const PH = 1.0, py0 = topY + 0.12, pz = -D / 2 + 0.01;
+  const pc = document.createElement('canvas'); pc.width = 256; pc.height = 256; const px = pc.getContext('2d'); px.fillStyle = '#c9cbc7'; px.fillRect(0, 0, 256, 256); px.fillStyle = '#3d3f41';
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) px.fillRect(10 + i * 32, 10 + j * 32, 10, 10);
+  const pt = new THREE.CanvasTexture(pc); pt.colorSpace = THREE.SRGBColorSpace; pt.wrapS = pt.wrapT = THREE.RepeatWrapping; pt.repeat.set(panelLen / 0.304, PH / 0.304); pt.anisotropy = 8;
+  box(g, panelLen, PH, 0.02, new THREE.MeshStandardMaterial({ map: pt, metalness: 0.3, roughness: 0.5 }), 0, py0 + PH / 2, pz);
+  box(g, panelLen + 0.03, 0.03, 0.03, M(0xb8bbb7, { metalness: 0.3 }), 0, py0 - 0.015, pz + 0.005);
+  for (const sx of [-1, 1]) box(g, 0.03, PH + 0.03, 0.04, M(0xb8bbb7, { metalness: 0.3 }), sx * (panelLen / 2 + 0.015), py0 + PH / 2, pz + 0.01);
+  box(g, panelLen + 0.06, 0.05, 0.3, M(0xb8bbb7, { metalness: 0.3, roughness: 0.45 }), 0, py0 + PH + 0.025, pz + 0.14);   // copertină
+  box(g, panelLen - 0.1, 0.012, 0.05, new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff6e5, emissiveIntensity: 1.2 }), 0, py0 + PH - 0.002, pz + 0.18);   // bandă LED
+  const zt = pz + 0.022, hook = M(0x8d9297, { metalness: 0.9, roughness: 0.3 });
+  const hk = (x, y) => { rod(g, [x, y, pz + 0.01], [x, y - 0.006, zt + 0.02], 0.002, hook, 6); };
+  const chrome = M(0xd8dcdf, { metalness: 0.95, roughness: 0.16 });
+  const xL = -panelLen / 2 + 0.12; let x = xL;
+  // 1) chei combinate 8…19 mm, în ordinea mărimilor, agățate de inel
+  const yW = py0 + PH - 0.1;
+  for (let i = 0; i < 12; i++) { const L = 0.13 + i * 0.012; const m = shapeMesh(wrenchShape(L), 0.004, chrome); m.rotation.z = Math.PI; m.position.set(x, yW - L / 2, zt + 0.004); g.add(m); hk(x, yW - 0.012); x += 0.03 + i * 0.0012; }
+  x += 0.06;
+  // 2) șurubelnițe (mâner bicolor), pe suport orizontal cu găuri
+  const sdY = py0 + PH - 0.16; box(g, 0.48, 0.012, 0.06, M(0x2a2d30), x + 0.23, sdY, zt + 0.03);
+  const hcol = [0xd63a1a, 0xd63a1a, 0xd63a1a, 0xf2c200, 0xf2c200, 0xf2c200, 0x1f5fa8, 0x1f5fa8, 0x1f5fa8, 0xd63a1a, 0xd63a1a, 0xf2c200];
+  for (let i = 0; i < 12; i++) {
+    const xx = x + 0.02 + i * 0.04, hl = 0.085 + (i % 3) * 0.015, bl = 0.08 + (i % 3) * 0.05;
+    cyl(g, 0.013, hl, M(hcol[i], { roughness: 0.4 }), xx, sdY + 0.012 + hl / 2, zt + 0.03, 'y', 8); cyl(g, 0.0135, hl * 0.35, M(0x111214, { roughness: 0.6 }), xx, sdY + 0.012 + hl * 0.25, zt + 0.03, 'y', 8);
+    cyl(g, 0.0035, bl, chrome, xx, sdY - bl / 2, zt + 0.03, 'y', 8);
+  }
+  x += 0.55;
+  // 3) clești (combinat, cu vârf lung, sfic, papagal) cu mânere izolate roșii
+  const yP = py0 + PH - 0.08, red = M(0xc42a1f, { roughness: 0.5 }), steelD = M(0x6f767c, { metalness: 0.85, roughness: 0.35 });
+  for (const [L, nose] of [[0.2, 'comb'], [0.2, 'long'], [0.16, 'comb'], [0.25, 'comb'], [0.25, 'long']]) {
+    for (const sx of [-1, 1]) { const m = shapeMesh(pliersShape(L, nose), 0.006, steelD); m.scale.x = sx; m.position.set(x, yP - L / 2, zt + 0.006); g.add(m); rod(g, [x + sx * L * 0.075, yP - L * 0.55, zt + 0.007], [x + sx * L * 0.11, yP - L, zt + 0.007], 0.007, red, 8); }
+    cyl(g, 0.008, 0.012, chrome, x, yP - L * 0.27, zt + 0.006, 'z', 10); hk(x, yP + 0.005); x += 0.11;
+  }
+  x += 0.05;
+  // 4) ciocane: lăcătușerie (coadă lemn) + ciocan de cauciuc
+  const wood = M(0xb98a52, { roughness: 0.6 });
+  rod(g, [x, py0 + 0.55, zt + 0.02], [x, py0 + 0.85, zt + 0.02], 0.012, wood); box(g, 0.1, 0.03, 0.03, steelD, x, py0 + 0.855, zt + 0.02); hk(x - 0.02, py0 + 0.84); hk(x + 0.02, py0 + 0.84);
+  x += 0.12; rod(g, [x, py0 + 0.55, zt + 0.025], [x, py0 + 0.82, zt + 0.025], 0.012, M(0x222222)); cyl(g, 0.03, 0.11, M(0x1b1b1b, { roughness: 0.85 }), x, py0 + 0.84, zt + 0.025, 'x', 18);
+  hk(x - 0.03, py0 + 0.82); hk(x + 0.03, py0 + 0.82); x += 0.12;
+  // 5) cheie franceză, clichet, cheie dinamometrică, set chei hexagonale în suport
+  const adj = shapeMesh(wrenchShape(0.25), 0.007, chrome); adj.rotation.z = Math.PI; adj.position.set(x, py0 + 0.72, zt + 0.006); g.add(adj); hk(x, py0 + 0.84); x += 0.07;
+  rod(g, [x, py0 + 0.55, zt + 0.015], [x, py0 + 0.82, zt + 0.015], 0.008, chrome); cyl(g, 0.02, 0.016, chrome, x, py0 + 0.84, zt + 0.015, 'z', 16); cyl(g, 0.011, 0.1, M(0x1d1f21), x, py0 + 0.6, zt + 0.015, 'y', 10); hk(x, py0 + 0.82); x += 0.08;
+  rod(g, [x, py0 + 0.42, zt + 0.02], [x, py0 + 0.86, zt + 0.02], 0.011, chrome); cyl(g, 0.014, 0.12, M(0x1d1f21), x, py0 + 0.48, zt + 0.02, 'y', 10); box(g, 0.035, 0.05, 0.02, M(0x1d1f21), x, py0 + 0.74, zt + 0.03); hk(x, py0 + 0.84); x += 0.08;
+  box(g, 0.12, 0.03, 0.04, M(0x2a2d30), x + 0.03, py0 + 0.82, zt + 0.02); for (let i = 0; i < 9; i++) { const l = 0.05 + i * 0.012; rod(g, [x - 0.02 + i * 0.012, py0 + 0.835, zt + 0.02], [x - 0.02 + i * 0.012, py0 + 0.835 - l, zt + 0.02], 0.002 + i * 0.0003, M(0x2c2f33, { metalness: 0.7 }), 6); }
+  x += 0.16;
+  // 6) șină cu tubulare (1/2″) în rest de spațiu + clichete scurte
+  if (x < panelLen / 2 - 0.3) { const railL = Math.min(0.5, panelLen / 2 - 0.15 - x); box(g, railL, 0.014, 0.02, M(0xc42a1f), x + railL / 2, py0 + 0.86, zt + 0.012); for (let i = 0; i * 0.035 < railL - 0.02; i++) cyl(g, 0.009 + i * 0.0008, 0.035, chrome, x + 0.02 + i * 0.035, py0 + 0.84, zt + 0.03, 'z', 12); x += railL + 0.06; }
+  // ---- jos pe panou: raft cu cutii de piese (albastre / roșii, frontal deschis) + suport de spray-uri și rolă de șervete
+  const shY = py0 + 0.18; box(g, panelLen - 0.2, 0.012, 0.16, M(0x9ea3a7, { metalness: 0.5 }), 0, shY, pz + 0.09);
+  const binC = [M(0x1f5fa8, { roughness: 0.5 }), M(0xc42a1f, { roughness: 0.5 }), M(0xf2c200, { roughness: 0.5 })];
+  for (let i = 0; i * 0.13 < panelLen - 0.45; i++) { const bx = -panelLen / 2 + 0.2 + i * 0.13; box(g, 0.11, 0.09, 0.14, binC[i % 7 === 3 ? 1 : i % 7 === 5 ? 2 : 0], bx, shY + 0.051, pz + 0.09); box(g, 0.08, 0.06, 0.03, M(0x0c0c0d), bx, shY + 0.07, pz + 0.155); box(g, 0.05, 0.016, 0.002, M(0xf5f5f0), bx, shY + 0.03, pz + 0.161); }
+  const sp = new THREE.Group(); sp.position.set(panelLen / 2 - 0.25, py0 + 0.42, pz + 0.06); g.add(sp); box(sp, 0.32, 0.01, 0.09, M(0x9ea3a7, { metalness: 0.5 }), 0, 0, 0);
+  [[0x1f5fa8, 0.17], [0xc42a1f, 0.2], [0xf2c200, 0.17], [0x2e7d32, 0.19]].forEach(([c, h], i) => { cyl(sp, 0.028, h, M(c, { roughness: 0.35, metalness: 0.4 }), -0.11 + i * 0.075, 0.005 + h / 2, 0, 'y', 16); cyl(sp, 0.02, 0.03, M(0xf2f2ee), -0.11 + i * 0.075, 0.02 + h, 0, 'y', 12); });
+  const roll = new THREE.Group(); roll.position.set(-panelLen / 2 + 0.25, py0 + 0.45, pz + 0.09); g.add(roll); cyl(roll, 0.08, 0.26, M(0xf3f1ea, { roughness: 0.9 }), 0, 0, 0, 'x', 24); cyl(roll, 0.006, 0.32, M(0x555a5e, { metalness: 0.8 }), 0, 0, 0, 'x', 8); for (const sx of [-1, 1]) box(roll, 0.006, 0.12, 0.09, M(0x555a5e, { metalness: 0.8 }), sx * 0.16, 0.0, -0.04);
+  const sheet = box(roll, 0.25, 0.1, 0.002, M(0xf3f1ea, { roughness: 0.9 }), 0, -0.1, 0.075); sheet.rotation.x = 0.1;
+  return g;
+}
