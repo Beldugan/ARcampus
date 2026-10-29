@@ -37,13 +37,13 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
 
 ### Capacitate maximă conform ARACIS și locuri amenajate
 
-Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor didactice și a echipamentelor de pe pardoseală (proiecția lor în plan, calculată din model). Numărul maxim de locuri = ⌊ netă / normă ⌋, după Metodologia ARACIS (partea I, std. 1.4.1.6 / 1.4.3.6): laboratoare cu caracter tehnic ≥ 4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc. Mesele și scaunele se amplasează automat (`seatLabs()` în `js/equipment.js`) în spațiul liber, cu 0,5 m de lucru în jurul standurilor și 1 m liber în fața ușilor. În P01 (ITP), P02 (service) și E13 (atelier proiecte) nu se pun mese. Valorile apar pe plăcuțele ușilor și în bara cu numele încăperii.
+Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor didactice și a echipamentelor de pe pardoseală (proiecția lor în plan, calculată din model). Numărul maxim de locuri = ⌊ netă / normă ⌋, după Metodologia ARACIS (partea I, std. 1.4.1.6 / 1.4.3.6): laboratoare cu caracter tehnic ≥ 4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc. Mesele și scaunele se amplasează automat (`seatLabs()` în `js/equipment.js`) în spațiul liber, cu 0,5 m de lucru în jurul standurilor și 1 m liber în fața ușilor. În P01 (ITP), P02 (service), P03 (laborator motoare) și E13 (atelier proiecte) nu se pun mese. Valorile apar pe plăcuțele ușilor și în bara cu numele încăperii.
 
 | Încăpere | Suprafață | Standuri / echipamente | Netă | Normă | Locuri max. | Amenajate |
 |---|---|---|---|---|---|---|
 | P01 Stație ITP | 80,0 m² | 21,1 m² | 59,0 m² | 4 | 14 | – (fără mese) |
 | P02 Service student | 115,9 m² | 38,0 m² | 77,9 m² | 4 | 19 | – (fără mese) |
-| P03 Laborator motoare | 176,6 m² | 18,7 m² | 157,9 m² | 4 | 39 | 39 |
+| P03 Laborator motoare | 176,6 m² | 18,7 m² | 157,9 m² | 4 | 39 | – (fără mese) |
 | E01 Diagnosticare + Mecatronică | 55,3 m² | 8,5 m² | 46,8 m² | 4 | 11 | 11 |
 | E02 CCA | 55,4 m² | 8,7 m² | 46,6 m² | 4 | 11 | 11 |
 | E03 Dinamică | 55,3 m² | 16,4 m² | 38,9 m² | 4 | 9 | 6 |
