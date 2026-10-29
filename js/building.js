@@ -42,6 +42,7 @@ function floorMat(kind, w, d) {
   if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map: T.epoxy([w / 4, d / 4]), roughness: 0.22, metalness: 0.0, clearcoat: 0.8, clearcoatRoughness: 0.12 });
   if (kind === 'vinyl') return new THREE.MeshStandardMaterial({ map: T.vinyl([w / 3, d / 3]), roughness: 0.5 });
   if (kind === 'tile') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2]), roughness: 0.3 });
+  if (kind === 'parquet') return new THREE.MeshStandardMaterial({ map: T.wood([w / 1.4, d / 0.35]), color: 0xd9c3a5, roughness: 0.45 });
   if (kind === 'stone') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2], '#cfcac0'), roughness: 0.35 });
   return m.slab;
 }
@@ -111,12 +112,12 @@ export const ROOMS = [
   { id: 'E10', name: 'Tehnic / curățenie', sign: ['TEHNIC', 'curățenie'], lvl: 1, r: [7.75, 18.35, 10.6, 19.8], floor: 'tile', ceil: 'tiles', h: 2.7 },
   { id: 'E11', name: 'Hol 1,50 m', hall: true, lvl: 1, r: [10.75, 11.1, 12.25, 19.8], floor: 'stone', ceil: 'tiles', h: 2.7 },
   { id: 'E05', name: 'E05 · HeV – Autovehicule hibride și electrice', sign: ['E05 · HeV', 'Hibride și electrice'], lvl: 1, r: [12.4, 11.1, 19.8, 19.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E13', name: 'E13 · Atelier proiecte – standuri didactice', sign: ['E13 · ATELIER PROIECTE', 'Standuri didactice · diplomă'], lvl: 1, r: [19.95, 11.1, 24.8, 19.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E13', name: 'E13 · Sală de protocol – întâlniri oficiale și ședințe', sign: ['E13 · SALĂ DE PROTOCOL', 'Delegații oficiale · ședințe'], lvl: 1, r: [19.95, 11.1, 24.8, 19.8], floor: 'parquet', ceil: 'tiles', h: 2.75 },
 ];
 // suprafețe utile calculate din plan (sumă pe dreptunghiurile fiecărei încăperi) și capacitatea maximă conform ARACIS –
 // Metodologia de evaluare externă, partea I, standardele 1.4.1.6 / 1.4.3.6: săli de curs ≥ 1 m²/loc, seminar ≥ 1,4 m²/loc,
 // laboratoare de informatică (și de specialitate cu calculatoare) ≥ 2,5 m²/loc, laboratoare cu caracter tehnic ≥ 4 m²/loc.
-export const ARACIS_NORM = { P01: 4, P02: 4, P03: 4, E01: 4, E02: 4, E03: 4, E04: 4, E05: 4, E12: 2.5, E13: 4 };
+export const ARACIS_NORM = { P01: 4, P02: 4, P03: 4, E01: 4, E02: 4, E03: 4, E04: 4, E05: 4, E12: 2.5 };
 export const ROOM_AREA = {}; for (const r of ROOMS) ROOM_AREA[r.id] = (ROOM_AREA[r.id] || 0) + (r.r[2] - r.r[0]) * (r.r[3] - r.r[1]);
 const fmtRo = v => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',').replace(',0', '');
 for (const r of ROOMS) {

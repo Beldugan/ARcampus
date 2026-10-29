@@ -32,12 +32,12 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
   * **P02 Service student, 113 m² + magazie piese 5,5 m²:** 2 posturi marcate (elevator cu 2 coloane și post la sol), acces din parcare. Lucrările se pot urmări pe un monitor din holul de intrare, conform RNTR 9.
   * **P03 Laborator motoare, 176 m²:** în formă de L, cu vitrină mare spre stradă, aripă estică pentru standurile de motor și ușă de echipamente spre parcare.
   * **Fâșia de est:** hol de intrare din stradă, vestiar, WC-uri și cameră tehnică.
-* **Etaj:** E01–E05, E12 Sală CAD (15 posturi PC), E13 Atelier proiecte, grupuri sanitare.
+* **Etaj:** E01–E05, E12 Sală CAD (15 posturi PC), E13 Sală de protocol (întâlniri oficiale, ședințe), grupuri sanitare.
 * **Fațada:** e tratată ca o clădire universitară: fibrociment deschis și grafit, cadru alb în consolă, copertină la intrare, accente turcoaz. Scara S1 are ecran de lamele, balustradă din sticlă și trepte placate cu HPL.
 
 ### Capacitate maximă conform ARACIS și locuri amenajate
 
-Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor didactice și a echipamentelor de pe pardoseală (proiecția lor în plan, calculată din model). Numărul maxim de locuri = ⌊ netă / normă ⌋, după Metodologia ARACIS (partea I, std. 1.4.1.6 / 1.4.3.6): laboratoare cu caracter tehnic ≥ 4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc. Mesele și scaunele se amplasează automat (`seatLabs()` în `js/equipment.js`) în spațiul liber, cu 0,5 m de lucru în jurul standurilor și 1 m liber în fața ușilor. În P01 (ITP), P02 (service), P03 (laborator motoare) și E13 (atelier proiecte) nu se pun mese. Valorile apar pe plăcuțele ușilor și în bara cu numele încăperii.
+Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor didactice și a echipamentelor de pe pardoseală (proiecția lor în plan, calculată din model). Numărul maxim de locuri = ⌊ netă / normă ⌋, după Metodologia ARACIS (partea I, std. 1.4.1.6 / 1.4.3.6): laboratoare cu caracter tehnic ≥ 4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc. Mesele și scaunele se amplasează automat (`seatLabs()` în `js/equipment.js`) în spațiul liber, cu 0,5 m de lucru în jurul standurilor și 1 m liber în fața ușilor. În P01 (ITP), P02 (service) și P03 (laborator motoare) nu se pun mese automat (în P03 sunt 4 bănci puse manual, în locul machetei Smart). E13 a devenit sală de protocol. Valorile apar pe plăcuțele ușilor și în bara cu numele încăperii.
 
 | Încăpere | Suprafață | Standuri / echipamente | Netă | Normă | Locuri max. | Amenajate |
 |---|---|---|---|---|---|---|
@@ -50,7 +50,6 @@ Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor di
 | E04 Caroserii | 64,4 m² | 10,8 m² | 53,6 m² | 4 | 13 | 13 |
 | E05 HeV | 64,4 m² | 6,8 m² | 57,6 m² | 4 | 14 | 13 |
 | E12 Sală CAD | 41,7 m² | 0 | 41,7 m² | 2,5 | 16 | 15 |
-| E13 Atelier proiecte | 42,2 m² | 6,4 m² | 35,8 m² | 4 | 8 | – (fără mese) |
 
 ### Trasee din stradă
 

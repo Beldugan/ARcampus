@@ -150,7 +150,7 @@ const TP = [
   { name: 'E04 · Caroserii', x: 3.9, y: 11.8, h: H1, yaw: 0 },
   { name: 'E05 · HeV', x: 16.0, y: 11.8, h: H1, yaw: 0 },
   { name: 'E12 · Sală CAD', x: 22.0, y: 8.2, h: H1, yaw: 180 },
-  { name: 'E13 · Atelier proiecte', x: 22.0, y: 11.8, h: H1, yaw: 0 },
+  { name: 'E13 · Sală de protocol', x: 22.0, y: 12.2, h: H1, yaw: 0 },
   { name: 'Scara S1 (de la fațadă)', x: 26.0, y: -3.5, h: 0, yaw: 0 },
   { name: 'Porțile ITP / service (parcare)', x: 8.0, y: 27, h: 0, yaw: 180 },
   { name: 'Parcarea · lotul 18', x: 10, y: 33, h: 0, yaw: 180 },
