@@ -183,6 +183,15 @@ export function buildBuilding(scene) {
     const d = y1 - 0.2; const deck = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, d), m.deck); deck.rotation.x = Math.PI / 2; deck.position.set((x0 + x1) / 2, 4.49, -(0.2 + y1) / 2); add(deck, false);
     for (let y = 0.2 + 0.9; y < y1; y += 1.0) boxXY(x0, y, x1, y + 0.06, 4.40, 4.49, m.steel, false);
     for (let y = 2.5; y < y1 - 1; y += 4.5) { boxXY(x0, y - 0.1, x1, y + 0.1, 4.05, 4.49, m.steel); }
+    if (x0 > 14) {   // laborator motoare: lămpi industriale suspendate tip clopot (ca în imaginea concept)
+      const dome = new THREE.MeshStandardMaterial({ color: 0x2b2f33, metalness: 0.6, roughness: 0.4, side: THREE.DoubleSide });
+      for (let x = x0 + 1.4; x < x1 - 0.5; x += 2.8) for (let y = 2.0; y < y1 - 1; y += 3.2) {
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.9), m.alu); rod.position.set(x, 4.0, -y); root.add(rod);
+        const sh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.3, 0.26, 28, 1, true), dome); sh.position.set(x, 3.42, -y); sh.castShadow = false; root.add(sh);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.08, 16), dome); top.position.set(x, 3.58, -y); root.add(top);
+        const lens = new THREE.Mesh(new THREE.CircleGeometry(0.27, 28), m.led); lens.rotation.x = Math.PI / 2; lens.position.set(x, 3.31, -y); root.add(lens);
+      }
+    } else
     for (let x = x0 + 1.6; x < x1 - 0.8; x += 2.6) for (let y = 1.2; y < y1 - 1.2; y += 2.2) {
       boxXY(x - 0.08, y, x + 0.08, y + 1.6, 3.95, 4.02, m.alu, false);
       const lens = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 1.55), m.led); lens.rotation.x = Math.PI / 2; lens.position.set(x, 3.945, -(y + 0.8)); root.add(lens);
@@ -193,8 +202,8 @@ export function buildBuilding(scene) {
     for (let y = 1.0; y < y1 - 0.5; y += 1.2) { const r = new THREE.Mesh(new THREE.TorusGeometry(0.255, 0.012, 6, 24), m.alu); r.position.set(dx, 3.85, -y); root.add(r); }
   }
   // stâlpi metalici HEA pe pereții halelor (ca în imaginile concept), gri deschis
-  const colM = new THREE.MeshStandardMaterial({ color: 0x9aa3aa, roughness: 0.45, metalness: 0.5 });
-  for (let y = 2.5; y < 19.5; y += 4.5) for (const [x, sx] of [[0.2, 1], [6.32, -1], [6.47, 1], [14.0, -1]]) {
+  const colM = new THREE.MeshStandardMaterial({ color: 0x4a5258, roughness: 0.45, metalness: 0.5 });
+  for (let y = 2.5; y < 19.5; y += 4.5) for (const [x, sx] of [[0.2, 1], [6.32, -1], [6.47, 1], [14.0, -1], [14.15, 1], [19.85, -1]]) {
     const xi = sx > 0 ? x : x - 0.26;
     boxXY(xi, y - 0.13, xi + 0.26, y - 0.11, 0, 4.4, colM); boxXY(xi, y + 0.11, xi + 0.26, y + 0.13, 0, 4.4, colM); boxXY(sx > 0 ? xi : xi + 0.24, y - 0.12, sx > 0 ? xi + 0.02 : xi + 0.26, y + 0.12, 0, 4.4, colM);
     boxXY(xi + 0.12, y - 0.12, xi + 0.14, y + 0.12, 0, 4.4, colM);

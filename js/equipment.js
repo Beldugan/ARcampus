@@ -590,6 +590,25 @@ function engineModel(kind = 'MPI', cyl = 4) {
   return g;
 }
 // banc cu piese de motor (ca în imaginea concept PCMAI + CCMAI): arbore cotit, pistoane cu biele, chiulasă, ax cu came
+// stand rotativ de motor (ca în imaginea concept): bază pe roți, coloană, cap rotativ cu placă în cruce, motorul în consolă la ~1 m
+function engineRotStand(kind = 'MPI', cut = true) {
+  const g = new THREE.Group(); const SF = C(0x1f4fa8, { metalness: 0.35, roughness: 0.4 });
+  B(g, 0.08, 0.08, 1.0, SF, 0.55, 0.08, 0); B(g, 1.25, 0.08, 0.08, SF, -0.05, 0.08, 0);                 // bază în T
+  for (const [x, z] of [[0.55, -0.48], [0.55, 0.48], [-0.65, 0]]) { B(g, 0.1, 0.02, 0.1, MAT.steel, x, 0.06, z); Cy(g, 0.04, 0.035, MAT.rubber, x, 0.035, z, 'z', 14); }
+  B(g, 0.09, 1.0, 0.09, SF, 0.55, 0.16, 0); tube(g, [0.55, 0.3, 0], [0.2, 0.12, 0], 0.025, SF);          // coloană + contrafișă
+  Cy(g, 0.045, 0.32, SF, 0.42, 1.08, 0, 'x', 16); Cy(g, 0.08, 0.04, C(0x0e2f5a), 0.26, 1.08, 0, 'x', 20);   // cap rotativ
+  for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.78; const arm = B(g, 0.02, 0.32, 0.04, SF, 0.24, 1.08 - 0.16, 0); arm.position.set(0.24, 1.08 + Math.sin(a) * 0.12 - 0.16, Math.cos(a) * 0.12); arm.rotation.x = a; }
+  B(g, 0.06, 0.1, 0.1, MAT.dark, 0.6, 1.0, 0.07);                                                        // reductor cu manivelă
+  Cy(g, 0.01, 0.18, MAT.steel, 0.66, 1.05, 0.15, 'z', 8);
+  const em = engineModel(kind); em.scale.setScalar(1.3); em.position.set(-0.22, 0.6, 0); g.add(em);
+  return g;
+}
+function cylHeadsBench(len = 2.2) {   // banc cu chiulase, ax cu came și scule (ca în imaginea concept)
+  const g = enginePartsBench(len);
+  for (const [x, z, r] of [[-0.75, 0.1, 0.1], [-0.25, -0.15, -0.05], [0.3, 0.12, 0.08]]) { const h = new THREE.Group(); h.position.set(x, 0.92, z); h.rotation.y = r; g.add(h); B(h, 0.5, 0.11, 0.22, ALU2, 0, 0, 0); for (let i = 0; i < 4; i++) { Cy(h, 0.034, 0.02, C(0x2a2d30), -0.18 + i * 0.12, 0.1, 0.0, 'y', 20); Cy(h, 0.012, 0.03, GEARM, -0.18 + i * 0.12, 0.11, 0.07, 'y', 10); } }
+  return g;
+}
+function greyCabinets(len = 3.0) { const g = new THREE.Group(); const gc = C(0xb9bec3, { metalness: 0.3, roughness: 0.45 }); B(g, len, 0.9, 0.6, gc, 0, 0, 0); B(g, len, 0.04, 0.62, MAT.wood, 0, 0.9, 0); for (let i = 0; i < Math.floor(len / 0.6); i++) { B(g, 0.56, 0.8, 0.01, C(0xc9cdd1, { metalness: 0.3 }), -len / 2 + 0.3 + i * 0.6, 0.05, 0.305); B(g, 0.02, 0.15, 0.02, MAT.dark, -len / 2 + 0.52 + i * 0.6, 0.6, 0.315); } B(g, len, 1.0, 0.35, gc, 0, 1.45, -0.12); return g; }
 function enginePartsBench(len = 2.2) {
   const g = new THREE.Group(); const blue = C(0x1f4fa8, { metalness: 0.35, roughness: 0.45 });
   B(g, len, 0.06, 0.8, MAT.wood, 0, 0.86, 0); B(g, len, 0.82, 0.74, blue, 0, 0.04, 0);
@@ -797,21 +816,24 @@ export function buildEquipment(scene) {
   for (const [x, y] of [[10.25, 6.0], [13.55, 9.8]]) put(extractionReel(2.3, MAT.dark), x, y, 0, 0, info('Furtun de evacuare a gazelor (post de lucru)', D.PRA + ' · ' + D.DA, ['Lucru cu motorul pornit la posturile service'], 'Imagini concept – service didactic'), false, 4.2);
   put(extinguisher(), 13.85, 1.0, -90, 0, info('Stingător P6', 'Securitate la incendiu', [], 'P118/2015'));
 
-  // ===================== P03 LABORATOR PCMAI + CCMAI (x 14.15–19.8, y 0.2–16.14)
-  put(engineStand('MPI'), 15.9, 16.0, 0, 0, info('Stand motor Otto 1.4 MPI (K7J, injecție multipunct)', D.PCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['PCMAI – caracteristici, raport de compresie', 'Diagnosticare L1–L4 (AVL, senzori, actuatori, etanșeitate)', 'SAA L1–L2 (consum, injecție), L4 ungere, L5 răcire, L7 demaror'], 'Caiet de sarcini Laborator Motoare Termice; îndrumare SAA/Diagnosticare 2026-2027'));
-  put(engineStand('dCi'), 18.5, 16.0, 0, 0, info('Stand motor Diesel 1.5 dCi (common rail, turbo)', D.CCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['Diagnosticare L5 – sistem de alimentare MAC / EGR', 'SAA L3 injecție diesel, L6 turbosuflantă cu geometrie variabilă', 'CCMAI – construcția mecanismului motor'], 'Caiet de sarcini Laborator Motoare Termice; îndrumar SAA 2026-2027'));
+  // ===================== P03 LABORATOR MOTOARE (x 14.15–19.85, y 0.2–19.8) – amenajare după imaginea concept PCMAI + CCMAI
+  put(engineRotStand('MPI'), 15.3, 17.5, 0, 0, info('Stand motor Otto 1.4 MPI (K7J, injecție multipunct)', D.PCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['PCMAI – caracteristici, raport de compresie', 'Diagnosticare L1–L4 (AVL, senzori, actuatori, etanșeitate)', 'SAA L1–L2 (consum, injecție), L4 ungere, L5 răcire, L7 demaror'], 'Caiet de sarcini Laborator Motoare Termice; îndrumare SAA/Diagnosticare 2026-2027'));
+  put(engineRotStand('dCi'), 17.1, 17.5, 0, 0, info('Stand motor Diesel 1.5 dCi (common rail, turbo)', D.CCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['Diagnosticare L5 – sistem de alimentare MAC / EGR', 'SAA L3 injecție diesel, L6 turbosuflantă cu geometrie variabilă', 'CCMAI – construcția mecanismului motor'], 'Caiet de sarcini Laborator Motoare Termice; îndrumar SAA 2026-2027'));
+  put(engineRotStand('MPI'), 18.9, 17.5, 0, 0, info('Motor secționat demonstrativ (CCMAI)', D.CCMAI + ' · ' + D.BAZ, ['Construcția mecanismului motor: bloc, chiulasă, mecanism bielă-manivelă, distribuție', 'Identificarea pieselor și a materialelor'], 'Imagine concept „PCMAI + CCMAI”'));
+  put(cylHeadsBench(2.2), 16.9, 14.4, 0, 0, info('Banc cu chiulase și ax cu came', D.CCMAI, ['Chiulase: camere de ardere, supape, ghiduri', 'Măsurători la axul cu came'], 'Imagine concept „PCMAI + CCMAI”'));
+  put(greyCabinets(2.4), 14.5, 16.4, 90, 0, info('Dulapuri de laborator (scule, aparate de măsură)', D.CCMAI + ' · ' + D.PCMAI, ['Micrometre, comparatoare, șublere, chei dinamometrice'], 'Imagine concept'));
   put(smartCutaway(), 16.6, 2.6, 0, 0, info('Machetă secționată Smart ForTwo', D.BAZ + ' · ' + D.DA + ' · ' + D.CCA, ['Bazele ingineriei – identificarea subsistemelor', 'Diagnosticare L1, L6 – sisteme activate din telecomandă', 'CCA – transmisie, direcție, frâne'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 1); îndrumar Diagnosticare'));
-  put(avlStation(), 17.0, 12.2, 180, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
+  put(avlStation(), 14.75, 11.7, 90, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
   put(studentDesk(1.8), 16.1, 6.4, 0, 0, info('Loc de lucru studenți (10 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Caiet de sarcini: „locuri de lucru pentru 10 studenți”; DXF A01'));
   put(studentDesk(1.8), 18.7, 6.4, 0, 0, null);
   put(studentDesk(1.8), 16.1, 8.4, 0, 0, null); put(studentDesk(1.8), 18.7, 8.4, 0, 0, null);
   put(enginePartsBench(2.2), 18.9, 10.9, -90, 0, info('Banc cu piese de motor: arbore cotit, pistoane cu biele, chiulasă, ax cu came', D.CCMAI + ' · ' + D.PCMAI, ['CCMAI – identificarea și măsurarea pieselor mecanismului bielă-manivelă', 'Proiect – dimensiuni principale (alezaj, cursă, bielă)'], 'Imagine concept „PCMAI + CCMAI”; caiet de sarcini Laborator Motoare (Fig. 2)'));
   put(poster('engine', 1.2), 14.17, 4.3, 90, 0, null, false);
   put(workbench(1.7), 14.6, 13.8, 90, 0, info('Masă de lucru cu scule (demontare / asamblare)', D.CCMAI + ' · ' + D.SAA, ['CCMAI – piston, bielă, segmenți (identificare, măsurare)', 'SAA – demontare demaror, pompă de apă'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 2)'));
-  for (const x of [15.9, 18.5]) put(extractionReel(2.2), x, 16.8, 0, 0, info('Sistem de evacuare a gazelor de eșapament', 'Siguranță laborator motoare', ['Obligatoriu la funcționarea standurilor de motor'], 'Caiet de sarcini: „sistem profesional de evacuare a gazelor”'), false, 3.4);
+  for (const x of [15.2, 17.0, 18.8]) put(extractionReel(2.4), x, 18.1, 0, 0, info('Sistem de evacuare a gazelor de eșapament', 'Siguranță laborator motoare', ['Obligatoriu la funcționarea standurilor de motor'], 'Caiet de sarcini: „sistem profesional de evacuare a gazelor”'), false, 4.2);
   put(whiteboard(2.4), 19.8, 8.0, -90, 0, null, false);
   put(projectorScreen(2.0), 14.25, 9.9, 90, 0, null, false);
-  put(extinguisher(), 14.4, 18.8, 90, 0, info('Stingător CO2 lângă standuri', 'Securitate', ['Obligatoriu lângă standurile de motor (SAA, MF)'], 'Îndrumar SAA 2026-2027 – norme'));
+  put(extinguisher(), 19.7, 15.2, -90, 0, info('Stingător CO2 lângă standuri', 'Securitate', ['Obligatoriu lângă standurile de motor (SAA, MF)'], 'Îndrumar SAA 2026-2027 – norme'));
 
   // ===================== P04 HOL DE INTRARE + ANEXE (fâșia de est, x 20.0–24.8)
   put(noticeBoard(), 24.75, 3.4, -90, 0, null, false);
