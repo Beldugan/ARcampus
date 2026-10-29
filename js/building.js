@@ -341,16 +341,12 @@ export function buildBuilding(scene) {
     boxXY(0.4, y0, 19.6, y1, 4.62, 4.8, m.white); boxXY(0.4, y0, 19.6, y1, 7.55, 7.75, m.white);
     boxXY(0.4, y0, 0.6, y1, 4.62, 7.75, m.white); boxXY(19.4, y0, 19.6, y1, 4.62, 7.75, m.white);
   }
-  // lamele verticale HPL (brise-soleil) în fața ferestrelor etajului, grupate pe travei
-  for (const yy of [-0.36, BD + 0.24]) for (let x = 0.9; x < 19.2; x += 0.55) { if ((x > 6.45 && x < 7.25) || (x > 12.9 && x < 13.75)) continue; boxXY(x, yy, x + 0.05, yy + 0.12, 4.8, 7.55, m.hpl, true); }
   // fâșie verticală turcoaz la joncțiunea cu intrarea principală și scara
   boxXY(19.75, -0.12, 20.25, 0.02, 0, PARAPET, m.teal); boxXY(24.7, -0.12, 25.0, 0.02, 0, PARAPET, m.teal);
   // copertină intrare principală: placă albă, intrados din lemn, inscripție
   boxXY(20.3, -2.2, 24.7, 0.0, 3.2, 3.45, m.white); boxXY(20.35, -2.15, 24.65, -0.05, 3.18, 3.2, m.hpl, false);
   for (const x of [20.45, 24.55]) boxXY(x - 0.05, -2.1, x + 0.05, -2.0, 0, 3.2, m.alu);
-  // atic: inscripție universitară pe fațada principală
   const big = (txt, sub, x, y, h, w, ry = 0) => { const mm = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 8), new THREE.MeshStandardMaterial({ map: labelTex(sub ? [txt, sub] : [txt], { w: 2048, h: 256, bg: '#f2f1ec', fg: '#1d2b3a', font: 'bold 110px Arial', sub: '64px Arial' }), roughness: 0.6 })); mm.position.set(x, h, -y); mm.rotation.y = ry; root.add(mm); };
-  big('UNIVERSITATEA „OVIDIUS” DIN CONSTANȚA', 'Facultatea de Inginerie Mecanică, Industrială și Maritimă · Corp Campus AR', 10.0, -0.46, 8.18, 6.4);
   // inscripție luminoasă pe copertină
   const lt = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.24), new THREE.MeshStandardMaterial({ map: labelTex(['INTRARE · AUTOVEHICULE RUTIERE'], { w: 1024, h: 64, bg: '#f2f1ec', fg: '#127c8a', font: 'bold 44px Arial' }), roughness: 0.5 })); lt.position.set(22.5, 3.325, 2.21); root.add(lt);
   // stâlpișori de protecție galben-negru la porțile din spate (acces din parcare)
