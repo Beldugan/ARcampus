@@ -21,16 +21,25 @@ export function buildSite(scene) {
   for (let x = -195; x < 215; x += 9) plane(x, -18.08, x + 4.5, -17.92, new THREE.MeshStandardMaterial({ color: 0xf2f2f2 }), 0.012);
   plane(-200, -12, 220, -9, mat(T.pavers([60, 1])), 0.03);                         // trotuar
   box(-200, -12.1, 220, -11.95, 0, 0.15, new THREE.MeshStandardMaterial({ color: 0xb0aca2 }), false);  // bordură
-  plane(-5, -9, 26, 0, mat(T.pavers([10, 3])), 0.035);                             // platformă frontală
+  plane(-5, -9, 29, 0, mat(T.pavers([11, 3])), 0.035);                             // platformă frontală
+  // alee de acces la scara S1 (pavaj antracit, borduri, iluminat la sol) și alee pietonală pe latura de est spre lift și parcare
+  const pathM = new THREE.MeshStandardMaterial({ map: T.pavers([2, 4]), color: 0x8e9297, roughness: 0.8 });
+  plane(24.9, -9, 27.3, -0.85, pathM, 0.04);
+  plane(26.9, -0.85, 28.9, 20.5, pathM, 0.04);
+  plane(24.9, 13.6, 28.9, 15.0, pathM, 0.04);
+  const kerb = new THREE.MeshStandardMaterial({ color: 0xb8b4aa, roughness: 0.8 });
+  for (const [x0, y0, x1, y1] of [[24.8, -9, 24.9, -0.85], [27.3, -9, 27.4, -0.85], [28.9, -0.85, 29.0, 20.5]]) box(x0, y0, x1, y1, 0, 0.08, kerb, false);
+  const ledM = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff2d0, emissiveIntensity: 0.6 });
+  for (let y = -8; y < -1; y += 2.2) for (const x of [24.95, 27.25]) box(x - 0.06, y - 0.06, x + 0.06, y + 0.06, 0, 0.6, new THREE.MeshStandardMaterial({ color: 0x3b4248, metalness: 0.6 })), box(x - 0.065, y - 0.065, x + 0.065, y + 0.065, 0.6, 0.66, ledM, false);
   plane(-4.5, 0, 0, 35, mat(T.asphalt([2, 12])), 0.03);                            // alee laterală 4 m (+0,5)
-  plane(0, 20, 20, 35, mat(T.pavers([8, 6])), 0.03);                              // parcare 20 x 15 = 300 m² (pavaj, ca în concept)
+  plane(0, 20, 25, 35, mat(T.pavers([10, 6])), 0.03);                              // parcare 20 x 15 = 300 m² (pavaj, ca în concept)
   plane(-4.5, -9, -0.5, -0.0, mat(T.asphalt([2, 3])), 0.034);
   // marcaje parcare: 6 locuri (inclusiv 1 adaptat)
   const white = new THREE.MeshStandardMaterial({ color: 0xf4f4f4 });
-  for (let i = 0; i <= 6; i++) plane(1 + i * 3.0, 29.8, 1.12 + i * 3.0, 34.8, white, 0.04);
-  plane(1, 34.8, 19.1, 34.92, white, 0.04);
+  for (let i = 0; i <= 7; i++) plane(1 + i * 3.0, 29.8, 1.12 + i * 3.0, 34.8, white, 0.04);
+  plane(1, 34.8, 22.1, 34.92, white, 0.04);
   const pmr = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2.4), new THREE.MeshStandardMaterial({ map: labelTex(['♿'], { w: 256, h: 256, bg: '#1f5fa8', font: 'bold 180px Arial' }) }));
-  pmr.rotation.x = -Math.PI / 2; pmr.position.set(17.6, 0.045, -32.3); g.add(pmr);
+  pmr.rotation.x = -Math.PI / 2; pmr.position.set(20.6, 0.045, -32.3); g.add(pmr);
   // săgeți de circulație (retur ITP)
   for (const [x, y, r] of [[3.3, 23, 0], [-2.2, 26, Math.PI], [-2.2, 10, Math.PI], [-2.2, -4, Math.PI]]) {
     const s = new THREE.Shape(); s.moveTo(0, 1.2); s.lineTo(0.6, 0.2); s.lineTo(0.2, 0.2); s.lineTo(0.2, -1.0); s.lineTo(-0.2, -1.0); s.lineTo(-0.2, 0.2); s.lineTo(-0.6, 0.2);
@@ -38,15 +47,15 @@ export function buildSite(scene) {
   }
   // borduri / limite de lot (stâlpișori)
   const curb = new THREE.MeshStandardMaterial({ color: 0xc9c5bb });
-  box(-4.6, 35, 20.1, 35.15, 0, 0.15, curb); box(20, 20, 20.15, 35, 0, 0.15, curb); box(-4.65, -9, -4.5, 35, 0, 0.15, curb);
+  box(-4.6, 35, 25.1, 35.15, 0, 0.15, curb); box(25, 20, 25.15, 35, 0, 0.15, curb); box(-4.65, -9, -4.5, 35, 0, 0.15, curb);
   // plăcuțe lot
   const sign = (txt, sub, x, y, rot = 0) => {
     const post = box(x - 0.04, y - 0.04, x + 0.04, y + 0.04, 0, 1.6, new THREE.MeshStandardMaterial({ color: 0x555b60, metalness: 0.6 }));
     const p = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.5), new THREE.MeshStandardMaterial({ map: labelTex([txt, sub], { bg: '#0f5e6a' }), side: THREE.DoubleSide }));
     p.position.set(x, 1.85, -y); p.rotation.y = rot; g.add(p);
   };
-  sign('LOT 21', 'Corp Campus AR · P+1', -5.4, -1.5);
-  sign('LOT 18', 'Parcare 300 m²', 21.0, 22.0, -Math.PI / 2);
+  sign('LOT 21', 'Corp Campus AR · P+1 · 500 m²', -5.4, -1.5);
+  sign('LOT 18', 'Parcare', 29.6, 22.0, -Math.PI / 2);
   // arbori și stâlpi de iluminat
   const trunk = new THREE.MeshStandardMaterial({ color: 0x6b5139, roughness: 1 });
   const leaf = [0x4f7a32, 0x5d8a3a, 0x46702c].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
@@ -55,9 +64,9 @@ export function buildSite(scene) {
     for (let k = 0; k < 3; k++) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry((1.5 - k * 0.3) * s, 1), leaf[k]); m.position.set(x + (k - 1) * 0.4 * s, (3.1 + k * 0.7) * s, -y + (k % 2 ? 0.4 : -0.3) * s); m.castShadow = true; g.add(m); }
   };
   for (let x = -40; x <= 60; x += 9) tree(x, -10.5, 0.9 + ((x * 7) % 5) / 20);
-  for (const [x, y] of [[24, 18], [26, 30], [-9, 8], [-9, 24], [8, 39], [16, 40], [28, 4]]) tree(x, y, 1.1);
+  for (const [x, y] of [[31, 18], [31, 30], [-9, 8], [-9, 24], [8, 39], [16, 40], [32, 4]]) tree(x, y, 1.1);
   const lampM = new THREE.MeshStandardMaterial({ color: 0x3b4248, metalness: 0.6, roughness: 0.4 });
-  for (const [x, y] of [[-5.2, 5], [-5.2, 25], [10, 35.6], [20.6, 28]]) { box(x - 0.06, y - 0.06, x + 0.06, y + 0.06, 0, 5.5, lampM); box(x - 0.3, y - 0.1, x + 0.3, y + 0.1, 5.5, 5.6, lampM); }
+  for (const [x, y] of [[-5.2, 5], [-5.2, 25], [10, 35.6], [29.4, 6], [29.4, 26]]) { box(x - 0.06, y - 0.06, x + 0.06, y + 0.06, 0, 5.5, lampM); box(x - 0.3, y - 0.1, x + 0.3, y + 0.1, 5.5, 5.6, lampM); }
   // vecinătăți (volumetrie simplificată, conform ilustrării PUZ)
   const nb = new THREE.MeshStandardMaterial({ map: T.sandwich([6, 4], '#e7e5df'), roughness: 0.7 });
   const nbw = new THREE.MeshStandardMaterial({ color: 0x8fb0c8, roughness: 0.1, metalness: 0.4 });
@@ -73,12 +82,12 @@ export function buildSite(scene) {
     for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, y = y0 + (y1 - y0) * i / n; box(x - 0.03, y - 0.03, x + 0.03, y + 0.03, 0, 1.6, fenceM); }
     const pnl = new THREE.Mesh(new THREE.PlaneGeometry(L, 1.5), meshM); pnl.position.set((x0 + x1) / 2, 0.85, -(y0 + y1) / 2); pnl.rotation.y = Math.atan2(y1 - y0, x1 - x0); g.add(pnl);
   };
-  fence(-4.6, 35.4, 20.4, 35.4); fence(20.4, 20, 20.4, 35.4); fence(20.4, 14, 20.4, 20);
+  fence(-4.6, 35.4, 25.4, 35.4); fence(25.4, 22.5, 25.4, 35.4);
   const shrubM = [0x3f6b2f, 0x4f7d36, 0x5a8a3f].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
   const shrub = (x, y, r = 0.45) => { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), shrubM[Math.abs(Math.round(x * 3 + y)) % 3]); m.position.set(x, r * 0.7, -y); m.scale.y = 0.8; m.castShadow = true; g.add(m); };
-  for (let x = 0.5; x < 20; x += 1.1) shrub(x, 35.0, 0.4);
-  for (let y = 20.5; y < 35; y += 1.2) shrub(19.9, y, 0.4);
-  for (let x = 20.6; x < 25.5; x += 1.0) shrub(x, -1.0, 0.35);
-  for (const [x, c] of [[2.56, 0xeceeef], [8.56, 0x3a3f45], [11.56, 0xb9bdc1]]) { const v = car(c); v.rotation.y = Math.PI / 2; v.position.set(x, 0.03, -32.0); v.traverse(o => { if (o.isMesh) o.castShadow = true; }); g.add(v); }
+  for (let x = 0.5; x < 25; x += 1.1) shrub(x, 35.0, 0.4);
+  for (let y = 23; y < 35; y += 1.2) shrub(24.9, y, 0.4);
+  for (let x = 29.4; x < 33; x += 1.0) shrub(x, -1.0, 0.35);
+  for (const [x, c] of [[2.56, 0xeceeef], [8.56, 0x3a3f45], [11.56, 0xb9bdc1], [17.56, 0x7a1f24]]) { const v = car(c); v.rotation.y = Math.PI / 2; v.position.set(x, 0.03, -32.0); v.traverse(o => { if (o.isMesh) o.castShadow = true; }); g.add(v); }
   return g;
 }

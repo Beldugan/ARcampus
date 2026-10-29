@@ -70,6 +70,12 @@ export const T = {
     g.fillStyle = '#3d4b5a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1b232c';
     for (let y = 8; y < h; y += 16) for (let x = 8; x < w; x += 16) { g.beginPath(); g.arc(x, y, 2.5, 0, 7); g.fill(); }
   }, rep),
+  perfAlu: (rep) => canvasTex('perf', 256, 256, (g, w, h) => {   // tablă de aluminiu perforată (găuri Ø ≈ 5 mm, pas 15 mm, rânduri decalate)
+    const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#d9dde0'); gr.addColorStop(1, '#c4c9cd'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 400; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.06})`; g.fillRect(0, Math.random() * h, w, 1); }
+    g.fillStyle = '#4a5056';
+    for (let y = 8, r = 0; y < h; y += 16, r++) for (let x = (r % 2 ? 16 : 8); x < w; x += 16) { g.beginPath(); g.arc(x, y, 2.6, 0, 7); g.fill(); }
+  }, rep),
   lineYellow: () => canvasTex('ly', 64, 64, (g, w, h) => { g.fillStyle = '#e8b81c'; g.fillRect(0, 0, w, h); noise(g, w, h, 'rgba(0,0,0,0)', 0.1, 200, 41, 2); }),
   hazard: (rep) => canvasTex('hz', 128, 128, (g, w, h) => {
     g.fillStyle = '#e8b81c'; g.fillRect(0, 0, w, h); g.fillStyle = '#1c1c1c';
@@ -94,8 +100,9 @@ export function labelTex(lines, opts = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
   g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = fg; g.textAlign = align; g.textBaseline = 'middle';
   const x = align === 'center' ? w / 2 : 30;
-  if (lines.length === 1) { g.font = font; g.fillText(lines[0], x, h / 2); }
-  else { g.font = font; g.fillText(lines[0], x, h * 0.36); g.font = sub; g.fillText(lines[1], x, h * 0.72); }
+  const fit = (txt, f) => { let [, pre, px, post] = f.match(/^(.*?)(\d+)px(.*)$/); px = +px; g.font = f; while (px > 10 && g.measureText(txt).width > w - 40) { px -= 2; g.font = pre + px + 'px' + post; } };
+  if (lines.length === 1) { fit(lines[0], font); g.fillText(lines[0], x, h / 2); }
+  else { fit(lines[0], font); g.fillText(lines[0], x, h * 0.36); fit(lines[1], sub); g.fillText(lines[1], x, h * 0.72); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; cache.set(key, t); return t;
 }
 

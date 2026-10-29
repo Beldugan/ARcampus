@@ -1,6 +1,6 @@
 # Corp Campus AR – explorare 3D (lot 21 + lot 18)
 
-Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (20 × 20 m, P+1) a Universității „Ovidius” din Constanța. Clădirea e amplasată pe lotul 21, cu parcarea pe lotul 18, la capătul opus față de stradă și lac. Se pot explora:
+Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (25 × 20 m = 500 m², P+1) a Universității „Ovidius” din Constanța. Clădirea e amplasată pe lotul 21, cu parcarea pe lotul 18, la capătul opus față de stradă și lac. Se pot explora:
 
 * stația ITP (P01);
 * Service-ul Student (P02);
@@ -24,11 +24,30 @@ Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (20 × 20 
 
 Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropii.
 
+### Organizare (500 m²)
+
+* **Parter:**
+  * linia ITP;
+  * service student, cu poarta rulou deschisă;
+  * laboratorul de motoare, cu ușă direct din stradă și ușă din holul de intrare;
+  * fâșia de est: hol de intrare din stradă, coridor, vestiar, WC femei, WC bărbați, WC accesibil și cameră tehnică.
+* **Etaj:**
+  * E01 Diagnosticare + Mecatronică;
+  * E02 CCA;
+  * E03 Dinamică;
+  * E12 Sală CAD / seminar;
+  * E04 Caroserii;
+  * E05 HeV;
+  * E13 Atelier proiecte (standuri didactice);
+  * grupuri sanitare.
+* **Plăcuțe pe uși:** fiecare ușă are pe ambele fețe numele încăperii în care intri.
+* **Standuri mobile:** sunt construite după proiectul propriu „Stand mobil cu panou perforat”: 1700 × 1000 × 800 mm, tablă de aluminiu perforată, E-stop, roți cu frână.
+
 ### Trasee din stradă
 
 * **Parter prin linia ITP:** poarta ITP e deschisă; de acolo intri în service și în holul P04.
-* **Intrare pietonală:** mergi pe latura de est a clădirii până la ușa holului P04.
-* **Etaj:** scara exterioară S1 de pe latura de est urcă până la podestul +4,80, de unde intri în holul etajului și apoi în fiecare laborator. Alternativ, liftul (tasta E).
+* **Intrare pietonală:** ușa principală e pe fațadă, în dreapta, și duce în holul de intrare P04, apoi pe coridor la vestiar și WC. Laboratorul de motoare are și o ușă proprie spre stradă.
+* **Etaj:** scara exterioară S1 pornește de la fațada principală, din capătul aleii de acces pavate, și urcă în linie dreaptă până la podestul +4,80, de unde intri în holul etajului și apoi în fiecare laborator. Alternativ, liftul (tasta E).
 
 ## Publicare pe GitHub Pages
 
