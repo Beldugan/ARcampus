@@ -287,6 +287,22 @@ function pcDesk(kind = 'cad', seed = 1) {
 }
 function labScope(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.17, 0.13, C(0xd9dcdf, { roughness: 0.5 }), 0, 0, 0); screen(g, 0.17, 0.11, 'scope', seed, -0.06, 0.03, 0.066); for (let i = 0; i < 6; i++) Cy(g, 0.01, 0.01, C(0x333), 0.07 + (i % 2) * 0.05, 0.04 + Math.floor(i / 2) * 0.04, 0.07, 'z', 10); for (let i = 0; i < 4; i++) Cy(g, 0.007, 0.012, [MAT.yellow, C(0x22aaee), C(0xdd44aa), MAT.green][i], -0.12 + i * 0.045, 0.015, 0.07, 'z', 10); return g; }
 function benchPSU() { const g = new THREE.Group(); B(g, 0.22, 0.13, 0.25, C(0x2b2f33), 0, 0, 0); B(g, 0.09, 0.04, 0.005, C(0x0a0a0a), -0.05, 0.08, 0.126); plate(g, '12.00 V', '', 0.08, -0.05, 0.1, 0.13, 0, '#300'); Cy(g, 0.008, 0.012, MAT.red, 0.06, 0.03, 0.13, 'z', 8); Cy(g, 0.008, 0.012, MAT.black, 0.085, 0.03, 0.13, 'z', 8); return g; }
+function labDesk(seed = 0) {   // masă de laborator: blat laminat deschis, cadru gri pe roți, corp cu sertare, aparatură și cabluri
+  const g = new THREE.Group(); const top = C(0xe4e0d6, { roughness: 0.45 }), fr = C(0x5d656c, { metalness: 0.5, roughness: 0.4 });
+  B(g, 1.6, 0.035, 0.75, top, 0, 0.74, 0); B(g, 1.6, 0.012, 0.75, C(0x9aa0a6), 0, 0.728, 0);
+  for (const x of [-0.76, 0.76]) for (const z of [-0.33, 0.33]) { B(g, 0.05, 0.66, 0.05, fr, x, 0.07, z); Cy(g, 0.035, 0.03, MAT.rubber, x, 0.035, z, 'z', 12); }
+  B(g, 1.5, 0.05, 0.05, fr, 0, 0.68, -0.33); B(g, 1.5, 0.3, 0.012, C(0xb9bec3, { metalness: 0.3 }), 0, 0.4, -0.35);
+  B(g, 0.42, 0.55, 0.6, C(0xc9cdd1, { metalness: 0.3 }), 0.5, 0.15, 0); for (let i = 0; i < 3; i++) { B(g, 0.4, 0.16, 0.01, C(0xd5d8db), 0.5, 0.18 + i * 0.18, 0.305); B(g, 0.12, 0.012, 0.012, MAT.dark, 0.5, 0.3 + i * 0.18, 0.31); }
+  const lt = laptop(seed * 3 + 1); lt.position.set(-0.3, 0.775, 0.08); g.add(lt);
+  lt.traverse(o => { if (o.isMesh && o.material.map) o.material = scr('scope', seed + 40); });
+  const sc = labScope(seed + 11); sc.position.set(0.35, 0.775, -0.18); g.add(sc);
+  B(g, 0.08, 0.035, 0.15, MAT.yellow, 0.05, 0.775, 0.05);                                              // multimetru
+  for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.03]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.1 + dx, 0.79, -0.1), new THREE.Vector3(0.2 + dx, 0.8, 0.1), new THREE.Vector3(0.6 + dx, 0.76, 0.33), new THREE.Vector3(0.65 + dx, 0.3, 0.36), new THREE.Vector3(0.4 + dx, 0.05, 0.3)]); const m = new THREE.Mesh(new THREE.TubeGeometry(cv, 24, 0.004, 6), c); g.add(m); }
+  B(g, 0.1, 0.05, 0.07, C(0x222222), -0.65, 0.775, -0.2);                                              // adaptor USB-CAN / interfață
+  for (const x of [-0.4, 0.4]) { const c = officeChair(); c.position.set(x, 0, 0.62); c.rotation.y = Math.PI; g.add(c); }
+  return g;
+}
+function instrumentTable() { const g = steelTable(1.2, 0.6, 0.8); const box = (w, h, d, x, z, col, sk, sd) => { B(g, w, h, d, C(col, { roughness: 0.5 }), x, 0.8, z); if (sk) screen(g, w * 0.45, h * 0.45, sk, sd, x - w * 0.18, 0.8 + h * 0.3, z + d / 2 + 0.002); }; box(0.32, 0.2, 0.3, -0.35, 0, 0xd9dcdf, 'scope', 71); box(0.28, 0.14, 0.28, 0.0, 0, 0x2b6cb0, 'diag', 72); box(0.3, 0.16, 0.28, 0.38, 0, 0xe6e9ea, 'scope', 73); return g; }
 function tvDisplay(w = 1.9, kind = 'cad', seed = 90) { const g = new THREE.Group(); B(g, w, w * 0.57, 0.05, C(0x111214), 0, 1.0, 0); const sc = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.04, w * 0.57 - 0.04), scr(kind, seed)); sc.position.set(0, 1.0 + w * 0.285, 0.026); g.add(sc); return g; }
 function whiteboard(w = 3) { const g = new THREE.Group(); B(g, w, 1.2, 0.03, C(0xfafafa, { roughness: 0.15 }), 0, 0.9, 0); B(g, w, 0.05, 0.1, MAT.alu, 0, 0.88, 0.05); return g; }
 function projectorScreen(w = 2.4) { const g = new THREE.Group(); B(g, w + 0.1, 0.1, 0.1, MAT.white, 0, 2.6, 0); B(g, w, 1.5, 0.005, C(0xffffff, { emissive: 0x111111 }), 0, 1.1, 0.04); return g; }
@@ -784,7 +800,6 @@ export function buildEquipment(scene) {
   // ===================== P03 LABORATOR PCMAI + CCMAI (x 14.15–19.8, y 0.2–16.14)
   put(engineStand('MPI'), 15.9, 16.0, 0, 0, info('Stand motor Otto 1.4 MPI (K7J, injecție multipunct)', D.PCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['PCMAI – caracteristici, raport de compresie', 'Diagnosticare L1–L4 (AVL, senzori, actuatori, etanșeitate)', 'SAA L1–L2 (consum, injecție), L4 ungere, L5 răcire, L7 demaror'], 'Caiet de sarcini Laborator Motoare Termice; îndrumare SAA/Diagnosticare 2026-2027'));
   put(engineStand('dCi'), 18.5, 16.0, 0, 0, info('Stand motor Diesel 1.5 dCi (common rail, turbo)', D.CCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['Diagnosticare L5 – sistem de alimentare MAC / EGR', 'SAA L3 injecție diesel, L6 turbosuflantă cu geometrie variabilă', 'CCMAI – construcția mecanismului motor'], 'Caiet de sarcini Laborator Motoare Termice; îndrumar SAA 2026-2027'));
-  put(engineStand('8V'), 17.2, 18.9, 180, 0, info('Stand motor 1.6 8V cu senzoristică', D.DA, ['Diagnosticare L2 – metode de diagnosticare a senzorilor', 'Diagnosticare L3 – diagnosticarea actuatorilor'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
   put(smartCutaway(), 16.6, 2.6, 0, 0, info('Machetă secționată Smart ForTwo', D.BAZ + ' · ' + D.DA + ' · ' + D.CCA, ['Bazele ingineriei – identificarea subsistemelor', 'Diagnosticare L1, L6 – sisteme activate din telecomandă', 'CCA – transmisie, direcție, frâne'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 1); îndrumar Diagnosticare'));
   put(avlStation(), 17.0, 12.2, 180, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
   put(studentDesk(1.8), 16.1, 6.4, 0, 0, info('Loc de lucru studenți (10 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Caiet de sarcini: „locuri de lucru pentru 10 studenți”; DXF A01'));
@@ -812,7 +827,7 @@ export function buildEquipment(scene) {
   put(electricalPanel(), 22.4, 19.6, 180, 0, info('Tablou electric general (TEG)', 'Instalații', ['Alimentare hale, laboratoare, stație ITP'], 'Concept'));
   put(boilerUnit(), 23.6, 19.5, 180, 0, null);
 
-  // ===================== ETAJ – E01 DIAGNOSTICARE + MECATRONICĂ (x 0.2–6.63, y 0.2–8.8)
+  // ===================== ETAJ – E01 DIAGNOSTICARE + MECATRONICĂ (x 0.2–6.63, y 0.2–8.8) – amenajare după imaginea concept
   const SRC_ST = 'Proiect_stand_mobil_panou_perforat.pdf (Beldugan 2026-2027) – cadru 1700×1000×800, tablă Al perforată; imagini ST1–ST12, BB1–BB5';
   const MECA = [
     ['L01 Microcontrolere: I/O, ADC, timere, PWM', 'L02 Condiționarea semnalelor', 'L03 Pedala de accelerație cu 2 piste', 'L04 Senzori de temperatură'],
@@ -820,12 +835,19 @@ export function buildEquipment(scene) {
     ['L08 IMU – accelerații, ruliu/tangaj', 'L09 Clapeta electronică: PWM, punte H, PID'],
     ['L10 CAN Bus – mesaje, arbitraj, decodare (USB-CAN)', 'MR4206 – ECU, ABS, ACC'],
   ];
-  [0.85, 2.0, 3.15, 4.3].forEach((x, i) => put(standMobil('meca', i + 1), x, 6.2, 180, 1, info('Stand mobil mecatronică nr. ' + (i + 1) + ' (proiect propriu)', D.MAM1 + ' · ' + D.MAM2, MECA[i], SRC_ST, 'Platformă dedicată Arduino + STM32F103 pe tabla perforată; 12 V pe panou, 230 V doar în cutia IP54 de pe poliță; E-stop la 1600 mm.')));
-  put(standMobil('diag', 5), 6.05, 3.6, -90, 1, info('Stand mobil diagnoză – ECU + breakout OBD (proiect propriu)', D.DA, ['L2 Metode de diagnosticare a senzorilor', 'L3 Diagnosticarea actuatorilor', 'L7 Magistrala CAN (pini 6/14, 120 Ω)'], SRC_ST + '; Lista dezmembrări Diagnosticare/MAM I'));
-  put(canBoard(), 0.25, 3.6, 90, 1, info('Rețea CAN didactică cu 3–4 noduri și gateway OBD-II', D.MAM1 + ' · ' + D.DA, ['Mecatronică L10', 'Diagnosticare L7 – magistrala de date CAN (terminare 120 Ω)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 12'), false);
-  put(injectorStand(), 6.1, 6.2, -90, 1, info('Stand verificare injectoare benzină', D.DA, ['Diagnosticare L4 – presiune, debit, menținerea presiunii', 'L2 – semnalul injectorului pe osciloscop'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 2'));
-  for (const [x, y] of [[1.5, 1.6], [4.2, 1.6], [1.5, 3.8], [4.2, 3.8]]) { put(studentDesk(1.6), x, y, 0, 1, null); put(labScope(Math.round(x * 7 + y)), x - 0.15, y + 0.2, 0, 1, null, false, 0.77); put(benchPSU(), x + 0.25, y + 0.2, 0, 1, null, false, 0.77); for (const dx of [-0.4, 0.4]) put(laptop(Math.round(x * 3 + y + dx * 4)), x + dx, y + 0.05, 180, 1, null, false, 0.75); }
-  put(whiteboard(2.2), 3.4, 0.25, 0, 1, null, false);
+  // peretele de panouri: cele 4 standuri mobile (proiect propriu) aliniate la fundul sălii, cu fața spre mese
+  [0.85, 2.0, 3.15, 4.3].forEach((x, i) => put(standMobil('meca', i + 1), x, 8.25, 0, 1, info('Stand mobil mecatronică nr. ' + (i + 1) + ' (proiect propriu)', D.MAM1 + ' · ' + D.MAM2, MECA[i], SRC_ST, 'Platformă dedicată Arduino + STM32F103 pe tabla perforată; 12 V pe panou, 230 V doar în cutia IP54 de pe poliță; E-stop la 1600 mm.')));
+  // motor pe stand albastru pentru diagnoză (colțul din dreapta), dulap de scule albastru, tablă albă
+  put(engineStand('8V'), 5.95, 6.75, -90, 1, info('Stand motor 1.6 8V (K7J) cu senzoristică – diagnoză', D.DA, ['Diagnosticare L2 – metode de diagnosticare a senzorilor', 'L3 – diagnosticarea actuatorilor', 'L4 – etanșeitatea camerei de ardere'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente; imagine concept'));
+  put(toolCabinet(MAT.blue), 6.3, 4.9, -90, 1, info('Dulap de scule (diagnoză)', D.DA, ['Sonde, adaptoare, cabluri de măsură'], 'Imagine concept'));
+  put(whiteboard(2.0), 6.6, 2.6, -90, 1, null, false);
+  put(standMobil('diag', 5), 0.75, 6.3, 90, 1, info('Stand mobil diagnoză – ECU + breakout OBD (proiect propriu)', D.DA, ['L2 Metode de diagnosticare a senzorilor', 'L3 Diagnosticarea actuatorilor', 'L7 Magistrala CAN (pini 6/14, 120 Ω)'], SRC_ST + '; Lista dezmembrări Diagnosticare/MAM I'));
+  put(canBoard(), 0.25, 3.0, 90, 1, info('Rețea CAN didactică cu 3–4 noduri și gateway OBD-II', D.MAM1 + ' · ' + D.DA, ['Mecatronică L10', 'Diagnosticare L7 – magistrala de date CAN (terminare 120 Ω)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 12'), false);
+  put(instrumentTable(), 5.3, 0.7, 0, 1, info('Masă cu aparate: generator de semnal, sursă dublă, osciloscop de rezervă', D.DA + ' · ' + D.MAM1, ['Generarea semnalelor de test pentru senzori'], 'Imagine concept'));
+  put(injectorStand(), 6.1, 3.85, -90, 1, info('Stand verificare injectoare benzină', D.DA, ['Diagnosticare L4 – presiune, debit, menținerea presiunii', 'L2 – semnalul injectorului pe osciloscop'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 2'));
+  // mese de laborator pe 3 rânduri, cu fața spre peretele de panouri
+  let ld = 0;
+  for (const y of [1.5, 3.3, 5.1]) for (const x of [1.35, 3.25]) put(labDesk(ld++), x, y, 0, 1, ld === 1 ? info('Masă de laborator – laptop, osciloscop de banc, multimetru', D.DA + ' · ' + D.MAM1, ['Achiziția și analiza semnalelor de la senzori și actuatori', 'Programare Arduino / STM32 (PlatformIO)'], 'Imagine concept „Diagnosticare + Mecatronică”') : null);
 
   // ===================== E02 CCA (x 6.78–13.22, y 0.2–8.8)
   put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 2.6, 180, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));
