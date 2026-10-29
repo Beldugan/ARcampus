@@ -35,6 +35,23 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
 * **Etaj:** E01–E05, E12 Sală CAD (15 posturi PC), E13 Atelier proiecte, grupuri sanitare.
 * **Fațada:** e tratată ca o clădire universitară: fibrociment deschis și grafit, cadru alb în consolă, copertină la intrare, accente turcoaz. Scara S1 are ecran de lamele, balustradă din sticlă și trepte placate cu HPL.
 
+### Capacitate maximă conform ARACIS
+
+Suprafețele sunt calculate din plan (dimensiuni libere ale încăperilor), iar numărul maxim de locuri respectă Metodologia ARACIS (partea I, standardele 1.4.1.6 / 1.4.3.6): săli de curs ≥ 1 m²/loc, seminar ≥ 1,4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc, laboratoare cu caracter tehnic ≥ 4 m²/loc. Valorile apar pe plăcuțele de pe uși și în bara cu numele încăperii.
+
+| Încăpere | Suprafață | Normă ARACIS | Locuri max. |
+|---|---|---|---|
+| P01 Stație ITP | 80,0 m² | 4 m²/loc (lab. tehnic) | 20 |
+| P02 Service student | 115,9 m² | 4 m²/loc | 28 |
+| P03 Laborator motoare | 176,6 m² | 4 m²/loc | 44 |
+| E01 Diagnosticare + Mecatronică | 55,3 m² | 4 m²/loc | 13 |
+| E02 CCA | 55,4 m² | 4 m²/loc | 13 |
+| E03 Dinamica autovehiculelor | 55,3 m² | 4 m²/loc | 13 |
+| E04 Caroserii | 64,4 m² | 4 m²/loc | 16 |
+| E05 HeV | 64,4 m² | 4 m²/loc | 16 |
+| E12 Sală CAD | 41,7 m² | 2,5 m²/loc (lab. informatică) | 16 (amenajate 15 posturi PC) |
+| E13 Atelier proiecte | 42,2 m² | 4 m²/loc | 10 |
+
 ### Trasee din stradă
 
 * **Vehicule:** pe aleea laterală de vest ajungi în parcarea din spate, iar de acolo intri prin porțile ITP și service.

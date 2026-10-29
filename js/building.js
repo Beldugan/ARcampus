@@ -88,6 +88,7 @@ export const WALLS = [
 export const ROOMS = [
   { id: 'P01', name: 'P01 · Stație ITP (clasa a II-a, ≤ 3,5 t) – 80 m²', sign: ['STAȚIE ITP', 'clasa a II-a · acces din parcare'], lvl: 0, r: [0.2, 6.0, 6.0, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
   { id: 'P02', name: 'P02 · Service student (2 posturi) – 113 m²', sign: ['SERVICE STUDENT', '2 posturi · acces din parcare'], lvl: 0, r: [6.15, 8.55, 15.0, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
+  { id: 'P02', name: 'P02 · Service student (2 posturi) – 113 m²', sign: ['SERVICE STUDENT', '2 posturi · acces din parcare'], lvl: 0, r: [8.6, 6.0, 15.0, 8.55], floor: 'epoxy', ceil: 'deck', h: 4.45 },   // fâșia de lângă magazie (geamul spre lab. motoare)
   { id: 'P12', name: 'P12 · Magazie piese service', sign: ['MAGAZIE PIESE', 'service'], lvl: 0, r: [6.15, 6.0, 8.45, 8.4], floor: 'epoxy', ceil: 'tiles', h: 3.0 },
   { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI) – 176 m²', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [0.2, 0.2, 19.85, 5.85], floor: 'epoxy', ceil: 'deck', h: 4.45 },
   { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI) – 176 m²', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [15.15, 5.85, 19.85, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
@@ -112,6 +113,18 @@ export const ROOMS = [
   { id: 'E05', name: 'E05 · HeV – Autovehicule hibride și electrice', sign: ['E05 · HeV', 'Hibride și electrice'], lvl: 1, r: [12.4, 11.1, 19.8, 19.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
   { id: 'E13', name: 'E13 · Atelier proiecte – standuri didactice', sign: ['E13 · ATELIER PROIECTE', 'Standuri didactice · diplomă'], lvl: 1, r: [19.95, 11.1, 24.8, 19.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
 ];
+// suprafețe utile calculate din plan (sumă pe dreptunghiurile fiecărei încăperi) și capacitatea maximă conform ARACIS –
+// Metodologia de evaluare externă, partea I, standardele 1.4.1.6 / 1.4.3.6: săli de curs ≥ 1 m²/loc, seminar ≥ 1,4 m²/loc,
+// laboratoare de informatică (și de specialitate cu calculatoare) ≥ 2,5 m²/loc, laboratoare cu caracter tehnic ≥ 4 m²/loc.
+export const ARACIS_NORM = { P01: 4, P02: 4, P03: 4, E01: 4, E02: 4, E03: 4, E04: 4, E05: 4, E12: 2.5, E13: 4 };
+export const ROOM_AREA = {}; for (const r of ROOMS) ROOM_AREA[r.id] = (ROOM_AREA[r.id] || 0) + (r.r[2] - r.r[0]) * (r.r[3] - r.r[1]);
+const fmtRo = v => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',').replace(',0', '');
+for (const r of ROOMS) {
+  const A = ROOM_AREA[r.id], n = ARACIS_NORM[r.id]; r.area = A;
+  r.name = r.name.replace(/ – \d+ m²$/, '') + ' – ' + fmtRo(A) + ' m²';
+  if (n) { r.cap = Math.floor(A / n + 1e-9); r.name += ' · max. ' + r.cap + ' locuri (ARACIS ' + fmtRo(n) + ' m²/loc)'; if (r.sign) r.sign = [r.sign[0], r.sign[1], fmtRo(A) + ' m² · max. ' + r.cap + ' locuri'];
+  }
+}
 export function roomAt(x, y, lvl) { return ROOMS.find(r => r.lvl === lvl && x >= r.r[0] && x <= r.r[2] && y >= r.r[1] && y <= r.r[3]) || null; }
 export const LEVEL_H = [H0, H1];
 

@@ -110,7 +110,8 @@ export function labelTex(lines, opts = {}) {
   const x = align === 'center' ? w / 2 : 30;
   const fit = (txt, f) => { let [, pre, px, post] = f.match(/^(.*?)(\d+)px(.*)$/); px = +px; g.font = f; while (px > 10 && g.measureText(txt).width > w - 40) { px -= 2; g.font = pre + px + 'px' + post; } };
   if (lines.length === 1) { fit(lines[0], font); g.fillText(lines[0], x, h / 2); }
-  else { fit(lines[0], font); g.fillText(lines[0], x, h * 0.36); fit(lines[1], sub); g.fillText(lines[1], x, h * 0.72); }
+  else if (lines.length === 2) { fit(lines[0], font); g.fillText(lines[0], x, h * 0.36); fit(lines[1], sub); g.fillText(lines[1], x, h * 0.72); }
+  else { fit(lines[0], font); g.fillText(lines[0], x, h * 0.26); fit(lines[1], sub); g.fillText(lines[1], x, h * 0.55); g.fillStyle = '#f2c200'; fit(lines[2], sub); g.fillText(lines[2], x, h * 0.82); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; cache.set(key, t); return t;
 }
 
