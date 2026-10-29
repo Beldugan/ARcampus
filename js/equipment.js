@@ -5,6 +5,7 @@ import { LEVEL_H } from './building.js';
 import { GLTFLoader } from 'three/addons/GLTFLoader.js';
 import * as BGU from 'three/addons/BufferGeometryUtils.js';
 import { MeshoptDecoder } from 'three/addons/meshopt_decoder.module.js';
+import { engineStandF1C, seatedStudent } from './detail.js';
 
 const C = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.6, metalness: 0.1 }, o));
 const MAT = {
@@ -331,8 +332,8 @@ function rigolFrontTex() {
   x.fillStyle = '#1f6fd0'; x.beginPath(); x.arc(150, 500, 16, 0, 7); x.fill();                                        // tasta POWER
   rigolFront = new THREE.CanvasTexture(c); rigolFront.colorSpace = THREE.SRGBColorSpace; rigolFront.anisotropy = 8; return rigolFront;
 }
-function rigolScope() {
-  const g = new THREE.Group(); const W = 0.313, H = 0.161, Dp = 0.122, body = C(0x3d4045, { roughness: 0.55, metalness: 0.1 });
+function rigolScope(col = 0x3d4045) {
+  const g = new THREE.Group(); const W = 0.313, H = 0.161, Dp = 0.122, body = C(col, { roughness: 0.55, metalness: 0.1 });
   const front = slab(W, H, 0.03, 0.012, body, 0.003); front.rotation.x = Math.PI / 2; front.position.set(0, H / 2 + 0.02, 0.0); g.add(front);   // ramă frontală rotunjită
   const face = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.01, H - 0.01), new THREE.MeshStandardMaterial({ map: rigolFrontTex(), roughness: 0.35 })); face.position.set(0, H / 2 + 0.02, 0.0345); g.add(face);
   const scrGlass = new THREE.Mesh(new THREE.PlaneGeometry(0.175, 0.122), new THREE.MeshPhysicalMaterial({ color: 0x000000, transparent: true, opacity: 0.12, roughness: 0.02, clearcoat: 1 })); scrGlass.position.set(-0.064, H / 2 + 0.043, 0.0352); g.add(scrGlass);
@@ -372,8 +373,8 @@ function labChair() {
 // ---- laptop: carcasă aluminiu cu muchii rotunjite, tastatură, touchpad, ecran cu ramă subțire
 let kbdTex = null;
 function keyboardTex() { if (kbdTex) return kbdTex; const c = document.createElement('canvas'); c.width = 512; c.height = 200; const x = c.getContext('2d'); x.fillStyle = '#8f949a'; x.fillRect(0, 0, 512, 200); x.fillStyle = '#16181b'; for (let r = 0; r < 6; r++) for (let k = 0; k < 15; k++) { const w = (r === 5 && k === 6) ? 150 : 28; if (r === 5 && k > 6 && k < 11) continue; x.fillRect(12 + k * 33 + (r === 5 && k > 10 ? -80 : 0), 10 + r * 31, w, 26); } kbdTex = new THREE.CanvasTexture(c); kbdTex.colorSpace = THREE.SRGBColorSpace; return kbdTex; }
-function laptop(seed = 1, kind = 'scope') {
-  const g = new THREE.Group(); const al = C(0x9aa0a6, { metalness: 0.75, roughness: 0.32 });
+function laptop(seed = 1, kind = 'scope', col = 0x3c4045) {
+  const g = new THREE.Group(); const al = C(col, { metalness: 0.6, roughness: 0.38 });
   const base = slab(0.325, 0.225, 0.012, 0.012, al, 0.003); base.position.y = 0.0; g.add(base);
   const kb = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.105), new THREE.MeshStandardMaterial({ map: keyboardTex(), roughness: 0.6 })); kb.rotation.x = -Math.PI / 2; kb.position.set(0, 0.0185, -0.03); g.add(kb);
   const tp = new THREE.Mesh(new THREE.PlaneGeometry(0.11, 0.065), C(0x8a9096, { metalness: 0.6, roughness: 0.25 })); tp.rotation.x = -Math.PI / 2; tp.position.set(0, 0.0185, 0.065); g.add(tp);
@@ -383,29 +384,45 @@ function laptop(seed = 1, kind = 'scope') {
   const sc = new THREE.Mesh(new THREE.PlaneGeometry(0.29, 0.18), scr(kind, seed)); sc.position.set(0, 0.112, 0.004); lid.add(sc);
   return g;
 }
-// ---- masă de laborator (ca în fotografia de referință): blat laminat gri-deschis cu cant ABS, cadru metalic pe roți, corp mobil cu sertare, prelungitor sub blat
-function labDesk(seed = 0) {
-  const g = new THREE.Group(); const top = C(0xdedbd3, { roughness: 0.4 }), fr = C(0x4a5056, { metalness: 0.55, roughness: 0.38 }), panel = C(0xc9cdd1, { metalness: 0.3, roughness: 0.4 });
-  const t = slab(1.6, 0.75, 0.022, 0.03, top, 0.004); t.position.y = 0.72; g.add(t);
-  B(g, 1.6, 0.006, 0.75, C(0x6f7377), 0, 0.715, 0);                                                      // cant
-  for (const x of [-0.74, 0.74]) {   // ramă laterală tip „C”
-    B(g, 0.05, 0.03, 0.66, fr, x, 0.68, 0); B(g, 0.05, 0.6, 0.03, fr, x, 0.08, -0.28); B(g, 0.05, 0.6, 0.03, fr, x, 0.08, 0.28); B(g, 0.05, 0.03, 0.66, fr, x, 0.06, 0);
-    for (const z of [-0.28, 0.28]) { B(g, 0.03, 0.02, 0.03, MAT.steel, x, 0.04, z); for (const dz of [-0.012, 0.012]) Cy(g, 0.025, 0.012, C(0x1c1d1f), x, 0.025, z + dz, 'x', 14); }   // roți duble
-  }
-  B(g, 1.44, 0.04, 0.03, fr, 0, 0.68, -0.33); B(g, 1.44, 0.28, 0.008, panel, 0, 0.38, -0.34);          // traversă + panou frontal
-  for (let i = 0; i < 18; i++) for (let j = 0; j < 4; j++) Cy(g, 0.008, 0.01, C(0x9ba1a7), -0.64 + i * 0.075, 0.42 + j * 0.06, -0.336, 'z', 8);   // perforații panou
-  photoBox(g, 'strip', 0.3, 0.1, 0.045, 0.45, 0.6, -0.31, 0x1a1a1a);                                     // prelungitor cu întrerupător (ca pe standuri)
-  // corp mobil cu 3 sertare
+// ---- placă de achiziție / osciloscop USB (cutie neagră cu borne și cabluri colorate, ca în imaginea concept E01)
+function usbDaq() {
+  const g = new THREE.Group(); const bd = C(0x1b1d20, { roughness: 0.5 });
+  g.add(Object.assign(slab(0.16, 0.11, 0.035, 0.01, bd, 0.003), {})); B(g, 0.14, 0.004, 0.09, C(0x2a2d31), 0, 0.038, 0);
+  for (let i = 0; i < 4; i++) { Cy(g, 0.0065, 0.016, C(0xc9cdd1, { metalness: 0.9, roughness: 0.2 }), -0.055 + i * 0.037, 0.02, 0.06, 'z', 14); }
+  [MAT.red, MAT.black, MAT.yellow, MAT.green].forEach((m, i) => Cy(g, 0.005, 0.012, m, -0.055 + i * 0.037, 0.03, -0.058, 'z', 10));
+  B(g, 0.05, 0.012, 0.004, C(0x0d4f8c, { emissive: 0x0d4f8c, emissiveIntensity: 0.6 }), 0.03, 0.03, 0.057);
+  return g;
+}
+function deskLead(g, pts, col, r = 0.003) { g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 36, r, 6), C(col, { roughness: 0.55 }))); }
+// ---- masă de laborator (după imaginea concept E01): blat laminat bej-deschis cu cant, cadru metalic gri antracit pe roți, panou frontal perforat, corp cu sertare;
+// aparatură: laptop cu forme de undă, osciloscop de banc gri-deschis, placă de achiziție USB, multimetru, cabluri de măsură care atârnă sub blat
+function labDesk(seed = 0, students = []) {
+  const g = new THREE.Group(); const top = C(0xe6e1d6, { roughness: 0.45 }), fr = C(0x3f454b, { metalness: 0.5, roughness: 0.4 }), panel = C(0xc4c8cc, { metalness: 0.3, roughness: 0.45 });
+  const t = slab(1.6, 0.75, 0.022, 0.012, top, 0.003); t.position.y = 0.72; g.add(t);
+  B(g, 1.6, 0.006, 0.75, C(0x8c8f92), 0, 0.715, 0);                                                      // cant
+  for (const x of [-0.75, 0.75]) for (const z of [-0.33, 0.33]) { B(g, 0.05, 0.66, 0.05, fr, x, 0.055, z); B(g, 0.04, 0.012, 0.04, MAT.steel, x, 0.045, z); Cy(g, 0.022, 0.018, C(0x1c1d1f), x, 0.024, z, 'x', 14); }   // 4 picioare pe roți
+  for (const x of [-0.75, 0.75]) B(g, 0.04, 0.04, 0.62, fr, x, 0.66, 0);
+  B(g, 1.46, 0.04, 0.03, fr, 0, 0.66, -0.33); B(g, 1.46, 0.04, 0.03, fr, 0, 0.66, 0.33); B(g, 1.46, 0.3, 0.008, panel, 0, 0.34, -0.34);          // ramă + panou frontal
+  for (let i = 0; i < 18; i++) for (let j = 0; j < 4; j++) Cy(g, 0.008, 0.01, C(0x9ba1a7), -0.64 + i * 0.075, 0.4 + j * 0.06, -0.336, 'z', 8);
+  photoBox(g, 'strip', 0.3, 0.1, 0.045, 0.45, 0.6, -0.31, 0x1a1a1a);
   const ped = new THREE.Group(); ped.position.set(0.45, 0, 0.02); g.add(ped);
   B(ped, 0.42, 0.56, 0.55, panel, 0, 0.05, 0); for (let i = 0; i < 3; i++) { B(ped, 0.4, 0.17, 0.012, C(0xd2d6da, { metalness: 0.3 }), 0, 0.075 + i * 0.18, 0.28); B(ped, 0.16, 0.012, 0.02, C(0x2b2e32), 0, 0.22 + i * 0.18, 0.29); }
   for (const [x, z] of [[-0.17, -0.22], [0.17, -0.22], [-0.17, 0.22], [0.17, 0.22]]) Cy(ped, 0.022, 0.02, C(0x1c1d1f), x, 0.025, z, 'x', 12);
-  // aparatură: laptop cu forme de undă, osciloscop Rigol, multimetru, sonde și cabluri
-  const lt = laptop(seed * 3 + 1, 'scope'); lt.position.set(-0.32, 0.745, 0.06); g.add(lt);
-  const os = rigolScope(); os.position.set(0.32, 0.745, -0.17); os.rotation.y = -0.15; g.add(os);
-  photoBox(g, 'dmm', 0.09, 0.035, 0.125, -0.0, 0.745, 0.12, 0xf2c200, 'y', 0.45).rotation.y = 0.2;
-  probeCable(g, [0.29, 0.79, -0.12], [0.6, 0.76, 0.3]); probeCable(g, [0.36, 0.79, -0.12], [0.75, 0.3, 0.38], 0x1a1a1a);
-  for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.02]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.0 + dx, 0.765, 0.06), new THREE.Vector3(0.1 + dx, 0.77, 0.25), new THREE.Vector3(0.2 + dx, 0.74, 0.37), new THREE.Vector3(0.24 + dx, 0.35, 0.4), new THREE.Vector3(0.1 + dx, 0.05, 0.35)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 30, 0.0035, 6), c)); }
-  for (const x of [-0.4, 0.4]) { const c = labChair(); c.position.set(x, 0, 0.62); c.rotation.y = Math.PI; g.add(c); }
+  const lt = laptop(seed * 3 + 1, seed % 3 === 2 ? 'code' : 'scope'); lt.position.set(-0.36, 0.745, 0.06); g.add(lt);
+  const os = rigolScope(0xd5d8db); os.position.set(0.3, 0.745, -0.16); os.rotation.y = -0.18; g.add(os);
+  const dq = usbDaq(); dq.position.set(0.02, 0.745, -0.12); dq.rotation.y = 0.15; g.add(dq);
+  deskLead(g, [[-0.2, 0.77, 0.0], [-0.09, 0.76, -0.08], [-0.03, 0.765, -0.11]], 0x2b2b2b, 0.0025);                         // USB laptop → placă
+  const dm = photoBox(g, 'dmm', 0.09, 0.035, 0.125, 0.12, 0.745, 0.15, 0xf2c200, 'y', 0.45); dm.rotation.y = 0.25;
+  // cabluri de măsură: din borne pe blat, peste cant, atârnând sub masă (ca în imaginea concept)
+  [[0x111111, -0.03], [0xc0392b, 0.0], [0xf2b705, 0.04], [0x2e7d32, 0.07]].forEach(([c, dx], i) => deskLead(g, [[dx - 0.03, 0.775, -0.06], [dx + 0.02, 0.77, 0.12], [dx + 0.08 + i * 0.02, 0.745, 0.38], [dx + 0.1 + i * 0.03, 0.45, 0.39], [dx + 0.06 + i * 0.04, 0.18 + i * 0.04, 0.33], [dx - 0.05, 0.6, 0.36]], c));
+  probeCable(g, [0.27, 0.79, -0.11], [0.6, 0.76, 0.3]); probeCable(g, [0.33, 0.79, -0.11], [0.7, 0.3, 0.38], 0x1a1a1a);
+  for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.02]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.12 + dx, 0.765, 0.15), new THREE.Vector3(0.18 + dx, 0.77, 0.28), new THREE.Vector3(0.24 + dx, 0.74, 0.37), new THREE.Vector3(0.26 + dx, 0.35, 0.4), new THREE.Vector3(0.12 + dx, 0.05, 0.35)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 30, 0.0035, 6), c)); }
+  // scaune; pe locul din stânga poate sta un cursant (cu fața spre laptop)
+  for (const x of [-0.38, 0.4]) {
+    const occ = x < 0 && students.length; const zc = occ ? 0.58 : 0.66;
+    const c = labChair(); c.position.set(x, 0, zc); c.rotation.y = Math.PI + (occ ? 0 : (seed % 2 ? 0.25 : -0.2)); g.add(c);
+    if (occ) { const st = seatedStudent(students[0]); st.position.set(x, 0, zc - 0.02); st.rotation.y = Math.PI; g.add(st); }
+  }
   return g;
 }
 
@@ -436,64 +453,95 @@ function mechaBench(seed = 1, title = 'Stand mecatronică') {
 // gabarit 1700 × 1000 × 800 mm, țeavă 40×40×2 vopsită, montanți la 400 mm de marginea din față, traverse la 500/1080/1660 mm,
 // rigidizare verticală la mijloc, 4 contrafișe 30×30 în plan lateral, tablă Al perforată 1000 × 1200 de la 500 la 1700 mm,
 // poliță jos cu sursa și cutia electrică IP54, 4 roți Ø100 cu frână + 4 picioare de nivelare, bară de împingere la 1000 mm, E-stop sus-dreapta.
-const STAND = { frame: C(0x3a3f44, { metalness: 0.45, roughness: 0.45 }), peg: new THREE.MeshStandardMaterial({ map: T.perfAlu([4, 5]), metalness: 0.35, roughness: 0.4, side: THREE.DoubleSide }) };
+const STAND = { frame: C(0x3b4045, { metalness: 0.4, roughness: 0.5 }), shelf: C(0x353a3f, { metalness: 0.35, roughness: 0.55 }), peg: new THREE.MeshStandardMaterial({ map: T.perfAlu([4, 5]), metalness: 0.35, roughness: 0.4, side: THREE.DoubleSide }) };
+function canvasTex(w, h, draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; }
+function texPlane(g, tex, w, h, x, y, z, ry = 0, emissive = false) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), emissive ? new THREE.MeshBasicMaterial({ map: tex }) : new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })); m.position.set(x, y, z); m.rotation.y = ry; g.add(m); return m; }
+function beam(g, a, b, s, mat) { const p = new THREE.Vector3(...a), q = new THREE.Vector3(...b); const m = new THREE.Mesh(new THREE.BoxGeometry(s, p.distanceTo(q), s), mat); m.position.copy(p).add(q).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), q.clone().sub(p).normalize()); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; }
+// modul voltmetru/ampermetru digital: casetă neagră, afișaj roșu cu 7 segmente, borne roșu/negru (ca în ST9–ST11, BB5)
+function voltModule(g, x, y, z, txt = '12.6') {
+  B(g, 0.12, 0.1, 0.035, C(0x151618), x, y - 0.05, z + 0.017);
+  texPlane(g, canvasTex(160, 64, (c, w, h) => { c.fillStyle = '#120404'; c.fillRect(0, 0, w, h); c.fillStyle = '#ff2a1a'; c.font = 'bold 46px "Courier New", monospace'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(txt, w / 2, h / 2 + 2); }), 0.08, 0.032, x, y + 0.018, z + 0.0355, 0, true);
+  for (const [dx, m] of [[-0.025, MAT.red], [0.025, MAT.black]]) { Cy(g, 0.009, 0.012, m, x + dx, y - 0.025, z + 0.04, 'z', 14); Cy(g, 0.004, 0.014, C(0x111111), x + dx, y - 0.025, z + 0.041, 'z', 8); }
+}
+function eStop(g, x, y, z) {   // ciupercă roșie pe cutie galbenă + buton verde de pornire dedesubt
+  B(g, 0.085, 0.085, 0.06, MAT.yellow, x, y - 0.0425, z + 0.03); Cy(g, 0.022, 0.012, C(0x8a1a12), x, y, z + 0.066, 'z', 20); Cy(g, 0.031, 0.022, MAT.red, x, y, z + 0.082, 'z', 24);
+  B(g, 0.055, 0.055, 0.035, C(0x24272a), x, y - 0.14, z + 0.017); Cy(g, 0.016, 0.014, C(0x1c8a3a, { roughness: 0.35 }), x, y - 0.112, z + 0.04, 'z', 18);
+}
+function plateAdapter(g, w, h, x, y, z) { B(g, w, h, 0.004, C(0x141517, { roughness: 0.5 }), x, y - h / 2, z + 0.002); for (const sx of [-1, 1]) for (const sy of [-1, 1]) Cy(g, 0.006, 0.004, MAT.steel, x + sx * (w / 2 - 0.014), y + sy * (h / 2 - 0.014), z + 0.006, 'z', 8); }
+// Stand mobil cu panou perforat – după „Proiect_stand_mobil_panou_perforat.pdf” (Beldugan, 2026-2027) și randările ST1–ST12, BB1–BB5:
+// gabarit 1700 × 1000 × 800 mm, țeavă 40×40×2 antracit, bază 1000 × 800 cu poliță din tablă, montanți la 400 mm de marginea din față,
+// traverse la 500/1080/1660 mm + rigidizare verticală, 4 contrafișe 30×30 în plan lateral (forma „A” din vederea laterală),
+// tablă Al perforată 1000 × 1200 de la 500 la 1700 mm pe fața cadrului, 4 roți pivotante Ø100 cu frână + 4 picioare de nivelare M12,
+// bară de împingere Ø25 la 1000 mm în spate, prelungitor 230 V pe spate, sursa ATX 12 V și cutia IP54 pe poliță, în spatele panoului; E-stop sus-dreapta.
 function standMobil(kind = 'meca', seed = 1, bare = false) {
-  const g = new THREE.Group(), F = STAND.frame, t = 0.04, H = 1.7, W = 1.0, zf = 0.4, zm = 0.0, hb = 0.15;   // fața standului = +z
-  // baza 1000 × 800: 2 lonjeroni + 3 traverse
-  for (const x of [-W / 2 + t / 2, W / 2 - t / 2]) B(g, t, t, 0.8, F, x, hb, 0);
-  for (const z of [-0.38, 0, 0.38]) B(g, W, t, t, F, 0, hb, z);
-  B(g, W - 0.08, 0.004, 0.76, C(0x2f3438, { metalness: 0.4 }), 0, hb + t, 0);                        // polița de jos (tablă 1,5 mm)
-  // montanți, traverse, rigidizare
-  for (const x of [-W / 2 + t / 2, W / 2 - t / 2]) B(g, t, H - hb - t, t, F, x, hb + t, zm);
+  const g = new THREE.Group(), F = STAND.frame, t = 0.04, W = 1.0, D = 0.8, hb = 0.13, zm = 0.0;   // fața standului = +z
+  const xs = W / 2 - t / 2, yb = hb + t, ys = yb + 0.004;
+  // baza: 2 lonjeroni + 3 traverse + polița din tablă 1,5 mm (cu margine îndoită)
+  for (const x of [-xs, xs]) B(g, t, t, D, F, x, hb, 0);
+  for (const z of [-D / 2 + t / 2, 0, D / 2 - t / 2]) B(g, W - 2 * t, t, t, F, 0, hb, z);
+  B(g, W, 0.004, D, STAND.shelf, 0, yb, 0);
+  for (const z of [-D / 2, D / 2]) B(g, W, 0.025, 0.004, STAND.shelf, 0, ys - 0.004, z);
+  // montanți (până la 1720) + traverse 500/1080/1660 + rigidizare verticală mediană + capace de capăt
+  for (const x of [-xs, xs]) { B(g, t, 1.72 - ys, t, F, x, ys, zm); B(g, t + 0.002, 0.004, t + 0.002, C(0x111214), x, 1.72, zm); }
   for (const h of [0.5, 1.08, 1.66]) B(g, W - 2 * t, t, t, F, 0, h - t / 2, zm);
   B(g, t, 1.16, t, F, 0, 0.5, zm);
-  // contrafișe 30×30 în plan lateral (de la montant la colțurile bazei)
-  for (const x of [-W / 2 + t / 2, W / 2 - t / 2]) for (const zs of [-1, 1]) {
-    const z0 = zs * 0.38, h0 = hb + t, z1 = zm, h1 = 1.05, len = Math.hypot(z1 - z0, h1 - h0);
-    const c = new THREE.Mesh(new THREE.BoxGeometry(0.03, len, 0.03), F); c.position.set(x, (h0 + h1) / 2, (z0 + z1) / 2); c.rotation.x = Math.atan2(z1 - z0, h1 - h0) * -1 * -1; c.rotation.x = -Math.atan2(z0 - z1, h1 - h0); c.castShadow = true; g.add(c);
+  // contrafișe 30×30 (vedere laterală în „A”): de la capetele lonjeronilor la montant, la ~640 mm, cu gusee
+  for (const x of [-xs, xs]) for (const zs of [-1, 1]) {
+    beam(g, [x, ys + 0.012, zs * (D / 2 - 0.035)], [x, 0.64, zm + zs * (t / 2 + 0.012)], 0.03, F);
+    const gu = B(g, 0.004, 0.06, 0.06, F, x + Math.sign(x) * 0.022, 0.6, zm + zs * 0.045); gu.rotation.x = zs * 0.6;
   }
-  // bară de împingere Ø25 la 1000 mm, în spatele montanților
-  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.0125, W - 0.06, 12), MAT.steel); bar.rotation.z = Math.PI / 2; bar.position.set(0, 1.0, zm - 0.09); g.add(bar);
-  for (const x of [-0.44, 0.44]) B(g, 0.025, 0.025, 0.07, MAT.steel, x, 0.99, zm - 0.055);
-  // roți Ø100 cu frână + picioare de nivelare M12
+  // roți pivotante Ø100 (bandă PU gri, jantă, furcă zincată, pedală de frână) și picioare de nivelare M12 cu talpă Ø60
   for (const [x, z] of [[-0.44, -0.34], [0.44, -0.34], [-0.44, 0.34], [0.44, 0.34]]) {
-    B(g, 0.08, 0.012, 0.1, MAT.steel, x, hb - 0.012, z); B(g, 0.05, 0.04, 0.06, MAT.steel, x, hb - 0.05, z);
-    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.035, 18), C(0x707a82, { roughness: 0.6 })); w.rotation.z = Math.PI / 2; w.position.set(x, 0.05, z + 0.02); g.add(w);
-    B(g, 0.03, 0.02, 0.05, MAT.red, x + 0.03, 0.09, z + 0.05);                                       // pedală frână
+    B(g, 0.1, 0.006, 0.08, MAT.steel, x, hb - 0.006, z); Cy(g, 0.032, 0.014, MAT.steel, x, hb - 0.02, z, 'y', 16);
+    for (const dx of [-0.022, 0.022]) B(g, 0.004, 0.06, 0.05, MAT.steel, x + dx, hb - 0.075, z - 0.012);
+    Cy(g, 0.05, 0.03, C(0x6d757c, { roughness: 0.7 }), x, 0.05, z - 0.02, 'x', 24); Cy(g, 0.03, 0.034, C(0x9aa1a7, { metalness: 0.5 }), x, 0.05, z - 0.02, 'x', 16); Cy(g, 0.008, 0.05, MAT.steel, x, 0.05, z - 0.02, 'x', 8);
+    const ped = B(g, 0.036, 0.006, 0.05, MAT.steel, x, 0.105, z + Math.sign(z) * 0.03); ped.rotation.x = -Math.sign(z) * 0.35;
   }
-  for (const [x, z] of [[-0.34, -0.38], [0.34, -0.38], [-0.34, 0.38], [0.34, 0.38]]) { Cy(g, 0.006, 0.14, MAT.steel, x, 0.012, z); Cy(g, 0.03, 0.012, C(0x111111), x, 0.0, z); }
+  for (const [x, z] of [[-0.34, -0.22], [0.34, -0.22], [-0.34, 0.22], [0.34, 0.22]]) { Cy(g, 0.016, 0.016, MAT.steel, x, hb - 0.016, z, 'y', 6); Cy(g, 0.006, hb - 0.03, MAT.steel, x, 0.018, z); Cy(g, 0.03, 0.016, C(0x111111, { roughness: 0.9 }), x, 0.002, z, 'y', 20); }
+  // bară de împingere Ø25 la 1000 mm, în spatele montanților, pe suporți sudați
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.0125, W - 0.04, 16), F); bar.rotation.z = Math.PI / 2; bar.position.set(0, 1.0, zm - 0.085); bar.castShadow = true; g.add(bar);
+  for (const x of [-xs, xs]) { B(g, 0.012, 0.05, 0.07, F, x, 0.975, zm - 0.055); }
+  // spate: prelungitor 230 V cu întrerupător pe traversa inferioară, canal de cablu, cablu de alimentare
+  const strip = photoBox(g, 'strip', 0.34, 0.075, 0.045, -0.22, 0.82, zm - t / 2 - 0.023, 0x151618); strip.rotation.y = Math.PI;
+  const loomR = (pts, r = 0.01) => g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 40, r, 8), C(0x111214, { roughness: 0.7 })));
+  loomR([[-0.4, 0.86, -0.07], [-0.44, 0.75, -0.07], [-0.4, 0.62, -0.06], [-0.05, 0.55, -0.04], [0.0, 0.4, -0.05], [0.08, ys + 0.2, -0.13]]);
+  // poliță (în spatele panoului, vizibile pe sub tablă): sursa ATX 12 V și cutia electrică IP54 cu fereastră și disjunctor 10 A / 30 mA, presetupe, PE
+  photoBox(g, 'psu', 0.22, 0.2, 0.2, -0.22, ys, -0.17, 0x151618);
+  photoBox(g, 'ebox', 0.3, 0.24, 0.16, 0.2, ys, -0.2, 0xc9ccc9, 'z', 0.45);
+  for (let i = 0; i < 3; i++) { Cy(g, 0.012, 0.02, C(0x1a1a1a), 0.04, ys + 0.07 + i * 0.05, -0.2, 'x', 12); const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.03, ys + 0.07 + i * 0.05, -0.2), new THREE.Vector3(-0.04, ys + 0.1 + i * 0.04, -0.17), new THREE.Vector3(-0.1, ys + 0.12, -0.12)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 16, 0.008, 8), C(0x111111))); }
+  const ye = new THREE.CatmullRomCurve3([new THREE.Vector3(0.2, ys + 0.03, -0.115), new THREE.Vector3(0.24, ys + 0.008, -0.08), new THREE.Vector3(0.38, ys + 0.004, -0.05), new THREE.Vector3(0.46, ys + 0.02, -0.02)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(ye, 16, 0.004, 6), C(0x9acd32)));   // conductor PE galben-verde 4 mm²
   if (bare) { plate(g, 'Cadru în execuție', 'tablă perforată – de montat', 0.5, 0, 1.2, zm + 0.03, 0, '#7f8c8d'); return g; }
-  // tabla perforată 1000 × 1200, pe fața din față a cadrului
-  B(g, W, 1.2, 0.004, STAND.peg, 0, 0.5, zm + t / 2 + 0.002);
-  const zp = zm + t / 2 + 0.006;
-  // poliță: sursă ATX 12 V și cutie electrică IP54 cu disjunctor diferențial 10 A / 30 mA (texturi din imaginile ST5/ST6)
-  photoBox(g, 'psu', 0.24, 0.21, 0.2, -0.24, hb + t + 0.004, 0.12, 0x151618);
-  photoBox(g, 'ebox', 0.3, 0.23, 0.15, 0.2, hb + t + 0.004, 0.1, 0xc9ccc9, 'z', 0.45);
-  for (let i = 0; i < 3; i++) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.06, hb + 0.18 + i * 0.04, 0.12), new THREE.Vector3(-0.03, hb + 0.25 + i * 0.03, 0.16), new THREE.Vector3(-0.12, hb + 0.2, 0.18)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 16, 0.009, 8), C(0x111111))); }
-  const ye = new THREE.CatmullRomCurve3([new THREE.Vector3(0.1, hb + 0.1, 0.18), new THREE.Vector3(0.12, hb + 0.06, 0.2), new THREE.Vector3(0.2, hb + 0.045, 0.24)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(ye, 10, 0.004, 6), C(0x9acd32)));   // conductor PE galben-verde
-  // E-stop sus-dreapta (1600 mm), panou siguranțe + întrerupător, prelungitor 230 V pe traversă (texturi foto)
-  B(g, 0.09, 0.09, 0.06, MAT.yellow, 0.4, 1.555, zp + 0.03); Cy(g, 0.03, 0.03, MAT.red, 0.4, 1.6, zp + 0.075, 'z', 18);
-  photoBox(g, 'fuse', 0.13, 0.1, 0.04, 0.22, 1.55, zp + 0.02, 0x151618);
-  photoBox(g, 'strip', 0.34, 0.11, 0.045, -0.2, 0.56, zp + 0.022, 0x151618);
-  const loom = (pts, r = 0.011) => g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], zp + p[2]))), 40, r, 8), C(0x111214, { roughness: 0.7 })));   // tub riflat
-  if (kind === 'diag') {   // după BB1–BB5: ECU, breakout OBD cu borne, multimetru pe suport, cutie de comandă cu relee
-    photoBox(g, 'ecu', 0.2, 0.32, 0.045, -0.3, 1.2, zp + 0.025, 0x9ea4aa, 'z', 0.35);
-    photoBox(g, 'breakout', 0.36, 0.215, 0.035, 0.12, 1.25, zp + 0.02, 0x151618);
-    photoBox(g, 'dmm', 0.1, 0.14, 0.045, 0.24, 1.04, zp + 0.035, 0xf2c200, 'z', 0.45); B(g, 0.12, 0.03, 0.05, C(0x151618), 0.24, 1.02, zp + 0.025);
-    photoBox(g, 'relaybox', 0.3, 0.32, 0.12, -0.18, 0.68, zp + 0.065, 0xd2d4d2, 'z', 0.4);
-    loom([[-0.3, 1.2, 0.05], [-0.38, 1.0, 0.06], [-0.3, 0.98, 0.06], [-0.18, 1.0, 0.07]]); loom([[0.0, 0.68, 0.08], [0.1, 0.62, 0.06], [0.3, 0.66, 0.04], [0.38, 0.9, 0.04]]);
-    const lead = (c, pts) => g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], zp + p[2]))), 30, 0.004, 6), c));
-    lead(C(0x111111), [[0.02, 1.27, 0.05], [0.05, 1.12, 0.08], [0.22, 1.0, 0.07]]); lead(MAT.red, [[0.26, 1.27, 0.05], [0.33, 1.1, 0.09], [0.27, 1.0, 0.07]]);
-    plate(g, 'Stand diagnoză', 'ECU · breakout OBD · senzori', 0.5, 0, 1.75, zm, 0, '#2e6fb0');
-  } else {   // standuri de mecatronică (st1, ST10–ST12): plăci de dezvoltare, afișaje, borne 12 V, senzori
-    B(g, 0.24, 0.16, 0.02, C(0x111214), -0.22, 1.32, zp + 0.01);
-    B(g, 0.07, 0.012, 0.054, MAT.blue, -0.28, 1.36, zp + 0.025).rotation.x = Math.PI / 2; B(g, 0.06, 0.01, 0.023, MAT.pcb, -0.16, 1.37, zp + 0.025).rotation.x = Math.PI / 2;   // Arduino + STM32 (Blue Pill)
-    B(g, 0.16, 0.055, 0.012, C(0xf3f3ee), -0.22, 1.26, zp + 0.024);                                       // breadboard
-    screen(g, 0.1, 0.06, seed % 2 ? 'code' : 'scope', seed + 3, 0.12, 1.36, zp + 0.012); B(g, 0.12, 0.08, 0.015, C(0x111214), 0.12, 1.345, zp + 0.006);   // afișaj TFT
-    B(g, 0.22, 0.12, 0.05, C(0xd1d4d4), -0.22, 0.95, zp + 0.025); [MAT.black, MAT.black, MAT.yellow, MAT.green, MAT.red].forEach((m, i) => Cy(g, 0.012, 0.03, m, 0.03 + i * 0.05, 0.98, zp + 0.03, 'z', 12));   // borne 4 mm
-    B(g, 0.1, 0.08, 0.07, C(0x2a2a2a), 0.25, 1.12, zp + 0.035); Cy(g, 0.03, 0.04, C(0x8a8f94, { metalness: 0.7 }), 0.25, 1.16, zp + 0.08, 'z', 18);   // clapetă electronică
-    loom([[-0.3, 1.25, 0.03], [-0.36, 1.05, 0.05], [-0.25, 0.98, 0.05]], 0.008); loom([[0.12, 1.31, 0.03], [0.2, 1.2, 0.05], [0.25, 1.12, 0.06]], 0.006);
-    plate(g, 'Stand mecatronică ' + seed, 'Arduino · STM32F103 · senzori', 0.5, 0, 1.75, zm, 0, '#2e6fb0');
+  // tabla perforată 1000 × 1200 × 2 (două câmpuri vizibile, îmbinare pe rigidizarea mediană) + șuruburi M6 cu cap bombat la ~150 mm
+  B(g, W, 1.2, 0.003, STAND.peg, 0, 0.5, zm + t / 2 + 0.0015);
+  B(g, 0.004, 1.2, 0.0012, C(0x7b8187, { metalness: 0.5 }), 0, 0.5, zm + t / 2 + 0.0034);
+  const zp = zm + t / 2 + 0.003, head = C(0xd0d4d8, { metalness: 0.9, roughness: 0.25 });
+  for (const y of [0.52, 1.08, 1.68]) for (let i = 0; i < 7; i++) Cy(g, 0.006, 0.004, head, -0.465 + i * 0.155, y, zp + 0.002, 'z', 10);
+  for (const x of [-0.48, 0, 0.48]) for (const y of [0.8, 1.38]) Cy(g, 0.006, 0.004, head, x, y, zp + 0.002, 'z', 10);
+  // față comună (ST9–ST11): E-stop la 1600 mm + buton pornire, modul voltmetru, panou siguranțe cu întrerupător
+  eStop(g, 0.39, 1.6, zp);
+  photoBox(g, 'fuse', 0.13, 0.1, 0.04, -0.34, 1.03, zp + 0.0, 0x151618);
+  if (kind === 'diag') {   // BB1–BB5: inserare defecte + breakout OBD
+    texPlane(g, canvasTex(512, 112, (c, w, h) => { c.fillStyle = '#f4f5f2'; c.fillRect(0, 0, w, h); c.strokeStyle = '#222'; c.lineWidth = 4; c.strokeRect(3, 3, w - 6, h - 6); c.fillStyle = '#111'; c.font = 'bold 40px Arial'; c.textAlign = 'center'; c.fillText('INSERARE DEFECTE', w / 2, 48); c.font = 'bold 34px Arial'; c.fillText('BREAKOUT OBD', w / 2, 92); }), 0.26, 0.057, 0.02, 1.625, zp + 0.002);
+    plateAdapter(g, 0.24, 0.24, -0.2, 1.52, zp);
+    photoBox(g, 'ecu', 0.17, 0.2, 0.04, -0.2, 1.31, zp + 0.004, 0x9ea4aa, 'z', 0.35);
+    photoBox(g, 'breakout', 0.27, 0.16, 0.035, 0.15, 1.36, zp, 0x151618);
+    plateAdapter(g, 0.22, 0.09, -0.2, 1.24, zp); B(g, 0.13, 0.045, 0.03, C(0x1b1c1e), -0.2, 1.175, zp + 0.004);
+    texPlane(g, canvasTex(256, 48, (c, w, h) => { c.fillStyle = '#151618'; c.fillRect(0, 0, w, h); c.fillStyle = '#e8e8e8'; c.font = 'bold 26px Arial'; c.textAlign = 'center'; c.fillText('CONEXIUNI MOTOR', w / 2, 34); }), 0.12, 0.022, -0.2, 1.222, zp + 0.005);
+    voltModule(g, 0.3, 1.18, zp, '12.0');
+    photoBox(g, 'dmm', 0.085, 0.13, 0.04, 0.13, 1.06, zp + 0.03, 0xf2c200, 'z', 0.45); B(g, 0.1, 0.03, 0.06, C(0x151618), 0.13, 1.035, zp + 0.025);
+    const lead = (c, pts) => g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], zp + p[2]))), 30, 0.0035, 6), c));
+    lead(C(0x111111), [[0.05, 1.32, 0.05], [0.07, 1.18, 0.08], [0.12, 1.06, 0.075]]); lead(MAT.red, [[0.25, 1.32, 0.05], [0.24, 1.15, 0.09], [0.15, 1.06, 0.075]]);
+    const loom = (pts, r = 0.011) => g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], zp + p[2]))), 40, r, 8), C(0x111214, { roughness: 0.7 })));
+    loom([[-0.2, 1.21, 0.03], [-0.33, 1.15, 0.035], [-0.3, 0.96, 0.035], [-0.02, 0.92, 0.03], [0.02, 1.27, 0.03]]); loom([[-0.13, 1.18, 0.025], [-0.12, 0.98, 0.03], [0.0, 0.7, 0.03], [0.0, 0.52, 0.02]], 0.008);
+    for (const [x, y] of [[-0.33, 1.1], [-0.15, 0.93], [0.0, 1.1], [0.0, 0.78]]) B(g, 0.03, 0.012, 0.03, C(0x1d1f22), x, y, zp + 0.02);   // coliere / cleme pe tablă
+    // spate: cutia de comandă cu ESP32 și relee (BB3), suport telefon „MOD PROFESOR” pe montant (BB1)
+    const rb = photoBox(g, 'relaybox', 0.3, 0.32, 0.12, 0.16, 1.12, zm - t / 2 - 0.06, 0xd2d4d2, 'z', 0.4); rb.rotation.y = Math.PI;
+    const ph = new THREE.Group(); ph.position.set(xs + 0.03, 1.3, zm + 0.02); ph.rotation.y = Math.PI / 2 - 0.35; g.add(ph);
+    B(ph, 0.09, 0.02, 0.02, C(0x111214), 0, -0.09, -0.005); B(ph, 0.012, 0.17, 0.02, C(0x111214), -0.045, -0.085, -0.005); B(ph, 0.012, 0.17, 0.02, C(0x111214), 0.045, -0.085, -0.005);
+    B(ph, 0.075, 0.155, 0.009, C(0x0c0c0d, { roughness: 0.3 }), 0, -0.078, 0.0);
+    texPlane(ph, canvasTex(160, 320, (c, w, h) => { c.fillStyle = '#f7f7f7'; c.fillRect(0, 0, w, h); c.fillStyle = '#111'; c.font = 'bold 17px Arial'; c.textAlign = 'center'; c.fillText('MOD PROFESOR', w / 2, 40); c.font = '13px Arial'; c.textAlign = 'left'; c.fillText('Circuit', 18, 80); c.strokeStyle = '#999'; c.strokeRect(16, 88, 128, 26); c.fillText('CAN-H', 24, 106); c.fillText('Defect', 18, 140); c.strokeRect(16, 148, 128, 26); c.fillText('Întrerupere', 24, 166); c.fillStyle = '#f26b1d'; c.fillRect(16, 196, 128, 34); c.fillStyle = '#fff'; c.font = 'bold 16px Arial'; c.textAlign = 'center'; c.fillText('ACTIV', w / 2, 219); c.strokeStyle = '#333'; c.strokeRect(16, 244, 128, 30); c.fillStyle = '#111'; c.font = '14px Arial'; c.fillText('Restabilește', w / 2, 264); c.font = '11px Arial'; c.fillText('ESP32 conectat', w / 2, 300); }), 0.067, 0.134, 0, 0.0, 0.0051, 0, true).position.y = -0.078;
+  } else {   // standuri de mecatronică (ST9–ST12): aceeași dotare de bază + plăci de dezvoltare pe placă-adaptor
+    voltModule(g, 0.3, 1.32, zp, (12 + seed * 0.1).toFixed(1));
   }
   return g;
 }
@@ -985,7 +1033,7 @@ export function buildEquipment(scene) {
   // peretele de panouri: cele 4 standuri mobile (proiect propriu) aliniate la fundul sălii, cu fața spre mese
   [0.85, 2.0, 3.15, 4.3].forEach((x, i) => put(standMobil('meca', i + 1), x, 8.25, 0, 1, info('Stand mobil mecatronică nr. ' + (i + 1) + ' (proiect propriu)', D.MAM1 + ' · ' + D.MAM2, MECA[i], SRC_ST, 'Platformă dedicată Arduino + STM32F103 pe tabla perforată; 12 V pe panou, 230 V doar în cutia IP54 de pe poliță; E-stop la 1600 mm.')));
   // motor pe stand albastru pentru diagnoză (colțul din dreapta), dulap de scule albastru, tablă albă
-  put(engineRotStand('MPI'), 6.05, 6.5, -90, 1, info('Stand motor 1.6 8V (K7J) cu senzoristică – diagnoză', D.DA, ['Diagnosticare L2 – metode de diagnosticare a senzorilor', 'L3 – diagnosticarea actuatorilor', 'L4 – etanșeitatea camerei de ardere'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente; imagine concept'));
+  put(engineStandF1C(), 5.95, 6.5, -90, 1, info('Motor diesel F1C 3.0 (common rail, turbo VGT) pe stand rotativ – diagnoză', D.DA + ' · ' + D.SAA, ['Diagnosticare L2 – senzori: turație, fază, presiune rampă, MAP, temperatură', 'L3 – actuatori: injectoare, supapa EGR, actuatorul VGT, regulatorul de presiune', 'L5 – alimentarea MAC common rail: CP3, rampă, injectoare', 'SAA – turbosuflanta cu geometrie variabilă, răcirea, accesoriile (alternator, compresor AC)'], 'Îndrumar Diagnosticare 2026-2027; motor F1C 3.0 (4 cilindri în linie, 16 supape, common rail)', 'Agregate montate: pompă CP3, rampă comună cu 4 injectoare, turbo VGT, EGR cu răcitor, alternator, compresor AC, pompă servodirecție, demaror; cablaj motor cu ECU EDC17 pe stand.'));
   put(toolCabinet(MAT.blue), 6.3, 4.9, -90, 1, info('Dulap de scule (diagnoză)', D.DA, ['Sonde, adaptoare, cabluri de măsură'], 'Imagine concept'));
   put(whiteboard(2.0), 6.6, 2.6, -90, 1, null, false);
   put(rackCabinet(), 0.55, 7.6, 90, 1, info('Dulap rack (rețea, server de laborator)', D.DA + ' · ' + D.MAM1, ['Rețea locală pentru posturi și standuri'], 'Fotografie de referință'));
@@ -995,7 +1043,7 @@ export function buildEquipment(scene) {
   put(injectorStand(), 6.1, 3.85, -90, 1, info('Stand verificare injectoare benzină', D.DA, ['Diagnosticare L4 – presiune, debit, menținerea presiunii', 'L2 – semnalul injectorului pe osciloscop'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 2'));
   // mese de laborator pe 3 rânduri, cu fața spre peretele de panouri
   let ld = 0;
-  for (const y of [1.5, 3.3, 5.1]) for (const x of [1.35, 3.25]) put(labDesk(ld++), x, y, 0, 1, ld === 1 ? info('Masă de laborator – laptop, osciloscop de banc, multimetru', D.DA + ' · ' + D.MAM1, ['Achiziția și analiza semnalelor de la senzori și actuatori', 'Programare Arduino / STM32 (PlatformIO)'], 'Imagine concept „Diagnosticare + Mecatronică”') : null);
+  for (const y of [1.5, 3.3, 5.1]) for (const x of [1.35, 3.25]) { const k = ld++; put(labDesk(k, k === 4 ? [0] : k === 1 ? [1] : []), x, y, 0, 1, k === 0 ? info('Masă de laborator – laptop, osciloscop de banc, multimetru', D.DA + ' · ' + D.MAM1, ['Achiziția și analiza semnalelor de la senzori și actuatori', 'Programare Arduino / STM32 (PlatformIO)'], 'Imagine concept „Diagnosticare + Mecatronică”') : null); }
 
   // ===================== E02 CCA (x 6.78–13.22, y 0.2–8.8)
   put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 2.6, 180, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));

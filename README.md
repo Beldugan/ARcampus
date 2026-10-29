@@ -77,7 +77,7 @@ Aspectul exterior și cel interior urmează imaginile concept din `img/concept/`
 | P01 Linie ITP | Inspecție tehnică: frâne, suspensie, ripaj, faruri, analizor gaze, detector de jocuri |
 | P02 Service student | Diagnosticare, practică, mentenanță: elevator 2 coloane, post la sol, X431, schimbător și echilibror de roți |
 | P03 PCMAI + CCMAI | Motoare: stand Otto 1.4 MPI, Diesel 1.5 dCi, AVL DiTEST, machetă secționată Smart |
-| E01 | Diagnosticare + Mecatronică: 4 standuri de mecatronică, rețea CAN cu gateway OBD-II, stand injectoare, panou perforat cu senzori/actuatori |
+| E01 | Diagnosticare + Mecatronică: 4 standuri mobile de mecatronică și un stand de diagnoză (inserare defecte + breakout OBD), refăcute după proiectul propriu (cadru 1700×1000×800, tablă perforată, ST1–ST12, BB1–BB5); motor diesel F1C 3.0 pe stand rotativ, cu agregate și cablaj; mese de laborator cu laptop, osciloscop, placă de achiziție și multimetru; 2 cursanți la mese; rețea CAN, stand injectoare |
 | E02 | Construcția autovehiculelor: ambreiaje și cutie de viteze secționate, McPherson, casetă de direcție, punte motoare, sisteme de frânare, raft pneuri |
 | E03 | Dinamica autovehiculelor: post de simulare dinamică, cântare de roți, stand de frânare hidraulică instrumentat |
 | E04 | Caroserii: caroserie în alb, ușă pe stand, braț de măsurare, crash-box-uri, post CAD |
