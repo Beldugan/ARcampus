@@ -1,7 +1,7 @@
 // Echipamente – modelate din primitive la dimensiuni reale; fiecare are o fișă (disciplină, lucrări, sursă)
 import * as THREE from 'three';
 import { T, labelTex, screenTex } from './textures.js';
-import { LEVEL_H } from './building.js';
+import { LEVEL_H, ROOMS, WALLS, ARACIS_NORM, ROOM_AREA } from './building.js';
 import { GLTFLoader } from 'three/addons/GLTFLoader.js';
 import * as BGU from 'three/addons/BufferGeometryUtils.js';
 import { MeshoptDecoder } from 'three/addons/meshopt_decoder.module.js';
@@ -239,10 +239,10 @@ function avlStation() {
 function extractionReel(len = 2.6, reel = MAT.red) {
   const g = new THREE.Group(); Cy(g, 0.28, 0.35, reel, 0, 0, 0, 'z'); Cy(g, 0.075, len, C(0x1c1c1c), 0.0, -len, 0.0, 'y', 14); Cy(g, 0.1, 0.25, MAT.red, 0, -len - 0.25, 0, 'y', 14); return g;
 }
-function studentDesk(w = 1.8) {
+function studentDesk(w = 1.8, n = 2) {
   const g = new THREE.Group(); B(g, w, 0.04, 0.65, MAT.wood, 0, 0.73, 0);
   for (const x of [-w / 2 + 0.05, w / 2 - 0.05]) B(g, 0.05, 0.73, 0.6, MAT.grey, x, 0, 0);
-  for (const x of [-w / 4, w / 4]) { const c = chair(); c.position.set(x, 0, 0.55); c.rotation.y = Math.PI; g.add(c); }
+  for (const x of (n === 1 ? [0] : [-w / 4, w / 4])) { const c = chair(); c.position.set(x, 0, 0.55); c.rotation.y = Math.PI; g.add(c); }
   return g;
 }
 function chair() {
@@ -275,6 +275,18 @@ function pcDesk(kind = 'cad', seed = 1, w = 1.4) {
   B(g, 0.44, 0.018, 0.14, C(0x2a2d31), 0, 0.765, 0.1); B(g, 0.06, 0.02, 0.1, C(0x2a2d31), 0.32, 0.765, 0.12);   // tastatură + mouse
   const tx = w / 2 - 0.18; B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), tx, 0, -0.1); Cy(g, 0.006, 0.01, C(0x3b82f6, { emissive: 0x3b82f6, emissiveIntensity: 1 }), tx, 0.38, 0.12, 'z', 8);   // unitate PC
   const c = officeChair(); c.position.set(0, 0, 0.62); c.rotation.y = Math.PI; g.add(c); return g;
+}
+function pcDesk2(seed = 1, n = 2, kind = 'cad') {   // masă dublă 1,6 m cu 2 posturi PC (monitor, tastatură, mouse, unitate, scaun rotativ)
+  const g = new THREE.Group(), w = 1.6; B(g, w, 0.035, 0.75, MAT.wood, 0, 0.73, 0); const lx = w / 2 - 0.03;
+  for (const x of [-lx, lx]) { B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, -0.33); B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, 0.33); B(g, 0.05, 0.02, 0.7, MAT.grey, x, 0.0, 0); }
+  B(g, w - 0.1, 0.35, 0.015, C(0x9aa3aa, { metalness: 0.3 }), 0, 0.36, -0.33);
+  for (const [i, x] of (n === 1 ? [[0, -0.38]] : [[0, -0.38], [1, 0.4]])) {
+    monitor(g, i ? (kind === 'cad' ? 'scope' : 'cad') : kind, seed * 2 + i, x, 0.765, -0.2);
+    B(g, 0.44, 0.018, 0.14, C(0x2a2d31), x, 0.765, 0.1); B(g, 0.06, 0.02, 0.1, C(0x2a2d31), x + 0.3, 0.765, 0.12);
+    B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), x + (i ? 0.22 : -0.22), 0, -0.1);
+    const c = officeChair(); c.position.set(x, 0, 0.62); c.rotation.y = Math.PI; g.add(c);
+  }
+  return g;
 }
 function labScope(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.17, 0.13, C(0xd9dcdf, { roughness: 0.5 }), 0, 0, 0); screen(g, 0.17, 0.11, 'scope', seed, -0.06, 0.03, 0.066); for (let i = 0; i < 6; i++) Cy(g, 0.01, 0.01, C(0x333), 0.07 + (i % 2) * 0.05, 0.04 + Math.floor(i / 2) * 0.04, 0.07, 'z', 10); for (let i = 0; i < 4; i++) Cy(g, 0.007, 0.012, [MAT.yellow, C(0x22aaee), C(0xdd44aa), MAT.green][i], -0.12 + i * 0.045, 0.015, 0.07, 'z', 10); return g; }
 function benchPSU() { const g = new THREE.Group(); B(g, 0.22, 0.13, 0.25, C(0x2b2f33), 0, 0, 0); B(g, 0.09, 0.04, 0.005, C(0x0a0a0a), -0.05, 0.08, 0.126); plate(g, '12.00 V', '', 0.08, -0.05, 0.1, 0.13, 0, '#300'); Cy(g, 0.008, 0.012, MAT.red, 0.06, 0.03, 0.13, 'z', 8); Cy(g, 0.008, 0.012, MAT.black, 0.085, 0.03, 0.13, 'z', 8); return g; }
@@ -386,7 +398,7 @@ function usbDaq() {
 function deskLead(g, pts, col, r = 0.003) { g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 36, r, 6), C(col, { roughness: 0.55 }))); }
 // ---- masă de laborator (după imaginea concept E01): blat laminat bej-deschis cu cant, cadru metalic gri antracit pe roți, panou frontal perforat, corp cu sertare;
 // aparatură: laptop cu forme de undă, osciloscop de banc gri-deschis, placă de achiziție USB, multimetru, cabluri de măsură care atârnă sub blat
-function labDesk(seed = 0, students = []) {
+function labDesk(seed = 0, students = [], n = 2) {
   const g = new THREE.Group(); const top = C(0xe6e1d6, { roughness: 0.45 }), fr = C(0x3f454b, { metalness: 0.5, roughness: 0.4 }), panel = C(0xc4c8cc, { metalness: 0.3, roughness: 0.45 });
   const t = slab(1.6, 0.75, 0.022, 0.012, top, 0.003); t.position.y = 0.72; g.add(t);
   B(g, 1.6, 0.006, 0.75, C(0x8c8f92), 0, 0.715, 0);                                                      // cant
@@ -408,7 +420,7 @@ function labDesk(seed = 0, students = []) {
   probeCable(g, [0.27, 0.79, -0.11], [0.6, 0.76, 0.3]); probeCable(g, [0.33, 0.79, -0.11], [0.7, 0.3, 0.38], 0x1a1a1a);
   for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.02]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.12 + dx, 0.765, 0.15), new THREE.Vector3(0.18 + dx, 0.77, 0.28), new THREE.Vector3(0.24 + dx, 0.74, 0.37), new THREE.Vector3(0.26 + dx, 0.35, 0.4), new THREE.Vector3(0.12 + dx, 0.05, 0.35)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 30, 0.0035, 6), c)); }
   // scaune; pe locul din stânga poate sta un cursant (cu fața spre laptop)
-  for (const x of [-0.38, 0.4]) {
+  for (const x of (n === 1 ? [-0.38] : [-0.38, 0.4])) {
     const occ = x < 0 && students.length; const zc = occ ? 0.58 : 0.66;
     const c = labChair(); c.position.set(x, 0, zc); c.rotation.y = Math.PI + (occ ? 0 : (seed % 2 ? 0.25 : -0.2)); g.add(c);
     if (occ) { const st = seatedStudent(students[0]); st.position.set(x, 0, zc - 0.02); st.rotation.y = Math.PI; g.add(st); }
@@ -932,6 +944,7 @@ const D = {
 };
 
 // ------------------------------------------------------------------ amplasare
+const fmt = v => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',').replace(/,0$/, '');
 export function buildEquipment(scene) {
   const items = []; const root = new THREE.Group(); root.name = 'echipamente'; scene.add(root);
   const put = (obj, x, y, rotDeg, lvl, info, collide = true, h = 0) => {
@@ -951,7 +964,6 @@ export function buildEquipment(scene) {
   put(headlightTester(), 0.75, 12.0, 0, 0, info('Regloscop (verificare faruri)', D.ITP + ' · ' + D.DA, ['ITP: reglajul fasciculului', 'Diagnosticare – sistem de iluminare'], 'DXF concept A01 „Gaze / faruri”'));
   put(gasCart(), 5.45, 15.4, -90, 0, info('Analizor de gaze + opacimetru', D.ITP + ' · ' + D.DA, ['ITP: emisii MAS (CO, HC, λ) și MAC (opacitate)', 'Diagnosticare L4 – sistemul de alimentare MAS'], 'DXF concept A01; îndrumar Diagnosticare 2026-2027'));
   put(car(0xb9bdc1), 3.1, 15.98, -90, 0, info('Autoturism în verificare pe linia ITP (puntea față pe standul de frânare)', D.ITP, ['Flux: stradă → linie ITP → ieșire spre parcare'], 'Concept A00 trasee'), true, -0.025);
-  put(itpDesk(), 5.3, 8.6, -90, 0, info('Post inspector ITP', D.ITP, ['Introducerea rezultatelor, emiterea raportului'], 'Organizare stație ITP'));
   put(extinguisher(), 0.35, 8.0, 90, 0, info('Stingător P6', 'Securitate la incendiu', ['Dotare obligatorie hală'], 'P118/2015'));
   put(hoseReel(), 5.95, 12.0, -90, 0, null, false, 3.0);
   put(extractionReel(2.4, MAT.dark), 5.45, 17.9, 0, 0, info('Furtun de evacuare a gazelor de eșapament', D.ITP, ['ITP: măsurarea emisiilor cu motorul pornit în hală'], 'Imagini concept – linie ITP'), false, 4.2);
@@ -985,9 +997,9 @@ export function buildEquipment(scene) {
   put(greyCabinets(2.4), 15.5, 13.2, 90, 0, info('Dulapuri de laborator (scule, aparate de măsură)', D.CCMAI + ' · ' + D.PCMAI, ['Micrometre, comparatoare, șublere, chei dinamometrice'], 'Imagine concept'));
   put(smartCutaway(), 10.2, 3.1, 0, 0, info('Machetă secționată Smart ForTwo', D.BAZ + ' · ' + D.DA + ' · ' + D.CCA, ['Bazele ingineriei – identificarea subsistemelor', 'Diagnosticare L1, L6 – sisteme activate din telecomandă', 'CCA – transmisie, direcție, frâne'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 1); îndrumar Diagnosticare'));
   put(avlStation(), 15.7, 16.9, 90, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
-  put(studentDesk(1.8), 2.2, 2.0, 0, 0, info('Loc de lucru studenți (10 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Caiet de sarcini: „locuri de lucru pentru 10 studenți”; DXF A01'));
-  put(studentDesk(1.8), 4.6, 2.0, 0, 0, null); put(studentDesk(1.8), 7.0, 2.0, 0, 0, null);
-  put(studentDesk(1.8), 2.2, 3.9, 0, 0, null); put(studentDesk(1.8), 4.6, 3.9, 0, 0, null); put(studentDesk(1.8), 7.0, 3.9, 0, 0, null);
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   put(enginePartsBench(2.2), 19.35, 17.7, -90, 0, info('Banc cu piese de motor: arbore cotit, pistoane cu biele, chiulasă, ax cu came', D.CCMAI + ' · ' + D.PCMAI, ['CCMAI – identificarea și măsurarea pieselor mecanismului bielă-manivelă', 'Proiect – dimensiuni principale (alezaj, cursă, bielă)'], 'Imagine concept „PCMAI + CCMAI”; caiet de sarcini Laborator Motoare (Fig. 2)'));
   put(poster('engine', 1.2), 8.2, 5.83, 180, 0, null, false);
   put(workbench(1.7), 15.55, 7.3, 90, 0, info('Masă de lucru cu scule (demontare / asamblare)', D.CCMAI + ' · ' + D.SAA, ['CCMAI – piston, bielă, segmenți (identificare, măsurare)', 'SAA – demontare demaror, pompă de apă'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 2)'));
@@ -1031,16 +1043,15 @@ export function buildEquipment(scene) {
   put(instrumentTable(), 5.3, 0.7, 0, 1, info('Masă cu aparate: generator de semnal, sursă dublă, osciloscop de rezervă', D.DA + ' · ' + D.MAM1, ['Generarea semnalelor de test pentru senzori'], 'Imagine concept'));
   put(injectorStand(), 6.1, 3.85, -90, 1, info('Stand verificare injectoare benzină', D.DA, ['Diagnosticare L4 – presiune, debit, menținerea presiunii', 'L2 – semnalul injectorului pe osciloscop'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 2'));
   // mese de laborator pe 3 rânduri, cu fața spre peretele de panouri
-  let ld = 0;
-  for (const y of [1.5, 3.3, 5.1]) for (const x of [1.35, 3.25]) { const k = ld++; put(labDesk(k, k === 4 ? [0] : k === 1 ? [1] : []), x, y, 0, 1, k === 0 ? info('Masă de laborator – laptop, osciloscop de banc, multimetru', D.DA + ' · ' + D.MAM1, ['Achiziția și analiza semnalelor de la senzori și actuatori', 'Programare Arduino / STM32 (PlatformIO)'], 'Imagine concept „Diagnosticare + Mecatronică”') : null); }
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
   // ===================== E02 CCA (x 6.78–13.22, y 0.2–8.8)
   put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 2.6, 180, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));
   put(displayTable([axle], 'Punte motoare · diferențial'), 11.6, 2.6, 180, 1, info('Punte motoare cu diferențial', D.CCA, ['Transmisia principală și diferențialul'], 'Fișa CCA'));
   put(displayTable([strut, strut, steeringRack], 'Suspensie · direcție'), 8.4, 5.6, 180, 1, info('Mecanisme de ghidare, suspensie McPherson, casetă de direcție', D.CCA, ['Mecanisme de ghidare a roților', 'Suspensie – elemente elastice și amortizoare', 'Sisteme de direcție'], 'Fișa CCA II (Mitroi) – lucrările 1–4'));
   put(displayTable([brakeKit, brakeKit], 'Frâne hidraulice · pneumatice'), 11.6, 5.6, 180, 1, info('Sisteme de frânare hidraulice și pneumatice', D.CCA, ['Frânare cu acționare hidraulică', 'Frânare cu acționare pneumatică (autocamion)'], 'Fișa CCA II – lucrările 5–6'));
-  put(studentDesk(1.6), 11.8, 7.9, 0, 1, null);
-  for (const [x, y] of [[7.6, 3.5], [9.4, 3.5], [10.8, 3.5], [12.4, 3.5], [10.8, 6.6], [12.4, 6.6]]) put(stool(), x, y, 0, 1, null);
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   put(poster('gear', 1.2), 10.6, 8.77, 0, 1, null, false); put(poster('susp', 1.2), 12.2, 8.77, 0, 1, null, false);
   put(whiteboard(2.4), 10.0, 0.25, 0, 1, null, false);
 
@@ -1052,9 +1063,9 @@ export function buildEquipment(scene) {
   put(tireRack(), 14.1, 6.6, 90, 1, info('Raft cu pneuri și jante (secțiuni)', D.DIN, ['Caracteristici geometrice și constructive ale pneului', 'Raza de rulare a roții'], 'Fișa Dinamica autovehiculelor I'));
   put(brakeHydStand(), 19.4, 6.6, -90, 1, info('Stand de frânare hidraulică instrumentat', D.DIN + ' · ' + D.MF + ' · ' + D.DA, ['Mecanica fluidelor L3 – legea lui Pascal', 'Diagnosticare L6 – ABS', 'Dinamica – frânare'], 'Îndrumar Mecanica fluidelor 2026-2027 (Fig. 3.1); Standuri diplomă nr. 5'));
   put(poster('dyn', 1.2), 16.8, 8.77, 0, 1, null, false); put(poster('car', 1.2), 18.4, 8.77, 0, 1, null, false);
-  put(pcDesk('cad', 31), 14.4, 1.2, 0, 1, info('Post de simulare dinamică', D.DIN, ['Vitezele pe trepte, momentele la roți, proiect Dinamica II'], 'Fișe Dinamica I–II'));
-  put(pcDesk('scope', 32), 15.9, 1.2, 0, 1, null);
-  put(pcDesk('cad', 33), 17.3, 1.2, 0, 1, null);
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
   // ===================== E04 CAROSERII (x 0.2–7.6, y 11.1–19.8)
   put(biwShell(), 3.4, 15.3, 90, 1, info('Caroserie în alb – machetă structurală', D.CAR, ['Parametri dimensionali și masici ai caroseriei', 'Spațiul postului de conducere, habitaclu, portbagaj', 'Structuri portante, zone de deformare'], 'Fișa Caroserii și structuri portante (proiect)'));
@@ -1063,8 +1074,8 @@ export function buildEquipment(scene) {
   put(sheetParts(), 6.75, 15.3, 90, 1, info('Masă cu piese din tablă (lonjeroane, suporți, întărituri)', D.CAR, ['Elemente ale structurii portante, îmbinări prin puncte de sudură'], 'Imagine concept „Caroserii”'));
   put(poster('car', 1.3), 7.58, 13.2, -90, 1, null, false); put(poster('chassis', 1.3), 7.58, 17.6, -90, 1, null, false);
   put(measureArm(), 6.9, 18.6, 0, 1, info('Braț de măsurare portabil', D.CAR + ' · ' + D.FRA, ['Determinarea dimensiunilor caroseriei', 'Expertiză după accident – cote de control'], 'Fișa Încercarea și omologarea – dimensiuni caroserie'));
-  put(pcDesk('cad', 41), 1.4, 18.9, 180, 1, info('Post CAD caroserie (CATIA / AutoCAD)', D.CAR + ' · ' + D.CAD, ['Proiect caroserii – forma și dimensiunile exterioare'], 'Fișa Caroserii și structuri portante – 5.2 rețea de calculatoare'));
-  put(pcDesk('cad', 42), 3.0, 18.9, 180, 1, null);
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
   // ===================== E05 HeV (x 12.4–19.8, y 11.1–19.8)
   put(batteryMockup(), 14.4, 13.0, 0, 1, info('Machetă baterie de tracțiune ≤ 60 V cu BMS', D.HEV + ' · ' + D.DA, ['Diagnoza sistemului de stocare – fără expunere la înaltă tensiune', 'Diagnosticare L7 (demonstrativ)'], 'Standuri lucrări de diplomă AR IV 2026-2027, nr. 4'));
@@ -1072,27 +1083,104 @@ export function buildEquipment(scene) {
   put(displayTable([hybridCut], 'Transmisie hibridă (secționată)'), 15.0, 16.6, 0, 1, info('Transmisie hibridă power-split (secționată)', D.HEV, ['Concepe strategii de operare hibride', 'Îndrumar proiect sisteme de propulsie hibride (simHEV)'], 'Îndrumar proiect – propulsie hibridă, ed. I'));
   put(wallbox(), 19.7, 15.5, -90, 1, info('Stație de încărcare AC (demo)', D.HEV, ['Încărcarea vehiculelor electrice, protocoale'], 'Program HeV'), false);
   put(hvCabinet(), 19.4, 18.9, -90, 1, info('Dulap echipament de protecție HV', D.HEV + ' · ' + D.DA, ['Lucru în siguranță: mănuși electroizolante, ecran facial, aparatură CAT III 1000 V'], 'Îndrumar Diagnosticare 2026-2027 – lucrul la vehicule HV'));
-  put(studentDesk(1.6), 17.4, 16.6, 0, 1, null);
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   put(hvToolMat(), 17.4, 16.6, 0, 1, info('Scule izolate VDE 1000 V, multimetru CAT III, mănuși electroizolante', D.HEV + ' · ' + D.DA, ['Lucru în siguranță la sisteme de înaltă tensiune'], 'Imagine concept „HeV”; îndrumar Diagnosticare – vehicule HV'), false, 0.77);
-  put(pcDesk('bms', 51), 13.6, 19.0, 180, 1, info('Post achiziție date HeV', D.HEV, ['Monitorizare BMS, date invertor'], 'Program HeV'));
-  put(pcDesk('code', 52), 15.2, 19.0, 180, 1, null);
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
   // ===================== E12 SALĂ CAD / SEMINAR (x 19.95–24.8, y 0.2–8.8)
   // 15 posturi: 5 rânduri × 3 mese de 1,2 m (2 + culoar central 0,95 m + 1), cu fața spre ecranul interactiv; ≈ 2,8 m²/loc
-  let sd = 70;
-  for (const y of [1.15, 2.57, 3.99, 5.41, 6.83]) for (const x of [20.6, 21.8, 23.95]) { const k = sd++; put(pcDesk('cad', k, 1.2), x, y, 0, 1, k === 70 ? info('Sală CAD / seminar – 15 posturi PC (5 rânduri × 3, culoar central)', D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'], 'Imagine concept „sală cu posturi PC”; norme ARACIS 2,5 m²/loc (≈ 2,8 m²/loc)') : null); }
+  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   put(tvDisplay(1.9, 'cad', 91), 23.6, 8.76, 180, 1, info('Ecran interactiv 86″', D.CAD, ['Prezentări, proiecte, demonstrații CAD'], 'Imagine concept „sală cu posturi PC”'), false);
   // ===================== E13 ATELIER PROIECTE – STANDURI DIDACTICE (x 19.95–24.8, y 11.1–19.8)
   [20.85, 22.05, 23.25].forEach((x, i) => put(standMobil(i === 1 ? 'meca' : 'diag', 6 + i), x, 14.6, 0, 1, info('Stand mobil în lucru – lucrare de diplomă ' + (i + 1), 'Lucrări de diplomă AR IV · ' + D.DA, ['Montare componente pe tabla perforată', 'Cablare 12 V, cutie electrică IP54, E-stop'], SRC_ST + '; Standuri_lucrari_diploma_AR_IV_2026-2027.pdf')));
   put(standMobil('meca', 9, true), 24.1, 17.2, -90, 1, info('Cadru stand mobil (în execuție)', 'Lucrări de diplomă AR IV', ['Cadru sudat 40×40×2, contrafișe 30×30, roți Ø100 cu frână'], SRC_ST));
   put(workbench(2.2), 21.5, 19.4, 180, 1, info('Banc de lucru – atelier proiecte', 'Lucrări de diplomă AR IV', ['Asamblare, cablare, testare'], 'Concept'));
   put(toolCabinet(), 23.4, 19.45, 180, 1, null);
-  put(pcDesk('code', 81), 20.75, 17.2, 90, 1, null);
 
   // ===================== HOL ETAJ + WC
   put(noticeBoard(), 3.0, 10.92, 180, 1, null, false);
   put(bench(), 17.5, 10.7, 180, 1, null);
   put(extinguisher(), 24.6, 9.2, -90, 1, info('Stingător P6 – hol', 'Securitate', [], 'P118/2015'));
   for (const [x, y] of [[8.5, 13.4], [8.5, 15.5], [8.5, 17.7]]) put(toilet(), x, y, 90, 1, null);
+  // ===================== LOCURI DE LUCRU (mese + scaune) – calculate pe fiecare laborator după ARACIS, din suprafața rămasă liberă
+  // suprafața netă = suprafața încăperii − amprenta standurilor didactice și a echipamentelor de pe pardoseală (proiecție în plan, fără suprapuneri);
+  // locuri max. = ⌊ netă / normă ⌋ (4 m²/loc laborator tehnic, 2,5 m²/loc laborator de informatică). În P01 (ITP), P02 (service) și E13 (atelier) nu se pun mese.
+  seatLabs();
+  function seatLabs() {
+    root.updateMatrixWorld(true);
+    const CELL = 0.05, bb = new THREE.Box3();
+    const SEAT = {
+      P03: { mk: (k, n) => studentDesk(1.6, n), w: 1.6, d: 0.65, seats: 2, face: 0, gap: 0.3, title: 'Loc de lucru studenți (PCMAI / CCMAI)', disc: D.PCMAI + ' · ' + D.CCMAI, luc: ['Măsurători, referate, proiecte PCMAI / CCMAI'] },
+      E01: { mk: (k, n) => labDesk(k, k === 0 ? [0] : k === 3 ? [1] : [], n), w: 1.6, d: 0.75, seats: 2, face: 0, gap: 0.3, title: 'Masă de laborator – laptop, osciloscop de banc, multimetru', disc: D.DA + ' · ' + D.MAM1, luc: ['Achiziția și analiza semnalelor de la senzori și actuatori', 'Programare Arduino / STM32 (PlatformIO)'] },
+      E02: { mk: (k, n) => studentDesk(1.6, n), w: 1.6, d: 0.65, seats: 2, face: 0, gap: 0.3, title: 'Loc de lucru studenți (CCA)', disc: D.CCA || 'Calculul și construcția autovehiculelor', luc: ['Calcule, schițe, relevee pe subansamble'] },
+      E03: { pc: true, mk: (k, n) => pcDesk2(30 + k, n, 'cad'), w: 1.6, d: 0.75, seats: 2, face: 0, gap: 0.3, title: 'Posturi PC de simulare dinamică', disc: D.DIN, luc: ['Vitezele pe trepte, momentele la roți, proiect Dinamica II'] },
+      E04: { pc: true, mk: (k, n) => pcDesk2(40 + k, n, 'cad'), w: 1.6, d: 0.75, seats: 2, face: 180, gap: 0.3, title: 'Posturi CAD caroserie (CATIA / AutoCAD)', disc: D.CAR + ' · ' + D.CAD, luc: ['Proiect caroserii – forma și dimensiunile exterioare'] },
+      E05: { pc: true, mk: (k, n) => pcDesk2(50 + k, n, k % 2 ? 'bms' : 'code'), w: 1.6, d: 0.75, seats: 2, face: 180, gap: 0.3, title: 'Posturi achiziție date HeV', disc: D.HEV, luc: ['Monitorizare BMS, date invertor'] },
+      E12: { mk: k => pcDesk('cad', 70 + k, 1.2), w: 1.2, d: 0.75, seats: 1, face: 0, gap: 0.0, aisleEvery: 2, faces: [0], noAlt: true, back: 0.67, title: 'Sală CAD / seminar – posturi PC', disc: D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, luc: ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'] },
+    };
+    const doorsOf = lvl => WALLS.filter(w => w[4] === lvl).flatMap(([x0, y0, x1, y1, , , ops]) => ops.filter(o => o[4] === 'door').map(([a, b]) => (x1 - x0) > (y1 - y0) ? [a - 0.2, (y0 + y1) / 2 - 1.0, b + 0.2, (y0 + y1) / 2 + 1.0] : [(x0 + x1) / 2 - 1.0, a - 0.2, (x0 + x1) / 2 + 1.0, b + 0.2]));
+    const stats = {};
+    for (const id of Object.keys(ARACIS_NORM)) {
+      const rects = ROOMS.filter(r => r.id === id), lvl = rects[0].lvl, norm = ARACIS_NORM[id], A = ROOM_AREA[id];
+      const X0 = Math.min(...rects.map(r => r.r[0])), Y0 = Math.min(...rects.map(r => r.r[1])), X1 = Math.max(...rects.map(r => r.r[2])), Y1 = Math.max(...rects.map(r => r.r[3]));
+      const nx = Math.ceil((X1 - X0) / CELL), ny = Math.ceil((Y1 - Y0) / CELL);
+      const inRoom = new Uint8Array(nx * ny), foot = new Uint8Array(nx * ny), block = new Uint8Array(nx * ny);
+      const cx = i => X0 + (i + 0.5) * CELL, cy = j => Y0 + (j + 0.5) * CELL;
+      const inside = (x, y, m = 0) => rects.some(r => x >= r.r[0] + m && x <= r.r[2] - m && y >= r.r[1] + m && y <= r.r[3] - m);
+      for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) inRoom[j * nx + i] = inside(cx(i), cy(j)) ? 1 : 0;
+      const fill = (arr, x0, y0, x1, y1) => { for (let j = Math.max(0, Math.floor((y0 - Y0) / CELL)); j < Math.min(ny, Math.ceil((y1 - Y0) / CELL)); j++) for (let i = Math.max(0, Math.floor((x0 - X0) / CELL)); i < Math.min(nx, Math.ceil((x1 - X0) / CELL)); i++) arr[j * nx + i] = 1; };
+      // amprenta echipamentelor de pe pardoseală (fără obiectele de perete subțiri și fără cele suspendate)
+      const eq = [];
+      for (const it of items) {
+        if (it.lvl !== lvl) continue; bb.setFromObject(it.obj); if (bb.isEmpty()) continue;
+        const ex0 = bb.min.x, ex1 = bb.max.x, ey0 = -bb.max.z, ey1 = -bb.min.z, base = LEVEL_H[lvl];
+        if (!inside((ex0 + ex1) / 2, (ey0 + ey1) / 2)) continue;
+        if (bb.min.y - base > 1.2 || bb.max.y - base < 0.03) continue;                      // suspendat / placă în pardoseală
+        if (Math.min(ex1 - ex0, ey1 - ey0) < 0.12) continue;                                // pe perete (planșe, tablă, ecran)
+        fill(foot, ex0, ey0, ex1, ey1); eq.push([ex0, ey0, ex1, ey1]);
+      }
+      let fc = 0; for (let k = 0; k < foot.length; k++) if (foot[k] && inRoom[k]) fc++;
+      const F = fc * CELL * CELL, net = A - F, cap = Math.floor(net / norm + 1e-9);
+      stats[id] = { A, F, net, cap, norm, placed: 0 };
+      const cfg = SEAT[id]; if (!cfg) continue;
+      // zone interzise: în afara încăperii / la < 0,15 m de pereți, standuri + 0,6 m spațiu de lucru, 1,3 m în fața ușilor
+      for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) if (!inside(cx(i), cy(j), 0.1)) block[j * nx + i] = 1;
+      for (const [a, b, c, d] of eq) fill(block, a - 0.5, b - 0.5, c + 0.5, d + 0.5);
+      for (const [a, b, c, d] of doorsOf(lvl)) fill(block, a, b, c, d);
+      const free = (x0, y0, x1, y1) => { if (x0 < X0 || y0 < Y0 || x1 > X1 || y1 > Y1) return false; for (let j = Math.floor((y0 - Y0) / CELL); j < Math.ceil((y1 - Y0) / CELL); j++) for (let i = Math.floor((x0 - X0) / CELL); i < Math.ceil((x1 - X0) / CELL); i++) if (block[j * nx + i]) return false; return true; };
+      // modul = masa + zona scaunului și trecerea din spatele lui (0,75 m); se umple rând cu rând, cu orientarea preferată, apoi rotit la 90° unde nu încape
+      let seats = 0, k = 0;
+      const alt = cfg.alt || (cfg.seats === 2 ? { mk: (kk) => cfg.pc ? pcDesk('cad', 90 + kk, 1.0) : studentDesk(1.0, 1), w: 1.0, d: cfg.pc ? 0.75 : 0.65, seats: 1 } : { mk: kk => pcDesk('cad', 95 + kk, 1.0), w: 1.0, d: 0.75, seats: 1 });
+      for (const P of cfg.noAlt ? [cfg] : [cfg, Object.assign({}, cfg, alt, { aisleEvery: 0 })]) {
+      const back = P.back || 0.75, hd = P.d / 2; let inRow = 0, rowY = null;
+      const faces = P.faces || [cfg.face, cfg.face === 0 ? 180 : 0, 90, -90];
+      for (let y = Y0; y < Y1 && seats < cap; y += CELL) {
+        for (let x = X0; x < X1 && seats < cap; x += CELL) {
+          let done = false;
+          for (const f of faces) {
+            const rot = f === 90 || f === -90, mw = rot ? back + P.d : P.w, mh = rot ? P.w : back + P.d;
+            if (!free(x, y, x + mw, y + mh)) continue;
+            const n = Math.min(P.seats, cap - seats);
+            const xc = f === 90 ? x + hd : f === -90 ? x + back + hd : x + mw / 2, yc = f === 0 ? y + back + hd : f === 180 ? y + hd : y + mh / 2;
+            if (!rot && rowY !== y) { rowY = y; inRow = 0; }
+            put(P.mk(k, n), xc, yc, f, lvl, k === 0 ? info(cfg.title, P.disc, cfg.luc.concat(['ARACIS: ' + fmt(A) + ' m² − standuri și echipamente ' + fmt(F) + ' m² = ' + fmt(net) + ' m² → max. ' + cap + ' locuri (' + fmt(norm) + ' m²/loc)']), 'Metodologia ARACIS, partea I, std. 1.4.1.6 / 1.4.3.6') : null);
+            if (rot) fill(block, x, y - P.gap, x + mw - 0.001, y + mh + P.gap);
+            else { inRow++; const aisle = P.aisleEvery && inRow % P.aisleEvery === 0 ? 0.8 : P.gap; fill(block, x - P.gap, y, x + mw + aisle, y + mh - 0.001); }
+            seats += n; k++; done = true; break;
+          }
+        }
+      }
+      }
+      stats[id].placed = seats;
+    }
+    // numele încăperilor și plăcuțele de pe uși, cu valorile nete
+    for (const r of ROOMS) {
+      const st = stats[r.id]; if (!st) continue;
+      r.cap = st.cap; r.name = r.name.replace(/ – [\d,]+ m².*$/, '') + ' – ' + fmt(st.A) + ' m² (liber ' + fmt(st.net) + ' m²) · max. ' + st.cap + ' locuri ARACIS' + (SEAT[r.id] ? ' · ' + st.placed + ' amenajate' : '');
+      if (r.sign) { r.sign = [r.sign[0], r.sign[1], fmt(st.A) + ' m² · liber ' + fmt(st.net) + ' m² · max. ' + st.cap + ' locuri']; for (const p of r.plates || []) { p.mesh.material.map = labelTex(r.sign, { bg: p.bg, w: 512, h: 190 }); p.mesh.material.needsUpdate = true; } }
+    }
+    window.ARACIS_STATS = stats; console.log('ARACIS', JSON.stringify(stats));
+  }
   return { root, items };
 }

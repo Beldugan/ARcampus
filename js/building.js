@@ -321,7 +321,7 @@ export function buildBuilding(scene) {
         const rm = target(side); if (!rm || rm.hall || !rm.sign) continue;
         const wc = /^WC/.test(rm.sign[0]);
         const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.17), new THREE.MeshStandardMaterial({ map: labelTex(rm.sign, { bg: wc ? '#1f5fa8' : '#1d2b3a', w: 512, h: 190 }), roughness: 0.4 }));
-        pl.position.set(w / 2, 1.58, side * (ext ? 0.03 : 0.023)); if (side < 0) pl.rotation.y = Math.PI; leaf.add(pl);
+        pl.position.set(w / 2, 1.58, side * (ext ? 0.03 : 0.023)); if (side < 0) pl.rotation.y = Math.PI; leaf.add(pl); (rm.plates ||= []).push({ mesh: pl, bg: wc ? '#1f5fa8' : '#1d2b3a' });
       }
       pivot.add(leaf);
       const baseRot = along === 'x' ? 0 : Math.PI / 2;

@@ -35,22 +35,22 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
 * **Etaj:** E01–E05, E12 Sală CAD (15 posturi PC), E13 Atelier proiecte, grupuri sanitare.
 * **Fațada:** e tratată ca o clădire universitară: fibrociment deschis și grafit, cadru alb în consolă, copertină la intrare, accente turcoaz. Scara S1 are ecran de lamele, balustradă din sticlă și trepte placate cu HPL.
 
-### Capacitate maximă conform ARACIS
+### Capacitate maximă conform ARACIS și locuri amenajate
 
-Suprafețele sunt calculate din plan (dimensiuni libere ale încăperilor), iar numărul maxim de locuri respectă Metodologia ARACIS (partea I, standardele 1.4.1.6 / 1.4.3.6): săli de curs ≥ 1 m²/loc, seminar ≥ 1,4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc, laboratoare cu caracter tehnic ≥ 4 m²/loc. Valorile apar pe plăcuțele de pe uși și în bara cu numele încăperii.
+Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor didactice și a echipamentelor de pe pardoseală (proiecția lor în plan, calculată din model). Numărul maxim de locuri = ⌊ netă / normă ⌋, după Metodologia ARACIS (partea I, std. 1.4.1.6 / 1.4.3.6): laboratoare cu caracter tehnic ≥ 4 m²/loc, laboratoare de informatică ≥ 2,5 m²/loc. Mesele și scaunele se amplasează automat (`seatLabs()` în `js/equipment.js`) în spațiul liber, cu 0,5 m de lucru în jurul standurilor și 1 m liber în fața ușilor. În P01 (ITP), P02 (service) și E13 (atelier proiecte) nu se pun mese. Valorile apar pe plăcuțele ușilor și în bara cu numele încăperii.
 
-| Încăpere | Suprafață | Normă ARACIS | Locuri max. |
-|---|---|---|---|
-| P01 Stație ITP | 80,0 m² | 4 m²/loc (lab. tehnic) | 20 |
-| P02 Service student | 115,9 m² | 4 m²/loc | 28 |
-| P03 Laborator motoare | 176,6 m² | 4 m²/loc | 44 |
-| E01 Diagnosticare + Mecatronică | 55,3 m² | 4 m²/loc | 13 |
-| E02 CCA | 55,4 m² | 4 m²/loc | 13 |
-| E03 Dinamica autovehiculelor | 55,3 m² | 4 m²/loc | 13 |
-| E04 Caroserii | 64,4 m² | 4 m²/loc | 16 |
-| E05 HeV | 64,4 m² | 4 m²/loc | 16 |
-| E12 Sală CAD | 41,7 m² | 2,5 m²/loc (lab. informatică) | 16 (amenajate 15 posturi PC) |
-| E13 Atelier proiecte | 42,2 m² | 4 m²/loc | 10 |
+| Încăpere | Suprafață | Standuri / echipamente | Netă | Normă | Locuri max. | Amenajate |
+|---|---|---|---|---|---|---|
+| P01 Stație ITP | 80,0 m² | 21,1 m² | 59,0 m² | 4 | 14 | – (fără mese) |
+| P02 Service student | 115,9 m² | 38,0 m² | 77,9 m² | 4 | 19 | – (fără mese) |
+| P03 Laborator motoare | 176,6 m² | 18,7 m² | 157,9 m² | 4 | 39 | 39 |
+| E01 Diagnosticare + Mecatronică | 55,3 m² | 8,5 m² | 46,8 m² | 4 | 11 | 11 |
+| E02 CCA | 55,4 m² | 8,7 m² | 46,6 m² | 4 | 11 | 11 |
+| E03 Dinamică | 55,3 m² | 16,4 m² | 38,9 m² | 4 | 9 | 6 |
+| E04 Caroserii | 64,4 m² | 10,8 m² | 53,6 m² | 4 | 13 | 13 |
+| E05 HeV | 64,4 m² | 6,8 m² | 57,6 m² | 4 | 14 | 13 |
+| E12 Sală CAD | 41,7 m² | 0 | 41,7 m² | 2,5 | 16 | 15 |
+| E13 Atelier proiecte | 42,2 m² | 6,4 m² | 35,8 m² | 4 | 8 | – (fără mese) |
 
 ### Trasee din stradă
 
