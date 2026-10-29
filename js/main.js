@@ -95,7 +95,7 @@ const pickRoots = scene.children.filter(o => o.name === 'cladire' || o.name === 
 // ------------------------------------------------------------ control
 const controls = new PointerLockControls(camera, document.body);
 const player = { x: 10, y: -7.5, h: 0, yaw: 0, pitch: 0 };
-const START = { x: 12, y: -8.5, h: 0, yaw: 0, pitch: 0.02 };
+const START = { x: 9.5, y: -11.5, h: 0, yaw: 0, pitch: 0.08 };
 const keys = {};
 let lockMode = false, dragLook = false, lastX = 0, lastY = 0;
 
@@ -139,10 +139,10 @@ addEventListener('keyup', e => keys[e.code] = false);
 
 // ------------------------------------------------------------ puncte de teleportare
 const TP = [
-  { name: 'Exterior · stradă', x: 12, y: -8.5, h: 0, yaw: 0 },
-  { name: 'P01 · Linie ITP', x: 3.3, y: 15.5, h: 0, yaw: 180 },
-  { name: 'P02 · Service student', x: 10.2, y: 17.5, h: 0, yaw: 180 },
-  { name: 'P03 · Laborator motoare', x: 16.9, y: 4.6, h: 0, yaw: 0 },
+  { name: 'Exterior · stradă', x: 9.5, y: -11.5, h: 0, yaw: 0 },
+  { name: 'P01 · Stație ITP', x: 3.1, y: 7.0, h: 0, yaw: 0 },
+  { name: 'P02 · Service student', x: 10.5, y: 9.6, h: 0, yaw: 0 },
+  { name: 'P03 · Laborator motoare', x: 1.2, y: 3.0, h: 0, yaw: -90 },
   { name: 'P04 · Hol de intrare', x: 22.4, y: 1.4, h: 0, yaw: 0 },
   { name: 'E01 · Diagnosticare + Mecatronică', x: 5.6, y: 8.3, h: H1, yaw: 180 },
   { name: 'E02 · CCA', x: 10.0, y: 8.0, h: H1, yaw: 180 },
@@ -152,7 +152,7 @@ const TP = [
   { name: 'E12 · Sală CAD', x: 22.0, y: 8.2, h: H1, yaw: 180 },
   { name: 'E13 · Atelier proiecte', x: 22.0, y: 11.8, h: H1, yaw: 0 },
   { name: 'Scara S1 (de la fațadă)', x: 26.0, y: -3.5, h: 0, yaw: 0 },
-  { name: 'Anexe parter (vestiar, WC)', x: 20.8, y: 7.0, h: 0, yaw: 0 },
+  { name: 'Porțile ITP / service (parcare)', x: 8.0, y: 27, h: 0, yaw: 180 },
   { name: 'Parcarea · lotul 18', x: 10, y: 33, h: 0, yaw: 180 },
 ];
 const tpList = document.getElementById('tplist');
@@ -210,6 +210,7 @@ function blockedOutside(x, y) {
   // la sol: liftul și spațiul de sub scară (rampa 1 de unde depășește 0,5 m, podestul, rampa 2, podestul superior)
   if (x > LIFT.x0 - RADIUS && x < LIFT.x1 + RADIUS && y > LIFT.y0 - RADIUS && y < LIFT.y1 + RADIUS) return true;
   if (x > 25.0 - RADIUS && x < 26.85 + RADIUS && y > 3.3 - RADIUS && y < 11.1 + RADIUS) return true;
+  if (x > 26.95 - RADIUS && x < 27.2 + RADIUS && y > -0.95 && y < 11.25) return true;   // ecranul de lamele al scării
   if (x > STAIR.lane0 - RADIUS && x < STAIR.lane1 + RADIUS && y > -0.9 && y < 3.3 && (y + 0.9) / 4.2 * 2.4 > 0.5) return true;
   if (x > 25.0 - RADIUS && x < STAIR.lane0 && y > -0.9 && y < 3.3) return true;   // laterala rampei spre clădire
   if (x > STAIR.lane1 && x < 26.85 + RADIUS && y > -0.1 && y < 3.3) return true;

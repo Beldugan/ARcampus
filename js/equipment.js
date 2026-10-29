@@ -409,6 +409,7 @@ function labDesk(seed = 0) {
   return g;
 }
 
+function partsRack() { const g = new THREE.Group(); const fr = C(0x2f5fa0, { metalness: 0.4 }); for (const x of [-0.88, 0.88]) for (const z of [-0.22, 0.22]) B(g, 0.04, 2.0, 0.04, fr, x, 0, z); const box = [C(0x2b6cb0), C(0xe8742b), C(0x2e7d32), C(0x9aa0a6)]; for (let i = 0; i < 5; i++) { B(g, 1.8, 0.02, 0.48, C(0xb9bec3, { metalness: 0.5 }), 0, 0.1 + i * 0.45, 0); for (let k = 0; k < 5; k++) B(g, 0.28, 0.16, 0.36, box[(i + k) % 4], -0.68 + k * 0.34, 0.12 + i * 0.45, 0); } return g; }
 function tvDisplay(w = 1.9, kind = 'cad', seed = 90) { const g = new THREE.Group(); B(g, w, w * 0.57, 0.05, C(0x111214), 0, 1.0, 0); const sc = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.04, w * 0.57 - 0.04), scr(kind, seed)); sc.position.set(0, 1.0 + w * 0.285, 0.026); g.add(sc); return g; }
 function whiteboard(w = 3) { const g = new THREE.Group(); B(g, w, 1.2, 0.03, C(0xfafafa, { roughness: 0.15 }), 0, 0.9, 0); B(g, w, 0.05, 0.1, MAT.alu, 0, 0.88, 0.05); return g; }
 function projectorScreen(w = 2.4) { const g = new THREE.Group(); B(g, w + 0.1, 0.1, 0.1, MAT.white, 0, 2.6, 0); B(g, w, 1.5, 0.005, C(0xffffff, { emissive: 0x111111 }), 0, 1.1, 0.04); return g; }
@@ -903,62 +904,64 @@ export function buildEquipment(scene) {
   };
   const info = (name, disc, lucrari, sursa, desc = '') => ({ name, disc, lucrari, sursa, desc });
 
-  // ===================== P01 LINIE ITP (x 0.2–6.32, y 0.2–19.8) – vehiculele intră din stradă (y=0) și ies în spate
-  put(brakeTester(), 3.26, 4.5, 90, 0, info('Stand de frânare cu role', D.ITP + ' · ' + D.DA, ['ITP: eficacitate și dezechilibru frânare', 'Diagnosticare L6 – ABS (opțional, la stația ITP)', 'Dinamica autovehiculelor – frânare'], 'DXF concept A01 „Stand frânare”; îndrumar Diagnosticare 2026-2027 L6', 'Două perechi de role montate în pardoseală; măsoară forța de frânare pe fiecare roată.'), false);
-  put(suspensionTester(), 3.26, 6.3, 90, 0, info('Tester suspensie (plăci vibrante)', D.ITP, ['ITP: eficacitatea amortizoarelor (EUSAMA)'], 'Echipare uzuală linie ITP autoturisme'), false);
-  put(sideSlip(), 2.4, 2.9, 90, 0, info('Placă de ripaj (convergență)', D.ITP, ['ITP: deviația laterală a roților directoare'], 'Echipare uzuală linie ITP'), false);
-  put(pit(6.5, 1.1), 3.26, 10.25, 90, 0, info('Canal de inspecție cu detector de jocuri', D.ITP + ' · ' + D.FRA, ['ITP: verificare sub vehicul – direcție, suspensie, evacuare', 'Fabricarea și repararea – constatare'], 'DXF concept A01 „Canal / platformă” 2,71–3,81 × 7,0–13,5 m'), false);
-  put(playDetector(), 3.26, 8.0, 90, 0, info('Detector de jocuri (plăci acționate hidraulic)', D.ITP, ['ITP: jocuri în articulațiile direcției și suspensiei'], 'Echipare uzuală linie ITP'), false);
-  put(headlightTester(), 5.6, 1.6, 0, 0, info('Regloscop (verificare faruri)', D.ITP + ' · ' + D.DA, ['ITP: reglajul fasciculului', 'Diagnosticare – sistem de iluminare'], 'DXF concept A01 „Gaze / faruri”'));
-  put(gasCart(), 5.25, 2.5, -90, 0, info('Analizor de gaze + opacimetru', D.ITP + ' · ' + D.DA, ['ITP: emisii MAS (CO, HC, λ) și MAC (opacitate)', 'Diagnosticare L4 – sistemul de alimentare MAS'], 'DXF concept A01; îndrumar Diagnosticare 2026-2027'));
-  put(car(0xb9bdc1), 3.26, 3.12, 90, 0, info('Autoturism în verificare pe linia ITP (puntea față pe standul de frânare)', D.ITP, ['Flux: stradă → linie ITP → ieșire spre parcare'], 'Concept A00 trasee'), true, -0.025);
-  put(itpDesk(), 1.4, 17.4, 0, 0, info('Post inspector ITP', D.ITP, ['Introducerea rezultatelor, emiterea raportului'], 'Organizare stație ITP'));
-  put(extinguisher(), 0.35, 14.0, 90, 0, info('Stingător P6', 'Securitate la incendiu', ['Dotare obligatorie hală'], 'P118/2015'));
-  put(hoseReel(), 6.15, 12.0, -90, 0, null, false, 3.0);
-  put(extractionReel(2.4, MAT.dark), 5.75, 9.0, 0, 0, info('Furtun de evacuare a gazelor de eșapament', D.ITP, ['ITP: măsurarea emisiilor cu motorul pornit în hală'], 'Imagini concept – linie ITP'), false, 4.2);
+  // ===================== P01 STAȚIE ITP clasa a II-a (x 0.2–6.0, y 6.0–19.8 = 80 m²; lățime 5,8 m ≥ 4,5 m – RNTR 1) – acces din parcare, poartă în spate
+  put(brakeTester(), 3.1, 14.6, 90, 0, info('Stand de frânare cu role', D.ITP + ' · ' + D.DA, ['ITP: eficacitate și dezechilibru frânare', 'Diagnosticare L6 – ABS (opțional, la stația ITP)', 'Dinamica autovehiculelor – frânare'], 'DXF concept A01 „Stand frânare”; îndrumar Diagnosticare 2026-2027 L6', 'Două perechi de role montate în pardoseală; măsoară forța de frânare pe fiecare roată.'), false);
+  put(suspensionTester(), 3.1, 16.3, 90, 0, info('Tester suspensie (plăci vibrante)', D.ITP, ['ITP: eficacitatea amortizoarelor (EUSAMA)'], 'Echipare uzuală linie ITP autoturisme'), false);
+  put(sideSlip(), 2.24, 17.7, 90, 0, info('Placă de ripaj (convergență)', D.ITP, ['ITP: deviația laterală a roților directoare'], 'Echipare uzuală linie ITP'), false);
+  put(pit(6.5, 1.1), 3.1, 9.95, 90, 0, info('Canal de inspecție cu detector de jocuri', D.ITP + ' · ' + D.FRA, ['ITP: verificare sub vehicul – direcție, suspensie, evacuare', 'Fabricarea și repararea – constatare'], 'DXF concept A01 „Canal / platformă” 2,71–3,81 × 7,0–13,5 m'), false);
+  put(playDetector(), 3.1, 12.4, 90, 0, info('Detector de jocuri (plăci acționate hidraulic)', D.ITP, ['ITP: jocuri în articulațiile direcției și suspensiei'], 'Echipare uzuală linie ITP'), false);
+  put(headlightTester(), 0.75, 12.0, 0, 0, info('Regloscop (verificare faruri)', D.ITP + ' · ' + D.DA, ['ITP: reglajul fasciculului', 'Diagnosticare – sistem de iluminare'], 'DXF concept A01 „Gaze / faruri”'));
+  put(gasCart(), 5.45, 15.4, -90, 0, info('Analizor de gaze + opacimetru', D.ITP + ' · ' + D.DA, ['ITP: emisii MAS (CO, HC, λ) și MAC (opacitate)', 'Diagnosticare L4 – sistemul de alimentare MAS'], 'DXF concept A01; îndrumar Diagnosticare 2026-2027'));
+  put(car(0xb9bdc1), 3.1, 15.98, -90, 0, info('Autoturism în verificare pe linia ITP (puntea față pe standul de frânare)', D.ITP, ['Flux: stradă → linie ITP → ieșire spre parcare'], 'Concept A00 trasee'), true, -0.025);
+  put(itpDesk(), 5.3, 8.6, -90, 0, info('Post inspector ITP', D.ITP, ['Introducerea rezultatelor, emiterea raportului'], 'Organizare stație ITP'));
+  put(extinguisher(), 0.35, 8.0, 90, 0, info('Stingător P6', 'Securitate la incendiu', ['Dotare obligatorie hală'], 'P118/2015'));
+  put(hoseReel(), 5.95, 12.0, -90, 0, null, false, 3.0);
+  put(extractionReel(2.4, MAT.dark), 5.45, 17.9, 0, 0, info('Furtun de evacuare a gazelor de eșapament', D.ITP, ['ITP: măsurarea emisiilor cu motorul pornit în hală'], 'Imagini concept – linie ITP'), false, 4.2);
 
-  // ===================== P02 SERVICE STUDENT (x 6.47–14.0, y 0.2–16.14)
-  put(twoPostLift(true, 0x3a3f45), 8.35, 8.25, 90, 0, info('POST 1 · Elevator cu 2 coloane (4 t)', D.FRA + ' · ' + D.BAZ + ' · ' + D.PRA, ['Bazele ingineriei – subansamble, întreținere', 'Fabricarea și repararea – lucrări de reparații', 'Practică de domeniu / specialitate în service propriu'], 'DXF concept A01 POST 1 „Elevator 2 coloane”'));
-  put(car(0xeef0f1), 12.02, 8.25, 90, 0, info('POST 2 · Lucru la sol (diagnoză, geometrie)', D.DA + ' · ' + D.PRA, ['Diagnosticare L1–L7 pe vehicul (X431, osciloscop)', 'Practică de specialitate'], 'DXF concept A01 POST 2 „Lucru la sol”'));
-  put(workbench(2.2), 8.0, 19.4, 180, 0, info('Banc de lucru cu menghină și panou de scule', D.FRA + ' · ' + D.PRA, ['Demontări / montări subansamble'], 'DXF concept A01 „Bancuri / scule”'));
-  put(workbench(2.2), 10.4, 19.4, 180, 0, info('Banc de lucru', D.FRA, ['Recondiționări, verificări'], 'DXF concept A01'));
-  put(toolCabinet(), 12.6, 19.45, 180, 0, info('Dulap de scule pe roți', D.FRA + ' · ' + D.PRA, ['Scule de mână, chei dinamometrice'], 'Dotare service'));
-  put(toolCabinet(MAT.blue), 13.4, 13.8, -90, 0, info('Dulap de scule (post 2)', D.PRA, [], 'Dotare service'));
-  put(x431(), 10.6, 4.3, 0, 0, info('Tester de diagnoză Launch X431 (VCI)', D.DA + ' · ' + D.SAA, ['Diagnosticare L1–L7: coduri, date live, teste active', 'SAA: date live presiune supraalimentare, datalog'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
-  put(toolWall(3.6, 1), 6.49, 3.6, 90, 0, info('Perete de scule (panou perforat)', D.PRA + ' · ' + D.FRA, ['Chei fixe/inelare, șurubelnițe, clești – la îndemâna posturilor'], 'Imagine concept „Service didactic · bancuri și scule”'), false);
-  put(workbench(2.6), 6.85, 3.6, 90, 0, null);
-  put(toolCabinet(), 13.6, 4.0, -90, 0, null);
-  put(tireChanger(), 7.2, 13.2, 90, 0, info('Mașină de demontat anvelope', D.PRA, ['Practică – întreținere roți'], 'Dotare service'));
-  put(wheelBalancer(), 7.2, 11.4, 90, 0, info('Mașină de echilibrat roți', D.PRA + ' · ' + D.DIN, ['Practică – echilibrare', 'Dinamica – dezechilibru roată'], 'Dotare service'));
-  put(oilDrainer(), 10.2, 5.5, 0, 0, info('Colector ulei uzat', D.PRA + ' · ' + D.SAA, ['SAA L4 – sistemul de ungere'], 'Dotare service'));
-  put(jack(), 13.4, 3.0, 0, 0, info('Cric hidraulic tip crocodil', D.PRA, [], 'Dotare service'));
-  put(batteryTester(), 12.6, 16.6, 180, 0, info('Tester baterii', D.SAA + ' · ' + D.DA, ['SAA L7 – pornirea cu demaror (test baterie, CCA)'], 'Îndrumar SAA 2026-2027'), true, 0);
-  put(compressor(), 13.4, 15.2, -90, 0, info('Compresor aer', 'Utilități atelier', ['Alimentare scule pneumatice, umflare roți'], 'Dotare service'));
-  put(hoseReel(), 6.65, 4.0, 90, 0, null, false, 3.0);
-  for (const [x, y] of [[10.25, 6.0], [13.55, 9.8]]) put(extractionReel(2.3, MAT.dark), x, y, 0, 0, info('Furtun de evacuare a gazelor (post de lucru)', D.PRA + ' · ' + D.DA, ['Lucru cu motorul pornit la posturile service'], 'Imagini concept – service didactic'), false, 4.2);
-  put(extinguisher(), 13.85, 1.0, -90, 0, info('Stingător P6', 'Securitate la incendiu', [], 'P118/2015'));
+  // ===================== P02 SERVICE STUDENT – 2 posturi marcate (x 6.15–15.0, y 8.55–19.8) + magazie piese – acces din parcare
+  put(twoPostLift(true, 0x3a3f45), 8.4, 14.8, -90, 0, info('POST 1 · Elevator cu 2 coloane (4 t)', D.FRA + ' · ' + D.BAZ + ' · ' + D.PRA, ['Bazele ingineriei – subansamble, întreținere', 'Fabricarea și repararea – lucrări de reparații', 'Practică de domeniu / specialitate în service propriu'], 'DXF concept A01 POST 1 „Elevator 2 coloane”'));
+  put(car(0xeef0f1), 12.72, 14.4, -90, 0, info('POST 2 · Lucru la sol (diagnoză, geometrie)', D.DA + ' · ' + D.PRA, ['Diagnosticare L1–L7 pe vehicul (X431, osciloscop)', 'Practică de specialitate'], 'DXF concept A01 POST 2 „Lucru la sol”'));
+  put(workbench(2.2), 10.0, 6.45, 0, 0, info('Banc de lucru cu menghină și panou de scule', D.FRA + ' · ' + D.PRA, ['Demontări / montări subansamble'], 'DXF concept A01 „Bancuri / scule”'));
+  put(workbench(2.2), 12.4, 6.45, 0, 0, info('Banc de lucru', D.FRA, ['Recondiționări, verificări'], 'DXF concept A01'));
+  put(toolCabinet(), 14.45, 16.4, -90, 0, info('Dulap de scule pe roți', D.FRA + ' · ' + D.PRA, ['Scule de mână, chei dinamometrice'], 'Dotare service'));
+  put(toolCabinet(MAT.blue), 6.6, 17.8, 90, 0, info('Dulap de scule (post 2)', D.PRA, [], 'Dotare service'));
+  put(x431(), 10.55, 11.0, 0, 0, info('Tester de diagnoză Launch X431 (VCI)', D.DA + ' · ' + D.SAA, ['Diagnosticare L1–L7: coduri, date live, teste active', 'SAA: date live presiune supraalimentare, datalog'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
+  put(toolWall(3.6, 1), 6.18, 11.0, 90, 0, info('Perete de scule (panou perforat)', D.PRA + ' · ' + D.FRA, ['Chei fixe/inelare, șurubelnițe, clești – la îndemâna posturilor'], 'Imagine concept „Service didactic · bancuri și scule”'), false);
+  put(workbench(2.6), 6.55, 11.0, 90, 0, null);
+  put(toolCabinet(), 14.45, 7.2, -90, 0, null);
+  put(tireChanger(), 14.4, 13.4, -90, 0, info('Mașină de demontat anvelope', D.PRA, ['Practică – întreținere roți'], 'Dotare service'));
+  put(wheelBalancer(), 14.4, 11.5, -90, 0, info('Mașină de echilibrat roți', D.PRA + ' · ' + D.DIN, ['Practică – echilibrare', 'Dinamica – dezechilibru roată'], 'Dotare service'));
+  put(oilDrainer(), 10.55, 16.4, 0, 0, info('Colector ulei uzat', D.PRA + ' · ' + D.SAA, ['SAA L4 – sistemul de ungere'], 'Dotare service'));
+  put(jack(), 14.5, 18.6, 0, 0, info('Cric hidraulic tip crocodil', D.PRA, [], 'Dotare service'));
+  put(batteryTester(), 10.55, 18.8, 180, 0, info('Tester baterii', D.SAA + ' · ' + D.DA, ['SAA L7 – pornirea cu demaror (test baterie, CCA)'], 'Îndrumar SAA 2026-2027'), true, 0);
+  put(compressor(), 7.0, 19.2, 180, 0, info('Compresor aer', 'Utilități atelier', ['Alimentare scule pneumatice, umflare roți'], 'Dotare service'));
+  put(hoseReel(), 6.2, 14.0, 90, 0, null, false, 3.0);
+  for (const [x, y] of [[8.4, 18.6], [12.72, 18.6]]) put(extractionReel(2.3, MAT.dark), x, y, 0, 0, info('Furtun de evacuare a gazelor (post de lucru)', D.PRA + ' · ' + D.DA, ['Lucru cu motorul pornit la posturile service'], 'Imagini concept – service didactic'), false, 4.2);
+  put(extinguisher(), 14.85, 19.2, -90, 0, info('Stingător P6', 'Securitate la incendiu', [], 'P118/2015'));
+  put(partsRack(), 6.55, 7.2, 90, 0, info('Rafturi magazie piese (evidența pieselor și materialelor)', D.PRA, ['Depozitarea și evidența pieselor de schimb'], 'RNTR 9, cap. II pct. 9 lit. b) – spații adecvate pentru depozitarea pieselor')); put(partsRack(), 8.2, 7.2, -90, 0, null);
 
-  // ===================== P03 LABORATOR MOTOARE (x 14.15–19.85, y 0.2–19.8) – amenajare după imaginea concept PCMAI + CCMAI
-  put(engineRotStand('MPI'), 15.3, 17.5, 0, 0, info('Stand motor Otto 1.4 MPI (K7J, injecție multipunct)', D.PCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['PCMAI – caracteristici, raport de compresie', 'Diagnosticare L1–L4 (AVL, senzori, actuatori, etanșeitate)', 'SAA L1–L2 (consum, injecție), L4 ungere, L5 răcire, L7 demaror'], 'Caiet de sarcini Laborator Motoare Termice; îndrumare SAA/Diagnosticare 2026-2027'));
-  put(engineRotStand('dCi'), 17.1, 17.5, 0, 0, info('Stand motor Diesel 1.5 dCi (common rail, turbo)', D.CCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['Diagnosticare L5 – sistem de alimentare MAC / EGR', 'SAA L3 injecție diesel, L6 turbosuflantă cu geometrie variabilă', 'CCMAI – construcția mecanismului motor'], 'Caiet de sarcini Laborator Motoare Termice; îndrumar SAA 2026-2027'));
-  put(engineRotStand('MPI'), 18.9, 17.5, 0, 0, info('Motor secționat demonstrativ (CCMAI)', D.CCMAI + ' · ' + D.BAZ, ['Construcția mecanismului motor: bloc, chiulasă, mecanism bielă-manivelă, distribuție', 'Identificarea pieselor și a materialelor'], 'Imagine concept „PCMAI + CCMAI”'));
-  put(cylHeadsBench(2.2), 16.9, 14.4, 0, 0, info('Banc cu chiulase și ax cu came', D.CCMAI, ['Chiulase: camere de ardere, supape, ghiduri', 'Măsurători la axul cu came'], 'Imagine concept „PCMAI + CCMAI”'));
-  put(greyCabinets(2.4), 14.5, 16.4, 90, 0, info('Dulapuri de laborator (scule, aparate de măsură)', D.CCMAI + ' · ' + D.PCMAI, ['Micrometre, comparatoare, șublere, chei dinamometrice'], 'Imagine concept'));
-  put(smartCutaway(), 16.6, 2.6, 0, 0, info('Machetă secționată Smart ForTwo', D.BAZ + ' · ' + D.DA + ' · ' + D.CCA, ['Bazele ingineriei – identificarea subsistemelor', 'Diagnosticare L1, L6 – sisteme activate din telecomandă', 'CCA – transmisie, direcție, frâne'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 1); îndrumar Diagnosticare'));
-  put(avlStation(), 14.75, 11.7, 90, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
-  put(studentDesk(1.8), 16.1, 6.4, 0, 0, info('Loc de lucru studenți (10 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Caiet de sarcini: „locuri de lucru pentru 10 studenți”; DXF A01'));
-  put(studentDesk(1.8), 18.7, 6.4, 0, 0, null);
-  put(studentDesk(1.8), 16.1, 8.4, 0, 0, null); put(studentDesk(1.8), 18.7, 8.4, 0, 0, null);
-  put(enginePartsBench(2.2), 18.9, 10.9, -90, 0, info('Banc cu piese de motor: arbore cotit, pistoane cu biele, chiulasă, ax cu came', D.CCMAI + ' · ' + D.PCMAI, ['CCMAI – identificarea și măsurarea pieselor mecanismului bielă-manivelă', 'Proiect – dimensiuni principale (alezaj, cursă, bielă)'], 'Imagine concept „PCMAI + CCMAI”; caiet de sarcini Laborator Motoare (Fig. 2)'));
-  put(poster('engine', 1.2), 14.17, 4.3, 90, 0, null, false);
-  put(workbench(1.7), 14.6, 13.8, 90, 0, info('Masă de lucru cu scule (demontare / asamblare)', D.CCMAI + ' · ' + D.SAA, ['CCMAI – piston, bielă, segmenți (identificare, măsurare)', 'SAA – demontare demaror, pompă de apă'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 2)'));
-  for (const x of [15.2, 17.0, 18.8]) put(extractionReel(2.4), x, 18.1, 0, 0, info('Sistem de evacuare a gazelor de eșapament', 'Siguranță laborator motoare', ['Obligatoriu la funcționarea standurilor de motor'], 'Caiet de sarcini: „sistem profesional de evacuare a gazelor”'), false, 4.2);
-  put(whiteboard(2.4), 19.8, 8.0, -90, 0, null, false);
-  put(projectorScreen(2.0), 14.25, 9.9, 90, 0, null, false);
-  put(extinguisher(), 19.7, 15.2, -90, 0, info('Stingător CO2 lângă standuri', 'Securitate', ['Obligatoriu lângă standurile de motor (SAA, MF)'], 'Îndrumar SAA 2026-2027 – norme'));
+  // ===================== P03 LABORATOR MOTOARE – în L: fâșia de la stradă (x 0.2–19.85, y 0.2–5.85) + aripa estică (x 15.15–19.85, y 5.85–19.8) – amenajare după imaginea concept PCMAI + CCMAI
+  put(engineRotStand('MPI'), 18.4, 7.8, 0, 0, info('Stand motor Otto 1.4 MPI (K7J, injecție multipunct)', D.PCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['PCMAI – caracteristici, raport de compresie', 'Diagnosticare L1–L4 (AVL, senzori, actuatori, etanșeitate)', 'SAA L1–L2 (consum, injecție), L4 ungere, L5 răcire, L7 demaror'], 'Caiet de sarcini Laborator Motoare Termice; îndrumare SAA/Diagnosticare 2026-2027'));
+  put(engineRotStand('dCi'), 18.4, 10.4, 0, 0, info('Stand motor Diesel 1.5 dCi (common rail, turbo)', D.CCMAI + ' · ' + D.DA + ' · ' + D.SAA, ['Diagnosticare L5 – sistem de alimentare MAC / EGR', 'SAA L3 injecție diesel, L6 turbosuflantă cu geometrie variabilă', 'CCMAI – construcția mecanismului motor'], 'Caiet de sarcini Laborator Motoare Termice; îndrumar SAA 2026-2027'));
+  put(engineRotStand('MPI'), 18.4, 15.2, 0, 0, info('Motor secționat demonstrativ (CCMAI)', D.CCMAI + ' · ' + D.BAZ, ['Construcția mecanismului motor: bloc, chiulasă, mecanism bielă-manivelă, distribuție', 'Identificarea pieselor și a materialelor'], 'Imagine concept „PCMAI + CCMAI”'));
+  put(cylHeadsBench(2.2), 14.0, 3.4, 0, 0, info('Banc cu chiulase și ax cu came', D.CCMAI, ['Chiulase: camere de ardere, supape, ghiduri', 'Măsurători la axul cu came'], 'Imagine concept „PCMAI + CCMAI”'));
+  put(greyCabinets(2.4), 15.5, 13.2, 90, 0, info('Dulapuri de laborator (scule, aparate de măsură)', D.CCMAI + ' · ' + D.PCMAI, ['Micrometre, comparatoare, șublere, chei dinamometrice'], 'Imagine concept'));
+  put(smartCutaway(), 10.2, 3.1, 0, 0, info('Machetă secționată Smart ForTwo', D.BAZ + ' · ' + D.DA + ' · ' + D.CCA, ['Bazele ingineriei – identificarea subsistemelor', 'Diagnosticare L1, L6 – sisteme activate din telecomandă', 'CCA – transmisie, direcție, frâne'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 1); îndrumar Diagnosticare'));
+  put(avlStation(), 15.7, 16.9, 90, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
+  put(studentDesk(1.8), 2.2, 2.0, 0, 0, info('Loc de lucru studenți (10 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Caiet de sarcini: „locuri de lucru pentru 10 studenți”; DXF A01'));
+  put(studentDesk(1.8), 4.6, 2.0, 0, 0, null); put(studentDesk(1.8), 7.0, 2.0, 0, 0, null);
+  put(studentDesk(1.8), 2.2, 3.9, 0, 0, null); put(studentDesk(1.8), 4.6, 3.9, 0, 0, null); put(studentDesk(1.8), 7.0, 3.9, 0, 0, null);
+  put(enginePartsBench(2.2), 19.35, 17.7, -90, 0, info('Banc cu piese de motor: arbore cotit, pistoane cu biele, chiulasă, ax cu came', D.CCMAI + ' · ' + D.PCMAI, ['CCMAI – identificarea și măsurarea pieselor mecanismului bielă-manivelă', 'Proiect – dimensiuni principale (alezaj, cursă, bielă)'], 'Imagine concept „PCMAI + CCMAI”; caiet de sarcini Laborator Motoare (Fig. 2)'));
+  put(poster('engine', 1.2), 8.2, 5.83, 180, 0, null, false);
+  put(workbench(1.7), 15.55, 7.3, 90, 0, info('Masă de lucru cu scule (demontare / asamblare)', D.CCMAI + ' · ' + D.SAA, ['CCMAI – piston, bielă, segmenți (identificare, măsurare)', 'SAA – demontare demaror, pompă de apă'], 'Caiet de sarcini Laborator Motoare Termice (Fig. 2)'));
+  for (const y of [7.8, 10.4, 15.2]) put(extractionReel(2.4), 17.6, y, 0, 0, info('Sistem de evacuare a gazelor de eșapament', 'Siguranță laborator motoare', ['Obligatoriu la funcționarea standurilor de motor'], 'Caiet de sarcini: „sistem profesional de evacuare a gazelor”'), false, 4.2);
+  put(whiteboard(2.4), 4.6, 5.82, 180, 0, null, false);
+  
+  put(extinguisher(), 19.7, 6.4, -90, 0, info('Stingător CO2 lângă standuri', 'Securitate', ['Obligatoriu lângă standurile de motor (SAA, MF)'], 'Îndrumar SAA 2026-2027 – norme'));
 
   // ===================== P04 HOL DE INTRARE + ANEXE (fâșia de est, x 20.0–24.8)
   put(noticeBoard(), 24.75, 3.4, -90, 0, null, false);
+  put(tvDisplay(1.1, 'diag', 93), 20.05, 4.4, 90, 0, info('Monitor de vizualizare a lucrărilor din service (camere video)', 'Service student', ['Clientul urmărește lucrările dintr-un spațiu separat de zona de lucru'], 'RNTR 9, cap. II pct. 9 lit. b¹'), false);
   put(bench(), 24.4, 1.4, 90, 0, null);
   put(extinguisher(), 20.15, 5.5, 90, 0, null);
   put(extinguisher(), 20.15, 15.0, 90, 0, null);

@@ -58,6 +58,14 @@ export const T = {
   grass: (rep) => canvasTex('grass', 512, 512, (g, w, h) => {
     noise(g, w, h, '#6f8f45', 0.22, 30000, 29, 2);
   }, rep),
+  fiber: (rep, color = '#d9d6cf') => canvasTex('fib' + color, 256, 256, (g, w, h) => {   // plăci fibrociment netede (fațadă ventilată)
+    noise(g, w, h, color, 0.05, 5000, 71, 1.5);
+    const r = rnd(72); for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(0,0,0,${r() * 0.025})`; g.fillRect(r() * w, r() * h, 20 + r() * 60, 20 + r() * 60); }
+  }, rep),
+  hpl: (rep) => canvasTex('hpl', 128, 512, (g, w, h) => {   // HPL cu aspect de lemn (lamele verticale)
+    const r = rnd(81); g.fillStyle = '#a8794c'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(80,48,22,${0.05 + r() * 0.12})`; g.lineWidth = 1 + r() * 1.5; const x = r() * w; g.beginPath(); g.moveTo(x, 0); g.bezierCurveTo(x + r() * 6 - 3, h * 0.3, x + r() * 6 - 3, h * 0.6, x + r() * 4 - 2, h); g.stroke(); }
+  }, rep),
   wood: (rep) => canvasTex('wood', 512, 128, (g, w, h) => {
     const r = rnd(31); g.fillStyle = '#b98a57'; g.fillRect(0, 0, w, h);
     for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(90,55,25,${0.05 + r() * 0.12})`; g.lineWidth = 1 + r() * 2; const y = r() * h; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + r() * 6 - 3, w * 0.6, y + r() * 6 - 3, w, y + r() * 4 - 2); g.stroke(); }

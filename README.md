@@ -28,25 +28,16 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
 ### Organizare (500 m²)
 
 * **Parter:**
-  * linia ITP;
-  * service student, cu poarta rulou deschisă;
-  * laboratorul de motoare, cu ușă direct din stradă și ușă din holul de intrare;
-  * fâșia de est: hol de intrare din stradă, coridor, vestiar, WC femei, WC bărbați, WC accesibil și cameră tehnică.
-* **Etaj:**
-  * E01 Diagnosticare + Mecatronică;
-  * E02 CCA;
-  * E03 Dinamică;
-  * E12 Sală CAD / seminar;
-  * E04 Caroserii;
-  * E05 HeV;
-  * E13 Atelier proiecte (standuri didactice);
-  * grupuri sanitare.
-* **Plăcuțe pe uși:** fiecare ușă are pe ambele fețe numele încăperii în care intri.
-* **Standuri mobile:** sunt construite după proiectul propriu „Stand mobil cu panou perforat”: 1700 × 1000 × 800 mm, tablă de aluminiu perforată, E-stop, roți cu frână.
+  * **P01 Stație ITP clasa a II-a (≤ 3,5 t), 80 m²:** 5,8 × 13,8 m. Lățimea depășește minimul RNTR 1 de 4,5 m pentru clasa a II-a, iar canalul de vizitare are 6,5 m (minimul este 6 m). Spațiul e separat de celelalte activități. Accesul vehiculelor se face din parcare, prin poarta din spate.
+  * **P02 Service student, 113 m² + magazie piese 5,5 m²:** 2 posturi marcate (elevator cu 2 coloane și post la sol), acces din parcare. Lucrările se pot urmări pe un monitor din holul de intrare, conform RNTR 9.
+  * **P03 Laborator motoare, 176 m²:** în formă de L, cu vitrină mare spre stradă, aripă estică pentru standurile de motor și ușă de echipamente spre parcare.
+  * **Fâșia de est:** hol de intrare din stradă, vestiar, WC-uri și cameră tehnică.
+* **Etaj:** E01–E05, E12 Sală CAD, E13 Atelier proiecte, grupuri sanitare.
+* **Fațada:** e tratată ca o clădire universitară: fibrociment deschis și grafit, cadru alb în consolă, lamele HPL cu aspect de lemn, copertină la intrare, accente turcoaz. Scara S1 are ecran de lamele, balustradă din sticlă și trepte placate cu HPL.
 
 ### Trasee din stradă
 
-* **Parter prin linia ITP:** poarta ITP e deschisă; de acolo intri în service și în holul P04.
+* **Vehicule:** pe aleea laterală de vest ajungi în parcarea din spate, iar de acolo intri prin porțile ITP și service.
 * **Intrare pietonală:** ușa principală e pe fațadă, în dreapta, și duce în holul de intrare P04, apoi pe coridor la vestiar și WC. Laboratorul de motoare are și o ușă proprie spre stradă.
 * **Etaj:** scara exterioară S1 pornește de la fațada principală, din capătul aleii de acces pavate, și urcă în linie dreaptă până la podestul +4,80, de unde intri în holul etajului și apoi în fiecare laborator. Alternativ, liftul (tasta E).
 
