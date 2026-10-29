@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corp Campus AR · tur virtual 3D</title>
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./lib/three/three.module.js", "three/addons/": "./lib/three/addons/" } }
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="crosshair"></div>
+<div id="room" class="hud"></div>
+<canvas id="minimap" width="240" height="240"></canvas>
+<div id="card" class="hidden"></div>
+<div id="concept" class="hidden"><img alt="Imagine concept"><div class="cap"></div></div>
+<div id="flash" class="hidden"></div>
+<div id="side">
+  <div class="sidehead">Mergi direct la</div>
+  <div id="tplist"></div>
+</div>
+<div id="help" class="hud hidden">
+  <b>Comenzi</b><br>
+  ↑ ↓ / W S – înainte / înapoi · ← → – rotire · A D – pas lateral<br>
+  Mouse – privire · Shift – mers rapid · PgUp / PgDn – privire sus / jos<br>
+  E – liftul (lângă scara S1) · M – harta · H – ajutor · 1–9 – teleportare<br>
+  C – mărește imaginea concept · N – următoarea imagine concept<br>
+  Privește un echipament pentru fișa lui (disciplină, lucrări, sursă).
+</div>
+<div id="overlay">
+  <div class="box">
+    <img class="hero" src="img/concept/ext-fata.jpg" alt="Concept fațadă">
+    <div class="kicker">FIMIM · Universitatea „Ovidius” din Constanța · Autovehicule Rutiere</div>
+    <h1>Corp Campus AR</h1>
+    <p class="lead">Tur virtual al conceptului P+1 (20 × 20 m) amplasat pe lotul 21, cu parcarea de 300 m² pe lotul 18: linia ITP, service-ul student, laboratorul PCMAI + CCMAI și cele cinci laboratoare de la etaj, echipate după fișele disciplinelor și îndrumarele 2026–2027. Aspectul urmează imaginile concept; în fiecare încăpere imaginea concept corespunzătoare apare în colțul din stânga jos.</p>
+    <div class="keys">
+      <div><kbd>↑</kbd><kbd>↓</kbd> sau <kbd>W</kbd><kbd>S</kbd> deplasare</div>
+      <div><kbd>←</kbd><kbd>→</kbd> rotire · <kbd>A</kbd><kbd>D</kbd> lateral</div>
+      <div>mouse – privire · <kbd>Shift</kbd> rapid</div>
+      <div><kbd>E</kbd> lift · <kbd>M</kbd> hartă · <kbd>1</kbd>–<kbd>9</kbd> teleport</div>
+      <div><kbd>C</kbd> imaginea concept a încăperii · <kbd>N</kbd> următoarea</div>
+    </div>
+    <button id="enter">Intră în tur (mouse blocat)</button>
+    <button id="enterFree" class="ghost">Mod fără blocarea mouse-ului (trage cu mouse-ul)</button>
+    <p class="note">Concept arhitectural, nu proiect de execuție. Echipamentele sunt reprezentări la dimensiuni reale, modelate simplificat. <kbd>Esc</kbd> eliberează mouse-ul.</p>
+  </div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
