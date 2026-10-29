@@ -3,7 +3,7 @@ import { PointerLockControls } from 'three/addons/PointerLockControls.js';
 import { RoomEnvironment } from 'three/addons/RoomEnvironment.js';
 import { T } from './textures.js';
 import { buildBuilding, surfacesAt, ROOMS, LEVEL_H, LIFT, H1 } from './building.js';
-import { buildEquipment } from './equipment.js';
+import { buildEquipment, CAR_MODEL } from './equipment.js';
 import { buildSite } from './site.js';
 
 const qs = new URLSearchParams(location.search);
@@ -55,7 +55,9 @@ function placeLights() {
 
 // ------------------------------------------------------------ conținut
 buildSite(scene);
-const { colliders } = buildBuilding(scene);
+const { colliders, doors } = buildBuilding(scene);
+// autoturisme parcate pe lotul 18 (obstacole)
+for (const x of [2.56, 8.56, 11.56]) colliders[0].push({ x0: x - 0.95, y0: 29.85, x1: x + 0.95, y1: 34.15 });
 const { items } = buildEquipment(scene);
 const eqBoxes = [[], []];
 const tmpBox = new THREE.Box3();
@@ -128,7 +130,8 @@ const TP = [
   { name: 'E03 · Dinamică', x: 16.6, y: 8.2, h: H1, yaw: 180 },
   { name: 'E04 · Caroserii', x: 3.9, y: 11.8, h: H1, yaw: 0 },
   { name: 'E05 · HeV', x: 16.0, y: 11.8, h: H1, yaw: 0 },
-  { name: 'Scara S1 (exterior)', x: 21.1, y: 11.6, h: 0, yaw: 0 },
+  { name: 'Scara S1 (exterior)', x: 24.6, y: 9.7, h: 0, yaw: 90 },
+  { name: 'Intrare pietonală · hol P04', x: 24.6, y: 17.9, h: 0, yaw: 90 },
   { name: 'Parcarea · lotul 18', x: 10, y: 33, h: 0, yaw: 180 },
 ];
 const tpList = document.getElementById('tplist');
@@ -164,20 +167,17 @@ function update(dt) {
     const dxp = (-Math.sin(yaw) * fwd + Math.cos(yaw) * side) * speed;   // plan x
     const dyp = (Math.cos(yaw) * fwd + Math.sin(yaw) * side) * speed;    // plan y (= -z)
     const lvl = player.h > 2.6 ? 1 : 0;
-    const inside = (x, y) => x > 0 && x < 20 && y > 0 && y < 20;
     const tryMove = (nx, ny) => {
-      const insideNow = inside(player.x, player.y), insideNext = inside(nx, ny);
-      // în afara clădirii la etaj (pe scară) – se verifică doar suprafețele
-      if (insideNext && blocked(nx, ny, lvl)) return false;
-      if (!insideNext && insideNow && blocked(nx, ny, lvl)) return false;
-      // suprafață de călcat
-      const s = surfacesAt(nx, ny);
+      // pereții (cu golurile de uși/porți) și echipamentele blochează atât din interior, cât și din exterior
+      if (blocked(nx, ny, lvl)) return false;
+      // suprafața de călcat: cea mai înaltă la care se poate urca un pas (trepte) sau coborî
       let best = null;
-      for (const hs of s) if (hs <= player.h + 0.45 && hs >= player.h - 0.6 && (best === null || Math.abs(hs - player.h) < Math.abs(best - player.h))) best = hs;
+      for (const hs of surfacesAt(nx, ny)) if (hs <= player.h + 0.45 && hs >= player.h - 0.6 && (best === null || hs > best)) best = hs;
       if (best === null) return false;
-      if (!insideNext) {   // limite scară / pasarelă când ești sus
-        if (player.h > 0.3 && !(nx > 19.95 && nx < 23.85 && ny > 3.1 && ny < 13.05)) return false;
-        if (player.h < 0.3 && blockedOutside(nx, ny)) return false;
+      const insideNext = nx > 0 && nx < 20 && ny > 0 && ny < 20;
+      if (!insideNext) {
+        if (best > 0.3 && !(nx > 19.95 && nx < 23.85 && ny > 3.1 && ny < 13.05)) return false;   // pe scară / pasarelă
+        if (best <= 0.3 && blockedOutside(nx, ny)) return false;
       }
       player.x = nx; player.y = ny; player.h = best; return true;
     };
@@ -186,12 +186,24 @@ function update(dt) {
   camera.position.set(player.x, player.h + EYE, -player.y);
 }
 function blockedOutside(x, y) {
-  // nu se trece prin clădire, prin scară dinspre lateral (doar pe la capătul rampei) sau prin lift
-  if (x > -RADIUS && x < 20 + RADIUS && y > -RADIUS && y < 20 + RADIUS) return true;
+  // la sol: liftul și spațiul de sub podestul +2,40 / rampa a doua / partea înaltă a primei rampe
   if (x > LIFT.x0 - RADIUS && x < LIFT.x1 + RADIUS && y > LIFT.y0 - RADIUS && y < LIFT.y1 + RADIUS) return true;
-  if (x > 21.85 - RADIUS && x < 23.8 + RADIUS && y > 3.15 - RADIUS && y < 10.45) return true;
   if (x > 20.2 - RADIUS && x < 23.8 + RADIUS && y > 3.15 - RADIUS && y < 4.75) return true;
+  if (x > 21.85 - RADIUS && x < 23.8 + RADIUS && y > 4.75 - RADIUS && y < 8.95) return true;
+  if (x > 20.0 && x < 21.85 && y > 4.75 && y < 8.95 && (8.95 - y) / 4.2 * 2.4 > 0.5) return true;
   return false;
+}
+// ------------------------------------------------------------ uși cu deschidere automată
+function updateDoors(dt) {
+  for (const d of doors) {
+    const lvlD = d.lvl, lvlP = player.h > 2.6 ? 1 : 0;
+    const near = lvlD === lvlP && Math.hypot(player.x - d.cx, player.y - d.cy) < 1.7;
+    if (near && d.ang < 0.02) d.side = (d.along === 'x' ? player.y : player.x) < d.mid ? 1 : -1;   // se deschide dinspre tine
+    const target = near ? 1 : 0;
+    d.ang += Math.sign(target - d.ang) * Math.min(Math.abs(target - d.ang), dt * 1.6);
+    const delta = d.ang * Math.PI / 2 * (d.along === 'x' ? d.side : -d.side);
+    d.pivot.rotation.y = d.baseRot + delta;
+  }
 }
 
 // ------------------------------------------------------------ informații la privire
@@ -283,15 +295,17 @@ if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawD
   const [x, y, h, yw, pt] = qs.get('cam').split(',').map(Number);
   overlay.classList.add('hidden'); setPose({ x, y, h, yawDeg: yw, pitch: THREE.MathUtils.degToRad(pt || 0) });
   document.body.classList.add('capture'); card.style.display = 'none';
-  placeLights(); renderer.render(scene, camera); window.READY = true;
+  CAR_MODEL.then(() => { placeLights(); renderer.render(scene, camera); window.READY = true; });
 } else {
   let frame = 0;
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
-    update(dt);
+    update(dt); updateDoors(dt);
     if (frame++ % 6 === 0) { pick(); roomEl.textContent = currentRoom(); drawMap(); showConcept(currentKey()); }
     if (frame % 20 === 1) placeLights();
     if (flashT > 0) { flashT -= dt; if (flashT <= 0) flashEl.classList.add('hidden'); }
     renderer.render(scene, camera);
   });
 }
+// acces pentru testare automată (fără efect în utilizare)
+window.APP = { player, keys, update, setPose, camera };

@@ -22,7 +22,13 @@ Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (20 × 20 
 | M | harta mică · H ajutor |
 | C / N | mărește imaginea concept a încăperii / trece la următoarea |
 
-Pe scară se urcă mergând pe trepte.
+Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropii.
+
+### Trasee din stradă
+
+* **Parter prin linia ITP:** poarta ITP e deschisă; de acolo intri în service și în holul P04.
+* **Intrare pietonală:** mergi pe latura de est a clădirii până la ușa holului P04.
+* **Etaj:** scara exterioară S1 de pe latura de est urcă până la podestul +4,80, de unde intri în holul etajului și apoi în fiecare laborator. Alternativ, liftul (tasta E).
 
 ## Publicare pe GitHub Pages
 
@@ -66,6 +72,6 @@ Aspectul exterior și cel interior urmează imaginile concept din `img/concept/`
 | E04 | Caroserii: caroserie în alb, ușă pe stand, braț de măsurare, crash-box-uri, post CAD |
 | E05 | Autovehicule hibride și electrice: machetă baterie ≤ 60 V cu BMS, motor electric, wallbox, transmisie hibridă secționată |
 
-Modelele sunt simplificate (volumetrie la scară reală, materiale PBR, lumină naturală și artificială). Nu sunt modele foto-realiste ale mărcilor concrete.
+Autoturismele folosesc un model 3D real: „2020 Mazda 3 Hatchback” de OUTPISTON (Sketchfab), licență [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), în varianta fără sigle pregătită de proiectul freaxnx01/game-rhyflitzer (detalii în `models/hatchback.LICENSE.md`). Licența permite doar utilizare necomercială, cu atribuire. Celelalte echipamente sunt modelate simplificat (volumetrie la scară reală, materiale PBR, lumină naturală și artificială). Nu sunt modele foto-realiste ale mărcilor concrete.
 
 ![ITP](docs/itp.png)

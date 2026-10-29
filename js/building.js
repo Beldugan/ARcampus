@@ -109,6 +109,7 @@ export function buildBuilding(scene) {
   const m = mats();
   const root = new THREE.Group(); root.name = 'cladire'; scene.add(root);
   const colliders = [[], []];      // AABB 2D pe nivel: {x0,y0,x1,y1}
+  const doors = [];
   const add = (mesh, cast = true, recv = true) => { mesh.castShadow = cast; mesh.receiveShadow = recv; root.add(mesh); return mesh; };
   const boxXY = (x0, y0, x1, y1, h0, h1, mat, cast = true) => {
     const g = new THREE.BoxGeometry(Math.max(x1 - x0, 0.001), Math.max(h1 - h0, 0.001), Math.max(y1 - y0, 0.001));
@@ -164,6 +165,8 @@ export function buildBuilding(scene) {
   for (const [a, b] of [[6.75, 9.95], [10.55, 13.75]]) {                               // conturul posturilor din service
     lineY(a, 4.0, a + 0.1, 12.6); lineY(b - 0.1, 4.0, b, 12.6); lineY(a, 12.5, b, 12.6);
   }
+  // placă pe sol sub tot parterul (fără goluri spre teren la praguri)
+  boxXY(0, 0, 20, 20, -0.05, 0.002, m.slab, false);
   // planșeu peste parter + acoperiș
   boxXY(0, 0, 20, 20, 4.50, 4.80, m.slab);
   boxXY(0, 0, 20, 20, ROOF - 0.30, ROOF, m.slab);
@@ -240,6 +243,7 @@ export function buildBuilding(scene) {
       for (let i = 1; i < n; i++) { const p = a + (b - a) * i / n; rect(p - 0.025, p + 0.025, zb, zt, m.alu, 0.08); }
       rect(a - 0.03, b + 0.03, zb - 0.06, zb - 0.02, m.alu, th + 0.18, ext === 'front' || ext === 'right' ? -0.0 : 0);
     } else if (tip === 'gate' || tip === 'gateC') {
+      rect(a, b, 0, 0.01, m.slab, th + 0.02);
       // poartă secțională: tocuri + panou ridicat (deschis) sau coborât (închis)
       rect(a - 0.12, a, 0, zt + 0.12, m.alu, th + 0.08); rect(b, b + 0.12, 0, zt + 0.12, m.alu, th + 0.08); rect(a - 0.12, b + 0.12, zt, zt + 0.12, m.alu, th + 0.08);
       if (tip === 'gateC') {
@@ -255,12 +259,25 @@ export function buildBuilding(scene) {
       }
     } else if (tip === 'door') {
       rect(a, a + 0.06, 0, zt, m.alu, th + 0.04); rect(b - 0.06, b, 0, zt, m.alu, th + 0.04); rect(a, b, zt - 0.06, zt, m.alu, th + 0.04);
-      // foaie de ușă deschisă la 90°
-      const w = b - a - 0.12; const leaf = new THREE.Mesh(new THREE.BoxGeometry(0.045, zt - 0.08, w), ext ? m.alu : m.doorLeaf);
-      if (along === 'x') { leaf.position.set(a + 0.08, base + (zt - 0.08) / 2, -(mid + (y1 > 18 ? -w / 2 - th / 2 : w / 2 + th / 2))); }
-      else { leaf.rotation.y = Math.PI / 2; leaf.position.set(mid + (x0 > 15 ? -w / 2 - th / 2 : w / 2 + th / 2), base + (zt - 0.08) / 2, -(a + 0.08)); }
-      leaf.castShadow = true; root.add(leaf);
-      if (ext) { rect(a + 0.1, b - 0.1, 0.9, zt - 0.2, m.glass, 0.02, 0); }
+      // foaie de ușă pe balama (închisă în planul peretelui; se deschide automat la apropiere – vezi main.js)
+      const w = b - a - 0.12, hl = zt - 0.08;
+      const pivot = new THREE.Group();
+      const leaf = new THREE.Group();
+      if (ext) {   // ușă exterioară: ramă aluminiu + geam
+        const fr = (lw, lh, px, py) => { const q = new THREE.Mesh(new THREE.BoxGeometry(lw, lh, 0.05), m.alu); q.position.set(px, py, 0); q.castShadow = true; leaf.add(q); };
+        fr(w, 0.1, w / 2, 0.05); fr(w, 0.08, w / 2, hl - 0.04); fr(0.08, hl, 0.04, hl / 2); fr(0.08, hl, w - 0.04, hl / 2); fr(w, 0.06, w / 2, 1.0);
+        const gl = new THREE.Mesh(new THREE.BoxGeometry(w - 0.16, hl - 0.2, 0.012), m.glass); gl.position.set(w / 2, hl / 2, 0); leaf.add(gl);
+      } else {
+        const q = new THREE.Mesh(new THREE.BoxGeometry(w, hl, 0.04), m.doorLeaf); q.position.set(w / 2, hl / 2, 0); q.castShadow = true; leaf.add(q);
+        const h1 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.025, 0.12), m.alu); h1.position.set(w - 0.1, 1.05, 0); leaf.add(h1);
+      }
+      pivot.add(leaf);
+      const baseRot = along === 'x' ? 0 : Math.PI / 2;
+      if (along === 'x') pivot.position.set(a + 0.06, base, -mid); else pivot.position.set(mid, base, -(a + 0.06));
+      pivot.rotation.y = baseRot; root.add(pivot);
+      doors.push({ pivot, baseRot, along, lvl, cx: along === 'x' ? (a + b) / 2 : mid, cy: along === 'x' ? mid : (a + b) / 2, mid, ang: 0, side: 1 });
+      // prag (pardoseală continuă sub ușă)
+      rect(a, b, 0, 0.012, m.slab, th + 0.02);
     }
   }
 
@@ -325,7 +342,7 @@ export function buildBuilding(scene) {
   sign('LIFT', 'apăsați E', 21.4, 10.58, 2.5, 1.2, 0, '#2e6fb0');
 
   colliders[0].push({ x0: STAIR.x0 - 0.05, y0: STAIR.y0, x1: STAIR.x0 + 0.1, y1: 3.4 });
-  return { root, colliders };
+  return { root, colliders, doors };
 }
 
 // suprafețe de călcat (pentru deplasare) – întoarce înălțimile posibile la (x,y)

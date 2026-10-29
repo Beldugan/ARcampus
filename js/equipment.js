@@ -2,6 +2,9 @@
 import * as THREE from 'three';
 import { T, labelTex, screenTex } from './textures.js';
 import { LEVEL_H } from './building.js';
+import { GLTFLoader } from 'three/addons/GLTFLoader.js';
+import * as BGU from 'three/addons/BufferGeometryUtils.js';
+import { MeshoptDecoder } from 'three/addons/meshopt_decoder.module.js';
 
 const C = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.6, metalness: 0.1 }, o));
 const MAT = {
@@ -37,52 +40,58 @@ function plate(g, txt, sub, w, x, y, z, ry = 0, bg = '#1d2b3a') {
 }
 
 // ------------------------------------------------------------------ autoturism (profil extrudat)
-export function car(color = 0xc8ccd0, opts = {}) {
-  // hatchback compact (clasa C, ~4,26 × 1,79 × 1,45 m) – profil lateral extrudat, geamuri, roți, faruri, oglinzi
+// Autoturism: model 3D real (hatchback 2020 Mazda 3, fără sigle – OUTPISTON / Sketchfab, CC BY-NC-SA 4.0, vezi models/hatchback.LICENSE.md)
+// Modelul se încarcă o singură dată și se clonează; până la încărcare rămâne doar volumul de coliziune (invizibil).
+const gltfLoader = new GLTFLoader(); gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+export const CAR_MODEL = new Promise(res => gltfLoader.load('models/hatchback.glb', g => {
+  // modelul vine fără normale (simplificat); se calculează normale netezite pe toate piesele, cu muchii vii păstrate
+  g.scene.traverse(o => {
+    if (!o.isMesh) return;
+    let geo = o.geometry.clone(); if (geo.attributes.normal) geo.deleteAttribute('normal'); for (const k of Object.keys(geo.attributes)) if (k !== 'position') geo.deleteAttribute(k);
+    geo = BGU.mergeVertices(geo, 2e-3); o.geometry = BGU.toCreasedNormals(geo, o.material.name === 'Paint' ? Math.PI * 0.42 : Math.PI / 3.5);
+  });
+  res(g.scene);
+}, undefined, () => res(null)));
+const CARMAT = {
+  Glass: () => new THREE.MeshPhysicalMaterial({ color: 0x0f161c, roughness: 0.02, metalness: 0.0, transparent: true, opacity: 0.62, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }),
+  Trim: () => new THREE.MeshStandardMaterial({ color: 0x141618, roughness: 0.55, metalness: 0.1 }),
+  Interior: () => new THREE.MeshStandardMaterial({ color: 0x1c1d1f, roughness: 0.8 }),
+  LampHead: () => new THREE.MeshPhysicalMaterial({ color: 0xe9eef5, roughness: 0.05, metalness: 0.7, emissive: 0xdfe8ff, emissiveIntensity: 0.25, clearcoat: 1 }),
+  LampTail: () => new THREE.MeshPhysicalMaterial({ color: 0x6d0606, roughness: 0.08, emissive: 0x3a0000, emissiveIntensity: 0.6, clearcoat: 1 }),
+  Tyre: () => new THREE.MeshStandardMaterial({ color: 0x18191a, roughness: 0.92 }),
+  Rim: () => new THREE.MeshStandardMaterial({ color: 0xb9bdc2, roughness: 0.28, metalness: 0.85 }),
+};
+function plateTex(txt) {
+  const c = document.createElement('canvas'); c.width = 520; c.height = 112; const x = c.getContext('2d');
+  x.fillStyle = '#f7f7f4'; x.fillRect(0, 0, 520, 112); x.strokeStyle = '#111'; x.lineWidth = 6; x.strokeRect(3, 3, 514, 106);
+  x.fillStyle = '#1f43a6'; x.fillRect(6, 6, 58, 100); x.fillStyle = '#ffcc00';
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; x.beginPath(); x.arc(35 + 17 * Math.cos(a), 36 + 17 * Math.sin(a), 2.6, 0, 7); x.fill(); }
+  x.fillStyle = '#fff'; x.font = 'bold 30px Arial'; x.textAlign = 'center'; x.fillText('RO', 35, 94);
+  x.fillStyle = '#111'; x.font = 'bold 76px "DIN Alternate", Arial'; x.fillText(txt, 292, 84);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+}
+let plateN = 0;
+export function car(color = 0xc8ccd0) {
   const g = new THREE.Group();
-  const L = 4.26, W = 1.79;
-  const pts = [[-2.08, 0.36], [-2.13, 0.62], [-2.12, 0.86], [-2.02, 1.06], [-1.82, 1.36], [-1.62, 1.44], [-0.05, 1.46], [0.32, 1.42], [0.98, 1.04], [1.62, 0.93], [2.02, 0.84], [2.13, 0.66], [2.1, 0.4], [1.95, 0.32], [-1.95, 0.32]];
-  const s = new THREE.Shape(); s.moveTo(pts[0][0], pts[0][1]); for (const q of pts.slice(1)) s.lineTo(q[0], q[1]); s.closePath();
-  const paint = new THREE.MeshPhysicalMaterial({ color, roughness: 0.28, metalness: 0.6, clearcoat: 1, clearcoatRoughness: 0.06 });
-  const body = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: W - 0.16, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.06, bevelSegments: 4, curveSegments: 4 }), paint);
-  body.position.z = -(W - 0.16) / 2; body.castShadow = true; body.receiveShadow = true; g.add(body);
-  const win = new THREE.MeshPhysicalMaterial({ color: 0x141c24, roughness: 0.04, metalness: 0.3, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
-  const trim = C(0x16181a, { roughness: 0.5 });
-  // geamuri laterale (cu stâlp B)
-  const ws = new THREE.Shape(); ws.moveTo(-1.86, 1.08); ws.lineTo(-1.7, 1.35); ws.lineTo(-0.05, 1.39); ws.lineTo(0.3, 1.36); ws.lineTo(0.9, 1.06); ws.closePath();
-  for (const sgn of [1, -1]) {
-    const wm = new THREE.Mesh(new THREE.ShapeGeometry(ws), win); wm.position.z = sgn * (W / 2 + 0.025); g.add(wm);
-    B(g, 0.09, 0.3, 0.01, trim, -0.55, 1.07, sgn * (W / 2 + 0.03));
-    B(g, 2.7, 0.025, 0.01, C(0x9aa0a6, { metalness: 0.8, roughness: 0.3 }), -0.5, 1.05, sgn * (W / 2 + 0.03));       // ornament
-    B(g, 0.012, 0.5, 0.008, C(0x000000), 0.35, 0.5, sgn * (W / 2 + 0.03)); B(g, 0.012, 0.5, 0.008, C(0x000000), -0.75, 0.5, sgn * (W / 2 + 0.03)); // linii uși
-    B(g, 0.14, 0.03, 0.02, trim, -0.05, 0.86, sgn * (W / 2 + 0.035));                                                  // mânere
-    const mir = B(g, 0.2, 0.12, 0.16, paint, 0.82, 1.02, sgn * (W / 2 + 0.07)); mir.rotation.y = sgn * 0.2;
-    // pasaj roți (umbră) + bandou inferior
-    for (const x of [1.32, -1.3]) { const arch = new THREE.Mesh(new THREE.CircleGeometry(0.4, 28, 0, Math.PI), trim); arch.position.set(x, 0.33, sgn * (W / 2 + 0.022)); if (sgn < 0) arch.rotation.y = Math.PI; g.add(arch); }
-    B(g, 2.2, 0.08, 0.02, trim, 0, 0.32, sgn * (W / 2 + 0.02));
-  }
-  const quad = (a, b, off) => {
-    const hw = W / 2 - 0.12, geo = new THREE.BufferGeometry();
-    const v = [a[0], a[1] + off, -hw, b[0], b[1] + off, -hw, b[0], b[1] + off, hw, a[0], a[1] + off, -hw, b[0], b[1] + off, hw, a[0], a[1] + off, hw];
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); geo.computeVertexNormals(); g.add(new THREE.Mesh(geo, win));
-  };
-  quad([0.34, 1.38], [0.95, 1.05], 0.11); quad([-1.84, 1.33], [-2.04, 1.08], 0.1);   // parbriz, lunetă
-  // roți: anvelopă + jantă aliaj cu spițe
-  for (const [x, z] of [[1.32, 1], [1.32, -1], [-1.3, 1], [-1.3, -1]]) {
-    const zz = z * (W / 2 - 0.1);
-    const tyre = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.095, 14, 32), MAT.rubber); tyre.position.set(x, 0.33, zz); tyre.scale.z = 1.6; tyre.castShadow = true; g.add(tyre);
-    const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.2, 24), C(0xb9bec3, { metalness: 0.85, roughness: 0.25 })); rim.rotation.x = Math.PI / 2; rim.position.set(x, 0.33, zz); g.add(rim);
-    for (let k = 0; k < 5; k++) { const sp = B(g, 0.04, 0.17, 0.02, C(0x2a2d30), 0, 0, 0); sp.position.set(x, 0.33, zz + z * 0.105); sp.rotation.z = k * Math.PI * 2 / 5; sp.geometry.translate(0, 0.07, 0); }
-  }
-  // față: faruri, grilă, bară; spate: stopuri, numere
-  for (const z of [0.58, -0.58]) {
-    const hl = B(g, 0.06, 0.13, 0.42, C(0xeef3ff, { emissive: 0xbfd0ff, emissiveIntensity: 0.35, roughness: 0.1, metalness: 0.5 }), 2.06, 0.74, z); hl.rotation.z = -0.35;
-    B(g, 0.06, 0.1, 0.38, C(0x9e1010, { emissive: 0x5a0000, roughness: 0.2 }), -2.12, 0.92, z * 1.05);
-  }
-  B(g, 0.05, 0.1, 0.95, trim, 2.1, 0.7, 0); B(g, 0.06, 0.18, 1.3, trim, 2.08, 0.42, 0);
-  B(g, 0.02, 0.11, 0.52, MAT.white, 2.14, 0.5, 0); B(g, 0.02, 0.11, 0.52, MAT.white, -2.14, 0.66, 0);
-  B(g, 0.06, 0.15, 1.5, trim, -2.1, 0.38, 0);
-  g.userData.len = L; return g;
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.45, 1.8), new THREE.MeshBasicMaterial()); proxy.position.y = 0.75; proxy.visible = false; g.add(proxy);
+  CAR_MODEL.then(src => {
+    if (!src) return;
+    const m = src.clone(true);
+    m.traverse(o => {
+      if (!o.isMesh) return;
+      o.castShadow = true; o.receiveShadow = true;
+      const n = o.material.name;
+      if (n === 'Paint') o.material = new THREE.MeshPhysicalMaterial({ color, roughness: 0.32, metalness: 0.35, clearcoat: 1, clearcoatRoughness: 0.04 });
+      else if (CARMAT[n]) o.material = CARMAT[n]();
+    });
+    g.add(m);
+    // numere de înmatriculare (format RO)
+    const txt = ['CT 21 UOC', 'CT 18 FIM', 'CT 07 ARS', 'CT 26 ITP', 'CT 11 AUT', 'CT 05 SRV'][plateN++ % 6];
+    const pm = new THREE.MeshStandardMaterial({ map: plateTex(txt), roughness: 0.4 });
+    const pf = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.112), pm); pf.position.set(2.27, 0.43, 0); pf.rotation.y = Math.PI / 2; g.add(pf);
+    const pr = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.112), pm); pr.position.set(-2.175, 0.58, 0); pr.rotation.y = -Math.PI / 2; g.add(pr);
+  });
+  g.userData.len = 4.45; return g;
 }
 
 // ------------------------------------------------------------------ ITP
@@ -138,15 +147,29 @@ function playDetector() { const g = new THREE.Group(); for (const z of [-0.78, 0
 
 // ------------------------------------------------------------------ service
 function twoPostLift(withCar = true, carColor = 0xe6e9ec) {
-  const g = new THREE.Group();
-  for (const z of [-1.55, 1.55]) {
-    B(g, 0.35, 3.9, 0.3, MAT.blue, 0, 0, z); B(g, 0.6, 0.02, 0.5, MAT.dark, 0, 0, z);
-    B(g, 0.18, 0.3, 0.2, MAT.yellow, 0, 1.0, z);
-    for (const s of [-1, 1]) { const arm = B(g, 1.2, 0.08, 0.12, MAT.blue, s * 0.65, 1.2, z * 0.62, 0); arm.rotation.y = s * (z > 0 ? 0.35 : -0.35); }
+  // elevator cu 2 coloane (tip simetric, 4 t): coloanele de o parte și de alta a vehiculului (axa locală z),
+  // vehiculul în lungul axei locale x, ridicat pe 4 brațe telescopice cu tampoane sub punctele de ridicare
+  const g = new THREE.Group(); const lift = 1.55;            // înălțimea tampoanelor (vehicul ridicat)
+  const blue = MAT.blue, pad = C(0x1a1a1a, { roughness: 0.9 });
+  for (const zs of [-1, 1]) {
+    const z = zs * 1.62;
+    B(g, 0.62, 0.02, 0.62, MAT.dark, 0, 0, z);                                   // placă de bază
+    B(g, 0.34, 3.95, 0.28, blue, 0, 0.02, z);                                     // coloană
+    B(g, 0.06, 3.7, 0.04, C(0x0e2f5a), 0, 0.15, z - zs * 0.16);                   // canal glisare
+    B(g, 0.42, 0.42, 0.18, C(0x17457f), 0, lift - 0.42, z - zs * 0.2);            // cărucior
+    for (const xs of [-1, 1]) {                                                   // braț telescopic spre punctul de ridicare
+      const tx = xs * 1.05, tz = zs * 0.62, sx = 0, sz = z - zs * 0.25;
+      const len = Math.hypot(tx - sx, tz - sz), ang = Math.atan2(tz - sz, tx - sx);
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(len, 0.09, 0.14), blue); arm.position.set((sx + tx) / 2, lift - 0.2, (sz + tz) / 2); arm.rotation.y = -ang; arm.castShadow = true; g.add(arm);
+      const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.12, 20), MAT.yellow); p1.position.set(tx, lift - 0.1, tz); g.add(p1);
+      const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.04, 20), pad); p2.position.set(tx, lift - 0.02, tz); g.add(p2);
+    }
+    B(g, 0.22, 0.32, 0.18, C(0x2b2f33), 0.3, 1.25, z + zs * 0.05);               // grup hidraulic / comenzi
   }
-  B(g, 0.2, 0.15, 3.4, MAT.blue, 0, 3.75, 0);
-  B(g, 0.25, 0.4, 0.22, C(0x2b2f33), 0.25, 1.3, 1.55); plate(g, 'Elevator 2 coloane', '4 t', 0.3, 0.38, 1.45, 1.55, Math.PI / 2, '#1f5fa8');
-  if (withCar) { const c = car(carColor); c.rotation.y = Math.PI / 2; c.position.y = 1.32; g.add(c); }
+  B(g, 0.22, 0.16, 3.6, blue, 0, 3.8, 0);                                         // traversa superioară
+  B(g, 0.03, 0.03, 3.3, C(0x111111), 0.0, 3.75, 0);                               // cablu sincronizare
+  plate(g, 'Elevator 2 coloane', '4 t', 0.28, 0.18, 1.85, 1.62, Math.PI / 2, '#1f5fa8');
+  if (withCar) { const c = car(carColor); c.position.y = lift - 0.19; g.add(c); }   // pragul caroseriei (y≈0,19 în model) pe tampoane
   return g;
 }
 function workbench(len = 2.0) {
@@ -387,7 +410,7 @@ export function buildEquipment(scene) {
   put(extractionReel(2.4, MAT.dark), 5.75, 9.0, 0, 0, info('Furtun de evacuare a gazelor de eșapament', D.ITP, ['ITP: măsurarea emisiilor cu motorul pornit în hală'], 'Imagini concept – linie ITP'), false, 4.2);
 
   // ===================== P02 SERVICE STUDENT (x 6.47–14.0, y 0.2–16.14)
-  put(twoPostLift(true, 0x3a3f45), 8.37, 8.25, 0, 0, info('POST 1 · Elevator cu 2 coloane (4 t)', D.FRA + ' · ' + D.BAZ + ' · ' + D.PRA, ['Bazele ingineriei – subansamble, întreținere', 'Fabricarea și repararea – lucrări de reparații', 'Practică de domeniu / specialitate în service propriu'], 'DXF concept A01 POST 1 „Elevator 2 coloane”'));
+  put(twoPostLift(true, 0x3a3f45), 8.35, 8.25, 90, 0, info('POST 1 · Elevator cu 2 coloane (4 t)', D.FRA + ' · ' + D.BAZ + ' · ' + D.PRA, ['Bazele ingineriei – subansamble, întreținere', 'Fabricarea și repararea – lucrări de reparații', 'Practică de domeniu / specialitate în service propriu'], 'DXF concept A01 POST 1 „Elevator 2 coloane”'));
   put(car(0xeef0f1), 12.02, 8.25, 90, 0, info('POST 2 · Lucru la sol (diagnoză, geometrie)', D.DA + ' · ' + D.PRA, ['Diagnosticare L1–L7 pe vehicul (X431, osciloscop)', 'Practică de specialitate'], 'DXF concept A01 POST 2 „Lucru la sol”'));
   put(workbench(2.2), 8.0, 15.4, 180, 0, info('Banc de lucru cu menghină și panou de scule', D.FRA + ' · ' + D.PRA, ['Demontări / montări subansamble'], 'DXF concept A01 „Bancuri / scule”'));
   put(workbench(2.2), 10.4, 15.4, 180, 0, info('Banc de lucru', D.FRA, ['Recondiționări, verificări'], 'DXF concept A01'));
