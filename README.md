@@ -32,7 +32,7 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
   * **P02 Service student, 113 m² + magazie piese 5,5 m²:** 2 posturi marcate (elevator cu 2 coloane și post la sol), acces din parcare. Lucrările se pot urmări pe un monitor din holul de intrare, conform RNTR 9.
   * **P03 Laborator motoare, 176 m²:** în formă de L, cu vitrină mare spre stradă, aripă estică pentru standurile de motor și ușă de echipamente spre parcare.
   * **Fâșia de est:** hol de intrare din stradă, vestiar, WC-uri și cameră tehnică.
-* **Etaj:** E01–E05, E12 Sală CAD, E13 Atelier proiecte, grupuri sanitare.
+* **Etaj:** E01–E05, E12 Sală CAD (15 posturi PC), E13 Atelier proiecte, grupuri sanitare.
 * **Fațada:** e tratată ca o clădire universitară: fibrociment deschis și grafit, cadru alb în consolă, copertină la intrare, accente turcoaz. Scara S1 are ecran de lamele, balustradă din sticlă și trepte placate cu HPL.
 
 ### Trasee din stradă

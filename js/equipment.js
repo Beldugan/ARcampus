@@ -267,13 +267,13 @@ function monitor(g, kind, seed, x, y, z, ry = 0) {   // monitor 24″: ramă sub
   const sc = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.305), scr(kind, seed)); sc.position.set(0, 0.13 + 0.165, 0.0131); m.add(sc);
   return m;
 }
-function pcDesk(kind = 'cad', seed = 1) {
-  const g = new THREE.Group(); B(g, 1.4, 0.035, 0.75, MAT.wood, 0, 0.73, 0);
-  for (const x of [-0.67, 0.67]) { B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, -0.33); B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, 0.33); B(g, 0.05, 0.02, 0.7, MAT.grey, x, 0.0, 0); }
-  B(g, 1.3, 0.35, 0.015, C(0x9aa3aa, { metalness: 0.3 }), 0, 0.36, -0.33);                        // panou frontal
+function pcDesk(kind = 'cad', seed = 1, w = 1.4) {
+  const g = new THREE.Group(); B(g, w, 0.035, 0.75, MAT.wood, 0, 0.73, 0); const lx = w / 2 - 0.03;
+  for (const x of [-lx, lx]) { B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, -0.33); B(g, 0.05, 0.71, 0.05, MAT.grey, x, 0.02, 0.33); B(g, 0.05, 0.02, 0.7, MAT.grey, x, 0.0, 0); }
+  B(g, w - 0.1, 0.35, 0.015, C(0x9aa3aa, { metalness: 0.3 }), 0, 0.36, -0.33);                        // panou frontal
   monitor(g, kind, seed, 0, 0.765, -0.2);
   B(g, 0.44, 0.018, 0.14, C(0x2a2d31), 0, 0.765, 0.1); B(g, 0.06, 0.02, 0.1, C(0x2a2d31), 0.32, 0.765, 0.12);   // tastatură + mouse
-  B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), 0.48, 0, -0.1); Cy(g, 0.006, 0.01, C(0x3b82f6, { emissive: 0x3b82f6, emissiveIntensity: 1 }), 0.48, 0.38, 0.12, 'z', 8);   // unitate PC
+  const tx = w / 2 - 0.18; B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), tx, 0, -0.1); Cy(g, 0.006, 0.01, C(0x3b82f6, { emissive: 0x3b82f6, emissiveIntensity: 1 }), tx, 0.38, 0.12, 'z', 8);   // unitate PC
   const c = officeChair(); c.position.set(0, 0, 0.62); c.rotation.y = Math.PI; g.add(c); return g;
 }
 function labScope(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.17, 0.13, C(0xd9dcdf, { roughness: 0.5 }), 0, 0, 0); screen(g, 0.17, 0.11, 'scope', seed, -0.06, 0.03, 0.066); for (let i = 0; i < 6; i++) Cy(g, 0.01, 0.01, C(0x333), 0.07 + (i % 2) * 0.05, 0.04 + Math.floor(i / 2) * 0.04, 0.07, 'z', 10); for (let i = 0; i < 4; i++) Cy(g, 0.007, 0.012, [MAT.yellow, C(0x22aaee), C(0xdd44aa), MAT.green][i], -0.12 + i * 0.045, 0.015, 0.07, 'z', 10); return g; }
@@ -1078,8 +1078,9 @@ export function buildEquipment(scene) {
   put(pcDesk('code', 52), 15.2, 19.0, 180, 1, null);
 
   // ===================== E12 SALĂ CAD / SEMINAR (x 19.95–24.8, y 0.2–8.8)
+  // 15 posturi: 5 rânduri × 3 mese de 1,2 m (2 + culoar central 0,95 m + 1), cu fața spre ecranul interactiv; ≈ 2,8 m²/loc
   let sd = 70;
-  for (const y of [1.6, 3.9, 6.2]) for (const x of [20.9, 22.35]) put(pcDesk('cad', sd++), x, y, 0, 1, sd === 71 ? info('Sală CAD / seminar – 6 posturi (culoar de acces 1,8 m)', D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'], 'Imagine concept „sală cu posturi PC”; norme ARACIS 2,5 m²/loc') : null);
+  for (const y of [1.15, 2.57, 3.99, 5.41, 6.83]) for (const x of [20.6, 21.8, 23.95]) { const k = sd++; put(pcDesk('cad', k, 1.2), x, y, 0, 1, k === 70 ? info('Sală CAD / seminar – 15 posturi PC (5 rânduri × 3, culoar central)', D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'], 'Imagine concept „sală cu posturi PC”; norme ARACIS 2,5 m²/loc (≈ 2,8 m²/loc)') : null); }
   put(tvDisplay(1.9, 'cad', 91), 23.6, 8.76, 180, 1, info('Ecran interactiv 86″', D.CAD, ['Prezentări, proiecte, demonstrații CAD'], 'Imagine concept „sală cu posturi PC”'), false);
   // ===================== E13 ATELIER PROIECTE – STANDURI DIDACTICE (x 19.95–24.8, y 11.1–19.8)
   [20.85, 22.05, 23.25].forEach((x, i) => put(standMobil(i === 1 ? 'meca' : 'diag', 6 + i), x, 14.6, 0, 1, info('Stand mobil în lucru – lucrare de diplomă ' + (i + 1), 'Lucrări de diplomă AR IV · ' + D.DA, ['Montare componente pe tabla perforată', 'Cablare 12 V, cutie electrică IP54, E-stop'], SRC_ST + '; Standuri_lucrari_diploma_AR_IV_2026-2027.pdf')));
