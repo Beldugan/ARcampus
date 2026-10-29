@@ -20,7 +20,7 @@ function mats() {
   M.facadeDark = new THREE.MeshStandardMaterial({ map: T.sandwich([4, 3], '#4a5560'), roughness: 0.55, metalness: 0.25 });
   M.base = new THREE.MeshStandardMaterial({ color: 0x4d555d, roughness: 0.8 });
   M.slab = new THREE.MeshStandardMaterial({ color: 0xb9b6ae, roughness: 0.95 });
-  M.deck = new THREE.MeshStandardMaterial({ color: 0x7d858c, roughness: 0.6, metalness: 0.4 });
+  M.deck = new THREE.MeshStandardMaterial({ color: 0xc3c9ce, roughness: 0.5, metalness: 0.35 });
   M.steel = new THREE.MeshStandardMaterial({ color: 0x5d6a75, roughness: 0.45, metalness: 0.6 });
   M.alu = new THREE.MeshStandardMaterial({ color: 0x3a4148, roughness: 0.35, metalness: 0.7 });
   M.glass = new THREE.MeshPhysicalMaterial({ color: 0xbfd6e4, roughness: 0.05, metalness: 0.0, transmission: 0.0, transparent: true, opacity: 0.28, envMapIntensity: 1.4, side: THREE.DoubleSide, depthWrite: false });
@@ -36,7 +36,7 @@ function mats() {
 }
 function floorMat(kind, w, d) {
   const m = mats();
-  if (kind === 'epoxy') return new THREE.MeshStandardMaterial({ map: T.epoxy([w / 4, d / 4]), roughness: 0.35, metalness: 0.05 });
+  if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map: T.epoxy([w / 4, d / 4]), roughness: 0.22, metalness: 0.0, clearcoat: 0.8, clearcoatRoughness: 0.12 });
   if (kind === 'vinyl') return new THREE.MeshStandardMaterial({ map: T.vinyl([w / 3, d / 3]), roughness: 0.5 });
   if (kind === 'tile') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2]), roughness: 0.3 });
   if (kind === 'stone') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2], '#cfcac0'), roughness: 0.35 });
@@ -191,6 +191,13 @@ export function buildBuilding(scene) {
     const dx = x0 + 0.7, dl = y1 - 0.6;
     const duct = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, dl, 24), m.duct); duct.rotation.x = Math.PI / 2; duct.position.set(dx, 3.85, -(0.4 + dl / 2)); root.add(duct);
     for (let y = 1.0; y < y1 - 0.5; y += 1.2) { const r = new THREE.Mesh(new THREE.TorusGeometry(0.255, 0.012, 6, 24), m.alu); r.position.set(dx, 3.85, -y); root.add(r); }
+  }
+  // stâlpi metalici HEA pe pereții halelor (ca în imaginile concept), gri deschis
+  const colM = new THREE.MeshStandardMaterial({ color: 0x9aa3aa, roughness: 0.45, metalness: 0.5 });
+  for (let y = 2.5; y < 19.5; y += 4.5) for (const [x, sx] of [[0.2, 1], [6.32, -1], [6.47, 1], [14.0, -1]]) {
+    const xi = sx > 0 ? x : x - 0.26;
+    boxXY(xi, y - 0.13, xi + 0.26, y - 0.11, 0, 4.4, colM); boxXY(xi, y + 0.11, xi + 0.26, y + 0.13, 0, 4.4, colM); boxXY(sx > 0 ? xi : xi + 0.24, y - 0.12, sx > 0 ? xi + 0.02 : xi + 0.26, y + 0.12, 0, 4.4, colM);
+    boxXY(xi + 0.12, y - 0.12, xi + 0.14, y + 0.12, 0, 4.4, colM);
   }
   // stâlpi metalici (simbolici, pe axe)
   for (const [x, y] of [[0.3, 0.3], [6.4, 0.3], [14.07, 0.3], [0.3, 19.7], [6.4, 19.7], [14.07, 19.7]]) boxXY(x - 0.12, y - 0.12, x + 0.12, y + 0.12, 0, 4.5, m.steel);

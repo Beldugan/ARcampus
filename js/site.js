@@ -14,7 +14,8 @@ export function buildSite(scene) {
     m.castShadow = cast; m.receiveShadow = true; g.add(m); return m;
   };
   const mat = (t, rough = 0.9) => new THREE.MeshStandardMaterial({ map: t, roughness: rough });
-  plane(-200, -200, 220, 220, mat(T.grass([80, 80])), -0.02);
+  const grassTex = new THREE.TextureLoader().load('textures/grass.jpg'); grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping; grassTex.repeat.set(70, 70); grassTex.colorSpace = THREE.SRGBColorSpace; grassTex.anisotropy = 8;
+  plane(-200, -200, 220, 220, new THREE.MeshStandardMaterial({ map: grassTex, roughness: 1, color: 0xd8e6c8 }), -0.02);   // gazon (textură foto)
   plane(-200, -60, 220, -32, new THREE.MeshStandardMaterial({ map: T.water([30, 6]), roughness: 0.08, metalness: 0.3, color: 0xb9d4ea }), -0.01);   // lacul
   plane(-200, -32, 220, -27, mat(T.pavers([60, 2])), 0.0);                         // promenadă mal
   plane(-200, -24, 220, -12, mat(T.asphalt([60, 4])), 0.005);                      // strada
@@ -59,9 +60,16 @@ export function buildSite(scene) {
   // arbori și stâlpi de iluminat
   const trunk = new THREE.MeshStandardMaterial({ color: 0x6b5139, roughness: 1 });
   const leaf = [0x4f7a32, 0x5d8a3a, 0x46702c].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
+  // arbori: coroană din multe ciorchini de frunziș deformați (siluetă neregulată, culori variate)
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const blob = (r) => { const geo = new THREE.IcosahedronGeometry(r, 2); const p = geo.attributes.position; const ph = rnd() * 10; for (let i = 0; i < p.count; i++) { const X = p.getX(i), Y = p.getY(i), Z = p.getZ(i); const k = 1 + 0.16 * Math.sin(X / r * 4.1 + ph) * Math.cos(Z / r * 3.7 - ph) + 0.08 * Math.sin(Y / r * 5.3 + ph * 2); p.setXYZ(i, X * k, Y * k * 0.85, Z * k); } geo.computeVertexNormals(); return geo; };
+  const leafM = [0x3f6b2a, 0x4d7a31, 0x5a8a3a, 0x355e25].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.95 }));
   const tree = (x, y, s = 1) => {
-    box(x - 0.13, y - 0.13, x + 0.13, y + 0.13, 0, 2.3 * s, trunk);
-    for (let k = 0; k < 3; k++) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry((1.5 - k * 0.3) * s, 1), leaf[k]); m.position.set(x + (k - 1) * 0.4 * s, (3.1 + k * 0.7) * s, -y + (k % 2 ? 0.4 : -0.3) * s); m.castShadow = true; g.add(m); }
+    const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.09 * s, 0.15 * s, 2.6 * s, 8), trunk); tr.position.set(x, 1.3 * s, -y); tr.castShadow = true; g.add(tr);
+    for (let k = 0; k < 9; k++) {
+      const a = rnd() * Math.PI * 2, rr = rnd() * 0.9 * s, h = (2.6 + rnd() * 2.0) * s;
+      const m = new THREE.Mesh(blob((0.55 + rnd() * 0.5) * s), leafM[k % 4]); m.position.set(x + Math.cos(a) * rr, h, -y + Math.sin(a) * rr); m.rotation.set(rnd() * 3, rnd() * 3, 0); m.castShadow = true; g.add(m);
+    }
   };
   for (let x = -40; x <= 60; x += 9) tree(x, -10.5, 0.9 + ((x * 7) % 5) / 20);
   for (const [x, y] of [[31, 18], [31, 30], [-9, 8], [-9, 24], [8, 39], [16, 40], [32, 4]]) tree(x, y, 1.1);

@@ -21,6 +21,7 @@ Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (25 × 20 
 | 1 – 9 | teleport în încăperi (lista din dreapta) |
 | M | harta mică · H ajutor |
 | C / N | mărește imaginea concept a încăperii / trece la următoarea |
+| Q | comută între calitate înaltă (ocluzie ambientală, antialiasing) și calitate rapidă |
 
 Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropii.
 
@@ -91,6 +92,6 @@ Aspectul exterior și cel interior urmează imaginile concept din `img/concept/`
 | E04 | Caroserii: caroserie în alb, ușă pe stand, braț de măsurare, crash-box-uri, post CAD |
 | E05 | Autovehicule hibride și electrice: machetă baterie ≤ 60 V cu BMS, motor electric, wallbox, transmisie hibridă secționată |
 
-Autoturismele folosesc un model 3D real: „2020 Mazda 3 Hatchback” de OUTPISTON (Sketchfab), licență [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), în varianta fără sigle pregătită de proiectul freaxnx01/game-rhyflitzer (detalii în `models/hatchback.LICENSE.md`). Licența permite doar utilizare necomercială, cu atribuire. Celelalte echipamente sunt modelate simplificat (volumetrie la scară reală, materiale PBR, lumină naturală și artificială). Nu sunt modele foto-realiste ale mărcilor concrete.
+Autoturismele folosesc un model 3D real: „2020 Mazda 3 Hatchback” de OUTPISTON (Sketchfab), licență [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), în varianta fără sigle pregătită de proiectul freaxnx01/game-rhyflitzer (detalii în `models/hatchback.LICENSE.md`). Licența permite doar utilizare necomercială, cu atribuire. Cerul și reflexiile exterioare folosesc panorama HDR „Quarry 01” de la Poly Haven (CC0), iar gazonul folosește textura din exemplele three.js. Celelalte echipamente sunt modelate simplificat (volumetrie la scară reală, materiale PBR, lumină naturală și artificială). Nu sunt modele foto-realiste ale mărcilor concrete.
 
 ![ITP](docs/itp.png)

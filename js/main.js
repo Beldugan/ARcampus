@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/PointerLockControls.js';
 import { RoomEnvironment } from 'three/addons/RoomEnvironment.js';
+import { RGBELoader } from '../lib/three/jsm/loaders/RGBELoader.js';
+import { EffectComposer } from '../lib/three/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from '../lib/three/jsm/postprocessing/RenderPass.js';
+import { GTAOPass } from '../lib/three/jsm/postprocessing/GTAOPass.js';
+import { OutputPass } from '../lib/three/jsm/postprocessing/OutputPass.js';
 import { T } from './textures.js';
 import { buildBuilding, surfacesAt, ROOMS, LEVEL_H, LIFT, STAIR, H1, BW, BD } from './building.js';
 import { buildEquipment, CAR_MODEL } from './equipment.js';
@@ -20,12 +25,30 @@ document.getElementById('app').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = T.sky();
-scene.fog = new THREE.Fog(0xdde6ee, 90, 260);
+scene.fog = new THREE.Fog(0xcfdbe6, 120, 420);
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const ENV_IN = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // reflexii interioare (hală / laborator)
+let ENV_OUT = ENV_IN;
+scene.environment = ENV_IN;
+// cer și reflexii exterioare: panoramă HDR reală (Poly Haven „Quarry 01”, CC0)
+const SKY = new Promise(res => new RGBELoader().load('textures/sky.hdr', t => {
+  t.mapping = THREE.EquirectangularReflectionMapping; scene.background = t; scene.backgroundIntensity = 0.9;
+  ENV_OUT = pmrem.fromEquirectangular(t).texture; res();
+}, undefined, () => res()));
+let envInside = true;
+function updateEnv(inside) { if (inside === envInside) return; envInside = inside; scene.environment = inside ? ENV_IN : ENV_OUT; }
 
 const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 600);
 camera.rotation.order = 'YXZ';
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { samples: 4, type: THREE.HalfFloatType }));
+composer.addPass(new RenderPass(scene, camera));
+const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.0, scale: 1.2, samples: 12 });
+gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 12 });
+gtao.blendIntensity = 0.9;
+composer.addPass(gtao); composer.addPass(new OutputPass());
+let HQ = !/Mobi|Android/i.test(navigator.userAgent);
+const draw = () => HQ ? composer.render() : renderer.render(scene, camera);
 
 // lumini
 scene.add(new THREE.HemisphereLight(0xdfeaff, 0x6b6250, 0.35));
@@ -293,12 +316,13 @@ let flashT = 0; const flashEl = document.getElementById('flash');
 function flash(t) { flashEl.textContent = t; flashEl.classList.remove('hidden'); flashT = 2.5; }
 
 // ------------------------------------------------------------ bucla
-addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); });
+addEventListener('keydown', e => { if (e.code === 'KeyQ') { HQ = !HQ; flash(HQ ? 'Calitate înaltă (umbre de contact)' : 'Calitate rapidă'); } });
 if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawDeg,pitchDeg
   const [x, y, h, yw, pt] = qs.get('cam').split(',').map(Number);
   overlay.classList.add('hidden'); setPose({ x, y, h, yawDeg: yw, pitch: THREE.MathUtils.degToRad(pt || 0) });
   document.body.classList.add('capture'); card.style.display = 'none';
-  CAR_MODEL.then(() => { placeLights(); renderer.render(scene, camera); window.READY = true; });
+  Promise.all([CAR_MODEL, SKY]).then(() => { const p = player; updateEnv(p.x > 0 && p.x < BW && p.y > 0 && p.y < BD); placeLights(); draw(); window.READY = true; });
 } else {
   let frame = 0;
   renderer.setAnimationLoop(() => {
@@ -307,7 +331,8 @@ if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawD
     if (frame++ % 6 === 0) { pick(); roomEl.textContent = currentRoom(); drawMap(); showConcept(currentKey()); }
     if (frame % 20 === 1) placeLights();
     if (flashT > 0) { flashT -= dt; if (flashT <= 0) flashEl.classList.add('hidden'); }
-    renderer.render(scene, camera);
+    updateEnv(player.x > 0 && player.x < BW && player.y > 0 && player.y < BD);
+    draw();
   });
 }
 // acces pentru testare automată (fără efect în utilizare)

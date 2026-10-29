@@ -357,6 +357,17 @@ function standMobil(kind = 'meca', seed = 1, bare = false) {
   }
   return g;
 }
+// perete de scule (ca în imaginea concept „bancuri și scule”): panou perforat gri închis cu chei, șurubelnițe, clești, cutii
+function toolWall(len = 3.0, seed = 1) {
+  const g = new THREE.Group(); let r = seed * 9301 % 233280; const rnd = () => (r = (r * 9301 + 49297) % 233280) / 233280;
+  B(g, len, 1.25, 0.02, new THREE.MeshStandardMaterial({ map: T.pegboard([len * 2, 2.5]), color: 0x7a8590, roughness: 0.6 }), 0, 1.0, 0);
+  const st = MAT.steel, red = C(0xb3141b, { roughness: 0.45 }), blk = C(0x1a1a1a);
+  for (let x = -len / 2 + 0.15; x < len / 2 - 0.1; x += 0.045) { const h = 0.12 + rnd() * 0.12; B(g, 0.022, h, 0.01, st, x, 1.95 - h, 0.02); B(g, 0.03, 0.03, 0.012, st, x, 1.95 - h - 0.02, 0.02); }   // chei fixe/inelare
+  for (let x = -len / 2 + 0.2; x < len / 2 - 0.1; x += 0.07) { B(g, 0.028, 0.11, 0.028, rnd() > 0.3 ? red : blk, x, 1.5, 0.03); B(g, 0.008, 0.12, 0.008, st, x, 1.38, 0.03); }   // șurubelnițe
+  for (let x = -len / 2 + 0.25; x < len / 2 - 0.2; x += 0.16) { B(g, 0.05, 0.16, 0.02, red, x, 1.12, 0.03); B(g, 0.03, 0.06, 0.015, st, x, 1.28, 0.03); }   // clești
+  for (let x = -len / 2 + 0.3; x < len / 2 - 0.2; x += 0.55) B(g, 0.3, 0.08, 0.14, rnd() > 0.5 ? C(0x1f5fa8) : C(0x333a40), x, 0.55, 0.07);   // cutii trusă
+  return g;
+}
 function laptop(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.018, 0.24, C(0x2f3337, { metalness: 0.5 }), 0, 0, 0); const sc = new THREE.Group(); sc.position.set(0, 0.018, -0.12); sc.rotation.x = -0.25; g.add(sc); B(sc, 0.34, 0.22, 0.01, C(0x2f3337, { metalness: 0.5 }), 0, 0, 0); screen(sc, 0.31, 0.19, seed % 2 ? 'diag' : 'code', seed, 0, 0.015, 0.006); return g; }
 // Dinamică – după imaginea concept: punte completă pe platformă (suspensii coilover), cușcă de încercare pneuri, turn de încercare amortizoare
 function halfCarRig() {
@@ -449,17 +460,52 @@ function biwFrame() {
 function doorStand() { const g = new THREE.Group(); B(g, 0.05, 1.1, 0.95, new THREE.MeshPhysicalMaterial({ color: 0x9b1c1c, roughness: 0.3, metalness: 0.5, clearcoat: 1 }), 0, 0.35, 0); B(g, 0.06, 0.4, 0.85, MAT.glass, 0, 1.0, 0); B(g, 0.6, 0.05, 0.6, MAT.dark, 0, 0, 0); B(g, 0.05, 0.4, 0.05, MAT.grey, 0, 0.05, 0); return g; }
 function crashBoxes() { const g = new THREE.Group(); for (let i = 0; i < 4; i++) B(g, 0.12, 0.3 - i * 0.05, 0.12, C(0xb0b7bd, { metalness: 0.7 }), -0.3 + i * 0.2, 0, 0); return g; }
 function measureArm() { const g = new THREE.Group(); Cy(g, 0.15, 0.1, MAT.dark, 0, 0, 0); Cy(g, 0.03, 0.6, MAT.alu, 0, 0.1, 0); const a = B(g, 0.6, 0.04, 0.04, MAT.alu, 0.3, 0.7, 0); a.rotation.z = 0.4; return g; }
+// HeV – după imaginea concept: masă cu cadru de oțel, carcasă de policarbonat transparentă, module de celule, bare și cabluri HV portocalii
+function steelTable(w, d, h = 0.85) {
+  const g = new THREE.Group(); const fr = C(0x6b747c, { metalness: 0.6, roughness: 0.35 });
+  B(g, w, 0.04, d, C(0x8a9399, { metalness: 0.5 }), 0, h - 0.04, 0);
+  for (const [x, z] of [[-w / 2 + 0.03, -d / 2 + 0.03], [w / 2 - 0.03, -d / 2 + 0.03], [-w / 2 + 0.03, d / 2 - 0.03], [w / 2 - 0.03, d / 2 - 0.03]]) B(g, 0.05, h - 0.04, 0.05, fr, x, 0, z);
+  for (const z of [-d / 2 + 0.03, d / 2 - 0.03]) B(g, w, 0.04, 0.04, fr, 0, 0.15, z); B(g, w - 0.1, 0.02, d - 0.1, C(0x5d666e, { metalness: 0.5 }), 0, 0.17, 0);
+  return g;
+}
+function hvCable(g, pts, r = 0.012) { const c = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))); const m = new THREE.Mesh(new THREE.TubeGeometry(c, 24, r, 8), MAT.hv); m.castShadow = true; g.add(m); }
 function batteryMockup() {
-  const g = new THREE.Group(); B(g, 1.6, 0.05, 0.8, MAT.steel, 0, 0.9, 0); B(g, 1.6, 0.9, 0.8, C(0x2f3b45), 0, 0, 0);
-  B(g, 0.9, 0.25, 0.5, C(0x3a4650, { metalness: 0.4 }), -0.25, 0.95, 0); for (let i = 0; i < 16; i++) Cy(g, 0.025, 0.07, MAT.cellBlue, -0.6 + (i % 8) * 0.1, 0.97, -0.1 + Math.floor(i / 8) * 0.2, 'x');
-  B(g, 0.3, 0.12, 0.25, MAT.pcb, 0.45, 0.95, 0.1); screen(g, 0.45, 0.28, 'bms', 21, 0.45, 1.25, -0.2);
-  B(g, 0.06, 0.06, 0.4, MAT.hv, 0.0, 1.2, 0.2); plate(g, 'Machetă baterie de tracțiune ≤ 60 V', 'BMS · HVIL · defect de izolație simulat', 0.9, 0, 0.55, 0.405, 0, '#d35400'); return g;
+  const g = steelTable(1.9, 0.95, 0.82);
+  const H = 0.82;
+  B(g, 1.6, 0.03, 0.75, C(0x2c3136, { metalness: 0.5 }), 0, H, 0);                                           // placa de bază a pachetului
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) {                                                  // 8 module de celule
+    const x = -0.6 + i * 0.4, z = -0.17 + j * 0.34;
+    B(g, 0.34, 0.16, 0.28, C(0x1d2733, { metalness: 0.4 }), x, H + 0.03, z);
+    for (let k = 0; k < 6; k++) B(g, 0.04, 0.005, 0.24, MAT.copper, x - 0.13 + k * 0.052, H + 0.19, z);     // bare de legătură
+  }
+  B(g, 0.2, 0.08, 0.12, C(0xd9d9d6), 0.68, H + 0.03, 0.25); B(g, 0.12, 0.05, 0.1, C(0xe8742b), 0.68, H + 0.11, 0.25);   // contactor + mentenanță
+  B(g, 0.26, 0.04, 0.16, MAT.pcb, 0.65, H + 0.03, -0.2);                                                    // BMS
+  hvCable(g, [[-0.78, H + 0.12, -0.3], [-0.85, H + 0.25, 0], [-0.6, H + 0.24, 0.3], [0.3, H + 0.24, 0.32], [0.62, H + 0.12, 0.25]], 0.016);
+  hvCable(g, [[0.62, H + 0.12, 0.2], [0.75, H + 0.3, 0.0], [0.9, H + 0.1, -0.3], [1.0, H - 0.2, -0.4]], 0.016);
+  const pc = new THREE.MeshPhysicalMaterial({ color: 0xe8f1f6, transparent: true, opacity: 0.18, roughness: 0.05, clearcoat: 1, side: THREE.DoubleSide, depthWrite: false });
+  B(g, 1.66, 0.34, 0.8, pc, 0, H + 0.03, 0);                                                                 // carcasă policarbonat
+  for (const [x, z] of [[-0.83, -0.4], [0.83, -0.4], [-0.83, 0.4], [0.83, 0.4]]) B(g, 0.02, 0.34, 0.02, MAT.alu, x, H + 0.03, z);
+  B(g, 0.15, 0.15, 0.005, MAT.yellow, 0.5, H + 0.2, 0.403); plate(g, '⚡', '', 0.1, 0.5, H + 0.27, 0.41, 0, '#f2b705');
+  screen(g, 0.45, 0.28, 'bms', 21, -0.55, H + 0.55, -0.42);
+  plate(g, 'Machetă baterie de tracțiune ≤ 60 V', 'BMS · HVIL · defect de izolație simulat', 0.9, 0, 0.5, 0.48, 0, '#d35400'); return g;
 }
 function emotorBench() {
-  const g = new THREE.Group(); B(g, 1.8, 0.06, 0.7, MAT.steel, 0, 0.75, 0); for (const x of [-0.85, 0.85]) B(g, 0.06, 0.75, 0.65, MAT.dark, x, 0, 0);
-  Cy(g, 0.17, 0.4, C(0x30363b, { metalness: 0.6 }), -0.4, 1.0, 0, 'x'); Cy(g, 0.17, 0.35, C(0x5c6c78, { metalness: 0.6 }), 0.25, 1.0, 0, 'x'); Cy(g, 0.03, 0.3, MAT.steel, -0.08, 1.0, 0, 'x');
-  B(g, 0.35, 0.15, 0.3, C(0x9aa3a8, { metalness: 0.6 }), 0.65, 0.81, 0); for (let i = 0; i < 3; i++) Cy(g, 0.02, 0.5, MAT.hv, 0.45 - i * 0.05, 0.95, 0.15, 'x', 8);
-  plate(g, 'Banc motor electric + invertor', 'PMSM · comandă vectorială · frână de sarcină', 0.8, 0, 0.45, 0.355, 0, '#d35400'); return g;
+  const g = steelTable(1.9, 0.8, 0.8); const H = 0.8;
+  Cy(g, 0.2, 0.42, C(0x3d4a55, { metalness: 0.6, roughness: 0.4 }), -0.35, H + 0.24, 0, 'x', 32);           // motor PMSM
+  for (let i = 0; i < 10; i++) Cy(g, 0.205, 0.012, C(0x2b343c, { metalness: 0.6 }), -0.52 + i * 0.038, H + 0.24, 0, 'x', 32);   // aripioare
+  B(g, 0.5, 0.06, 0.4, C(0x2b343c), -0.35, H, 0);
+  Cy(g, 0.03, 0.3, MAT.steel, 0.0, H + 0.24, 0, 'x'); Cy(g, 0.07, 0.06, MAT.yellow, 0.0, H + 0.24, 0, 'x');   // cuplaj
+  Cy(g, 0.16, 0.3, C(0x6e7b86, { metalness: 0.6 }), 0.32, H + 0.24, 0, 'x', 28); B(g, 0.36, 0.06, 0.34, C(0x2b343c), 0.32, H, 0);   // frână de sarcină
+  B(g, 0.42, 0.18, 0.3, C(0xb4bbc1, { metalness: 0.7 }), 0.7, H, 0.12);                                     // invertor
+  for (let i = 0; i < 3; i++) hvCable(g, [[0.55, H + 0.12, 0.05 + i * 0.05], [0.3, H + 0.45, 0.2 + i * 0.03], [-0.2, H + 0.42, 0.12 + i * 0.03], [-0.35, H + 0.44, 0.0]], 0.013);
+  plate(g, 'Banc motor electric + invertor', 'PMSM · comandă vectorială · frână de sarcină', 0.8, 0, 0.45, 0.405, 0, '#d35400'); return g;
+}
+function hvToolMat() {   // covor izolant cu scule izolate VDE, multimetru CAT III, mănuși electroizolante
+  const g = new THREE.Group(); B(g, 0.9, 0.006, 0.5, C(0x151617, { roughness: 0.9 }), 0, 0, 0);
+  for (let i = 0; i < 6; i++) { B(g, 0.025, 0.02, 0.2, MAT.red, -0.35 + i * 0.07, 0.006, -0.05); B(g, 0.025, 0.02, 0.08, MAT.yellow, -0.35 + i * 0.07, 0.006, -0.19); B(g, 0.008, 0.008, 0.08, MAT.steel, -0.35 + i * 0.07, 0.01, 0.09); }
+  B(g, 0.1, 0.035, 0.19, C(0xe8742b), 0.2, 0.006, -0.05); B(g, 0.07, 0.004, 0.06, C(0x9fb59a), 0.2, 0.042, -0.08);
+  B(g, 0.12, 0.03, 0.22, C(0xe8742b, { roughness: 0.9 }), 0.36, 0.006, 0.08);
+  return g;
 }
 function wallbox() { const g = new THREE.Group(); B(g, 0.35, 0.5, 0.15, C(0xf3f3f1), 0, 1.1, 0); B(g, 0.2, 0.06, 0.01, MAT.green, 0, 1.45, 0.08); Cy(g, 0.02, 0.8, MAT.black, 0.1, 0.4, 0.1); plate(g, 'Stație AC 11 kW', 'Type 2 · demo', 0.4, 0, 0.95, 0.08, 0, '#2e7d32'); return g; }
 function hvCabinet() { const g = new THREE.Group(); B(g, 0.8, 1.9, 0.45, MAT.yellow, 0, 0, 0); plate(g, '⚡ ECHIPAMENT HV', 'mănuși 1000 V · scule izolate · covor', 0.7, 0, 1.5, 0.23, 0, '#d32f2f'); return g; }
@@ -527,6 +573,9 @@ export function buildEquipment(scene) {
   put(toolCabinet(), 12.6, 19.45, 180, 0, info('Dulap de scule pe roți', D.FRA + ' · ' + D.PRA, ['Scule de mână, chei dinamometrice'], 'Dotare service'));
   put(toolCabinet(MAT.blue), 13.4, 13.8, -90, 0, info('Dulap de scule (post 2)', D.PRA, [], 'Dotare service'));
   put(x431(), 13.3, 6.0, -90, 0, info('Tester de diagnoză Launch X431 (VCI)', D.DA + ' · ' + D.SAA, ['Diagnosticare L1–L7: coduri, date live, teste active', 'SAA: date live presiune supraalimentare, datalog'], 'Îndrumar Diagnosticare 2026-2027, tabel echipamente'));
+  put(toolWall(3.6, 1), 6.49, 3.6, 90, 0, info('Perete de scule (panou perforat)', D.PRA + ' · ' + D.FRA, ['Chei fixe/inelare, șurubelnițe, clești – la îndemâna posturilor'], 'Imagine concept „Service didactic · bancuri și scule”'), false);
+  put(workbench(2.6), 6.85, 3.6, 90, 0, null);
+  put(toolCabinet(), 13.6, 4.0, -90, 0, null);
   put(tireChanger(), 7.2, 13.2, 90, 0, info('Mașină de demontat anvelope', D.PRA, ['Practică – întreținere roți'], 'Dotare service'));
   put(wheelBalancer(), 7.2, 11.4, 90, 0, info('Mașină de echilibrat roți', D.PRA + ' · ' + D.DIN, ['Practică – echilibrare', 'Dinamica – dezechilibru roată'], 'Dotare service'));
   put(oilDrainer(), 10.2, 5.5, 0, 0, info('Colector ulei uzat', D.PRA + ' · ' + D.SAA, ['SAA L4 – sistemul de ungere'], 'Dotare service'));
@@ -614,6 +663,8 @@ export function buildEquipment(scene) {
   put(displayTable([hybridCut], 'Transmisie hibridă (secționată)'), 15.0, 16.6, 0, 1, info('Transmisie hibridă power-split (secționată)', D.HEV, ['Concepe strategii de operare hibride', 'Îndrumar proiect sisteme de propulsie hibride (simHEV)'], 'Îndrumar proiect – propulsie hibridă, ed. I'));
   put(wallbox(), 19.7, 15.5, -90, 1, info('Stație de încărcare AC (demo)', D.HEV, ['Încărcarea vehiculelor electrice, protocoale'], 'Program HeV'), false);
   put(hvCabinet(), 19.4, 18.9, -90, 1, info('Dulap echipament de protecție HV', D.HEV + ' · ' + D.DA, ['Lucru în siguranță: mănuși electroizolante, ecran facial, aparatură CAT III 1000 V'], 'Îndrumar Diagnosticare 2026-2027 – lucrul la vehicule HV'));
+  put(studentDesk(1.6), 17.4, 16.6, 0, 1, null);
+  put(hvToolMat(), 17.4, 16.6, 0, 1, info('Scule izolate VDE 1000 V, multimetru CAT III, mănuși electroizolante', D.HEV + ' · ' + D.DA, ['Lucru în siguranță la sisteme de înaltă tensiune'], 'Imagine concept „HeV”; îndrumar Diagnosticare – vehicule HV'), false, 0.77);
   put(pcDesk('bms', 51), 13.6, 19.0, 180, 1, info('Post achiziție date HeV', D.HEV, ['Monitorizare BMS, date invertor'], 'Program HeV'));
   put(pcDesk('code', 52), 15.2, 19.0, 180, 1, null);
 
