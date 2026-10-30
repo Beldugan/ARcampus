@@ -7,13 +7,14 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Corp Campus AR · tur virtual 3D · R09</title>
-<link rel="stylesheet" href="css/style.css?v=r09-labs-1">
+<link rel="stylesheet" href="css/style.css?v=r09-render-2">
 <script type="importmap">
 { "imports": { "three": "./lib/three/three.module.js", "three/addons/": "./lib/three/addons/" } }
 </script>
 </head>
 <body>
 <div id="app"></div>
+<div id="render-status" role="status">Pregătim turul 3D…</div>
 <div id="crosshair"></div>
 <nav id="views" aria-label="Mod de vizualizare"><button data-view="tour" aria-pressed="true">Tur 3D</button><button data-view="0" aria-pressed="false">Plan parter</button><button data-view="1" aria-pressed="false">Plan etaj</button></nav>
 <div id="room" class="hud"></div>
@@ -35,6 +36,6 @@
   <div><kbd>C</kbd> / <kbd>N</kbd> imagine concept · <kbd>Q</kbd> calitate</div>
   <div class="kf">Privește un echipament pentru fișa lui<br><kbd>H</kbd> ascunde acest panou</div>
 </div>
-<script type="module" src="js/main.js?v=r09-labs-1"></script>
+<script type="module" src="js/boot.js?v=r09-render-2"></script>
 </body>
 </html>

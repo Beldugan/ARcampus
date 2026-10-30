@@ -19,7 +19,7 @@ const EYE = 1.65, RADIUS = 0.28;
 
 // ------------------------------------------------------------ randare
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: qs.has('cam') });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, /Mobi|Android/i.test(navigator.userAgent)?1.5:2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.94;
@@ -43,21 +43,38 @@ function updateEnv(inside) { if (inside === envInside) return; envInside = insid
 
 const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 0.05, 600);
 camera.rotation.order = 'YXZ';
-const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { samples: 4, type: THREE.HalfFloatType }));
-composer.addPass(new RenderPass(scene, camera));
-const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
-gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.0, scale: 1.2, samples: 12 });
-gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 12 });
-gtao.blendIntensity = 0.9;
-composer.addPass(gtao); composer.addPass(new OutputPass());
-let HQ = !/Mobi|Android/i.test(navigator.userAgent);
-const draw = () => HQ ? composer.render() : renderer.render(scene, camera);
+// Post-processing is optional and allocated only when Q is requested.
+let composer = null, HQ = false;
+function highQualityComposer() {
+  if (composer) return composer;
+  const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, { samples: 0, type: THREE.UnsignedByteType });
+  const next = new EffectComposer(renderer, target);
+  next.setPixelRatio(1);
+  next.addPass(new RenderPass(scene, camera));
+  const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+  gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1.0, scale: 1.2, samples: 12 });
+  gtao.blendIntensity = 0.9;
+  next.addPass(gtao); next.addPass(new OutputPass());
+  composer = next;
+  return composer;
+}
+const draw = () => {
+  if (HQ) {
+    try { highQualityComposer().render(); return; }
+    catch (error) {
+      console.error('Efectele avansate au fost dezactivate:', error);
+      HQ = false;
+      composer?.dispose(); composer = null;
+    }
+  }
+  renderer.render(scene, camera);
+};
 
 // lumini
 scene.add(new THREE.HemisphereLight(0xdfeaff, 0x817a6e, 0.55));
 const sun = new THREE.DirectionalLight(0xfff1dc, 2.6);
 sun.position.set(-30, 45, 40); sun.target.position.set(10, 0, -10);
-sun.castShadow = true; sun.shadow.mapSize.set(qs.has('cam') ? 2048 : 4096, qs.has('cam') ? 2048 : 4096); sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02;
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02;
 Object.assign(sun.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, near: 1, far: 160 });
 scene.add(sun, sun.target);
 // iluminat artificial: 6 surse care se mută în cele mai apropiate încăperi (număr constant = fără recompilări)
@@ -94,10 +111,11 @@ for (const it of items) {
   eqBoxes[it.lvl].push({ x0: tmpBox.min.x, x1: tmpBox.max.x, y0: -tmpBox.max.z, y1: -tmpBox.min.z });
 }
 // după încărcarea modelului de autoturism: casetele echipamentelor (pentru fișe), apoi comasarea geometriei statice
+let sceneReady = false;
 let OPT_READY = CAR_MODEL.then(() => new Promise(r => setTimeout(r, 0))).then(() => {
   for (const it of items) it.box = new THREE.Box3().setFromObject(it.obj);
   if (!qs.has('nomerge')) for (const r of scene.children.filter(o => ['cladire', 'echipamente', 'amplasament'].includes(o.name))) mergeStatic(r);
-  renderer.shadowMap.needsUpdate = true; dirty = true; window.OPT_DONE = true;
+  renderer.shadowMap.needsUpdate = true; dirty = true; window.OPT_DONE = true; sceneReady = true;
 });
 let dirty = true;
 
@@ -344,7 +362,7 @@ let flashT = 0; const flashEl = document.getElementById('flash');
 function flash(t) { flashEl.textContent = t; flashEl.classList.remove('hidden'); flashT = 2.5; }
 
 // ------------------------------------------------------------ bucla
-addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); dirty = true; });
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer?.setSize(innerWidth, innerHeight); dirty = true; });
 addEventListener('keydown', e => { if (e.code === 'KeyQ') { HQ = !HQ; flash(HQ ? 'Calitate înaltă (umbre de contact)' : 'Calitate rapidă'); dirty = true; } });
 if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawDeg,pitchDeg
   const [x, y, h, yw, pt] = qs.get('cam').split(',').map(Number);
@@ -354,6 +372,7 @@ if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawD
 } else {
   let frame = 0, lastPose = '', idle = 0, hqDone = false;
   renderer.setAnimationLoop(() => {
+    if (!sceneReady || renderer.getContext().isContextLost()) return;
     const dt = Math.min(clock.getDelta(), 0.05);
     update(dt); const doorsMoving = updateDoors(dt);
     const pose = camera.position.x.toFixed(3) + ',' + camera.position.y.toFixed(3) + ',' + camera.position.z.toFixed(3) + ',' + camera.rotation.x.toFixed(4) + ',' + camera.rotation.y.toFixed(4);
@@ -367,10 +386,11 @@ if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawD
       idle = 0; hqDone = false; dirty = false;
     } else if (!hqDone) {
       idle += dt;
-      if (idle > 0.25) { placeLights(); if (HQ) composer.render(); else renderer.render(scene, camera); hqDone = true; }   // pe loc: un cadru de calitate (ocluzie ambientală)
+      if (idle > 0.25) { placeLights(); draw(); hqDone = true; }   // pe loc: un cadru de calitate (ocluzie ambientală)
     }
   });
 }
 // acces pentru testare automată (fără efect în utilizare)
 window.APP = { player, keys, update, updateDoors, useLift, setPose, camera, blocked, ROOMS, items, colliders, eqBoxes, doors, scene, surfacesAt, teleport, TP, setPlanView };
+OPT_READY.then(() => { const status = document.getElementById('render-status'); if (status?.getAttribute('role') === 'status') status.remove(); }).catch(window.reportRenderError);
 window.PERF = () => { const c = {}; scene.traverse(o => { if (o.isMesh) { let r = o; while (r.parent && r.parent !== scene) r = r.parent; c[r.name || r.type] = (c[r.name || r.type] || 0) + 1; } }); renderer.render(scene, camera); return { meshes: c, calls: renderer.info.render.calls, tris: renderer.info.render.triangles, progs: renderer.info.programs.length, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }; };
