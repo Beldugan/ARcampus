@@ -1311,7 +1311,7 @@ export function buildEquipment(scene) {
  put(headlightTester(),24.7,4.2,90,0,'Regloscop',D.ITP);
  put(twoPostLift(true),28.6,7.25,90,0,'Post 1 · elevator 2 coloane',D.PRA);
  put(car(0xeef0f1),33.1,7.25,90,0,'Post 2 · diagnoză la sol',D.DA);
- put(workbench(2.2),30.8,11.7,0,0,'Banc cu panou de scule · concept service',D.PRA);
+ put(workbench(2.2),26.5,10.9,90,0,'Banc cu panou de scule · concept service',D.PRA);
  put(tireChanger(),34.1,3.5,90,0,'Mașină anvelope',D.PRA);
  put(wheelBalancer(),30.6,3.5,90,0,'Echilibror roți',D.PRA);
  for(const u of [28.6,33.1])put(extractionReel(2.1),u,9.8,0,0,'Extracție gaze la sursă',D.PRA,false,4.2);

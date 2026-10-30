@@ -51,6 +51,13 @@ assert(!west[6].some(o=>o[4]==='gate'&&o[0]<19),'P03 still has an industrial gat
 assert(west[6].some(o=>o[4]==='door'&&o[0]>7&&o[1]<19),'P03 needs exterior pedestrian door');
 assert(west[6].filter(o=>o[4]==='win'&&o[0]>7&&o[1]<19).length>=4,'P03 needs normal windows');
 for(let v=11;v<=14;v+=.02){assert(!blocked(13.86,v,0),'P03 pedestrian entry blocked');}
+// Keep the west gate approach clear of equipment, including the tool-panel workbench.
+for(const it of eq[0]){
+ const u0=it.y0,u1=it.y1,v0=12.5-it.x1,v1=12.5-it.x0;
+ for(const[a,b]of [[20.8,24.2],[29.3,32.7]]){
+  if(u0<b&&u1>a&&v0<13.5&&v1>10.7)faults.push('gate approach obstructed by '+it.name);
+ }
+}
 // Stair surfaces must connect continuously through both flights and intermediate landing.
 for(const external of[false,true]){
  const seq=external?[[44.1,5.84],[44.1,2.2],[42.4,2.2],[42.4,5.84]]:[[1,6.9],[1,10.54],[2.8,10.54],[2.8,6.9]];
