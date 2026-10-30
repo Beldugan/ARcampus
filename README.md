@@ -34,7 +34,7 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
   * **P01 Stație ITP clasa a II-a, 78 m²:** linie în lungul clădirii (canal 6,50 m, role de frânare, tester suspensie, ripaj, regloscop, analizor gaze), poartă 3,60 × 3,80 m pe latura de vest;
   * **P02 Service student, 116 m²:** 2 posturi, fiecare cu poarta lui pe latura de vest; bancuri, mașini de anvelope și echilibrare;
   * în spate: magazie piese, vestiar, cameră tehnică.
-* **Etaj:** hol central de 2,00 m în lungul clădirii. Spre vest: E01 Diagnosticare + Mecatronică, E03 Dinamică, E05 HeV, E12 Laborator CAD și fabricație aditivă. Spre est: E14 Sală de seminar (30 de locuri), E13 Sală de seminar și protocol (30 de locuri), E02 CCA, E04 Caroserii. WC-uri la capătul dinspre stradă.
+* **Etaj:** hol central de 2,00 m în lungul clădirii. Spre vest: E01 Diagnosticare + Mecatronică, E03 Dinamică, E05 HeV, E12 Laborator CAD și fabricație aditivă. Spre est: E14 Sală de seminar (30 de locuri), E13 Sală de seminar și protocol (masă ovală, 28 de locuri), E02 CCA, E04 Caroserii. WC-uri la capătul dinspre stradă.
 * **Accese:** vehiculele ITP și service intră și ies prin curtea de manevră de pe latura de vest, legată direct de stradă. Pietonii intră pe ușa principală de la stradă. Scara S1 (în U, acoperită) e în spatele clădirii și se ajunge la ea pe aleea de est.
 * **E12:** 9 posturi PC, 2 imprimante 3D FDM de format mare (1000 × 1000 × 1000 mm) și o imprimantă 3D cu gel întărit UV.
 
@@ -54,7 +54,7 @@ Suprafața netă = suprafața încăperii − amprenta standurilor didactice și
 | E05 HeV | 38,5 m² | 4 | 7 | 7 |
 | E12 Laborator CAD | 34,5 m² | 2,5 | 11 | 9 |
 | E14 Sală de seminar | 43,4 m² | 1,4 | 30 | 30 |
-| E13 Sală de seminar și protocol | 43,4 m² | 1,4 | 30 | 30 |
+| E13 Sală de seminar și protocol | 43,4 m² | 1,4 | 30 | 28 (masă ovală) |
 
 ## Publicare pe GitHub Pages
 

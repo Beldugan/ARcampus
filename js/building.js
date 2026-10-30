@@ -103,7 +103,7 @@ export const ROOMS = [
   { id: 'E05', name: 'E05 · HeV – Autovehicule hibride și electrice', sign: ['E05 · HeV', 'Hibride și electrice'], lvl: 1, r: [0.2, 24.75, 5.1, 32.6], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
   { id: 'E12', name: 'E12 · Laborator CAD și fabricație aditivă', sign: ['E12 · CAD', 'Grafică asistată · imprimare 3D'], lvl: 1, r: [0.2, 32.75, 5.1, 39.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
   { id: 'E14', name: 'E14 · Sală de seminar (30 locuri)', sign: ['E14 · SEMINAR', '30 de locuri'], lvl: 1, r: [7.4, 3.55, 12.3, 12.4], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E13', name: 'E13 · Sală de seminar și protocol (30 locuri)', sign: ['E13 · SEMINAR / PROTOCOL', '30 de locuri · întâlniri oficiale'], lvl: 1, r: [7.4, 12.55, 12.3, 21.4], floor: 'parquet', ceil: 'tiles', h: 2.75 },
+  { id: 'E13', name: 'E13 · Sală de seminar și protocol (masă ovală)', sign: ['E13 · SEMINAR / PROTOCOL', 'masă ovală · întâlniri oficiale'], lvl: 1, r: [7.4, 12.55, 12.3, 21.4], floor: 'parquet', ceil: 'tiles', h: 2.75 },
   { id: 'E02', name: 'E02 · CCA – Calculul și construcția autovehiculelor', sign: ['E02 · CCA', 'Construcția autovehiculelor'], lvl: 1, r: [7.4, 21.55, 12.3, 30.4], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
   { id: 'E04', name: 'E04 · Caroserii și structuri portante', sign: ['E04 · CAROSERII', 'Structuri portante'], lvl: 1, r: [7.4, 30.55, 12.3, 39.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
 ];

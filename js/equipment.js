@@ -1290,6 +1290,7 @@ const D = {
 
 // ------------------------------------------------------------------ amplasare
 const fmt = v => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',').replace(/,0$/, '');
+let E13_SEATS = 0;
 export function buildEquipment(scene) {
   const items = []; const root = new THREE.Group(); root.name = 'echipamente'; scene.add(root);
   const put = (obj, x, y, rotDeg, lvl, info, collide = true, h = 0) => {
@@ -1416,7 +1417,35 @@ export function buildEquipment(scene) {
   for (const [id, dy] of [['E14', 0], ['E13', 9.0]]) {
     const prot = id === 'E13';
     (put(prot ? videoWall(2.6) : whiteboard(2.6), 9.4, 3.62 + dy, 180, 1, prot ? info('Ecran 75″ cu bară de videoconferință, pe panou acustic din lamele de stejar', 'Seminar · protocol', ['Prezentări, videoconferințe cu delegații'], 'Amenajare E13') : null, false)).userData.noFoot = true;
-    put(studentDesk(1.2, 1), 11.6, 4.5 + dy, 0, 1, info(prot ? 'Catedră / prezidiu' : 'Catedră', 'Sală de seminar', [], 'Amenajare ' + id)).userData.noFoot = true;
+    if (!prot) put(studentDesk(1.2, 1), 11.6, 4.5 + dy, 0, 1, info('Catedră', 'Sală de seminar', [], 'Amenajare ' + id)).userData.noFoot = true;
+  }
+  // E13: masă ovală de consiliu (nuc, 6,40 × 1,60 m, capete semicirculare) cu scaune executive pe tot conturul – număr maxim de locuri
+  {
+    const TL = 6.4, TW = 1.6, cx = 9.85, cy = 16.9, R = TW / 2, straight = TL - TW;
+    const t = new THREE.Group(), walnut = new THREE.MeshStandardMaterial({ map: T.wood([2, 1]), color: 0x8a5a3a, roughness: 0.35 });
+    const top = slab(TW, TL, 0.05, R - 0.001, walnut, 0.008); top.position.y = 0.72; t.add(top);
+    const edge = slab(TW - 0.06, TL - 0.06, 0.03, R - 0.031, C(0x2b2f33, { roughness: 0.5 })); edge.position.y = 0.69; t.add(edge);
+    for (const z of [-straight / 2 + 0.4, 0, straight / 2 - 0.4]) { B(t, 0.5, 0.69, 0.5, C(0x2b2f33, { metalness: 0.5, roughness: 0.35 }), 0, 0, z); B(t, 0.9, 0.02, 0.7, C(0xb08d57, { metalness: 0.8, roughness: 0.3 }), 0, 0, z); }
+    for (let k = 0; k < 6; k++) Cy(t, 0.035, 0.01, C(0x1a1a1a), 0, 0.77, -straight / 2 + k * straight / 5, 'y', 16);   // microfoane / prize încastrate
+    const tb = put(t, cx, cy, 0, 1, info('Sală de seminar și protocol – masă ovală de consiliu', 'Seminarii · întâlniri cu delegații oficiale · ședințe · videoconferințe', ['Masă ovală din nuc 6,40 × 1,60 m, scaune executive din piele pe tot conturul', 'Ecran 75″ cu bară de videoconferință, steagurile României și UE', 'Seminarii, susțineri de proiecte, ședințe de catedră'], 'Amenajare E13'));
+    tb.userData.noFoot = true;
+    // scaune pe un contur paralel cu marginea mesei (0,45 m în afară), la pas egal
+    const rr = R + 0.45, per = 2 * straight + 2 * Math.PI * rr, n = Math.floor(per / 0.62);
+    const ptAt = u => {   // u ∈ [0, per): latura de est (în sus), capătul de nord, latura de vest (în jos), capătul de sud
+      if (u < straight) return [cx + rr, cy - straight / 2 + u, -90];
+      u -= straight; if (u < Math.PI * rr) { const a = u / rr; return [cx + rr * Math.cos(a), cy + straight / 2 + rr * Math.sin(a), null]; }
+      u -= Math.PI * rr; if (u < straight) return [cx - rr, cy + straight / 2 - u, 90];
+      u -= straight; const a = Math.PI + u / rr; return [cx + rr * Math.cos(a), cy - straight / 2 + rr * Math.sin(a), null];
+    };
+    let seated = 0;
+    for (let k = 0; k < n; k++) {
+      let [x, y] = ptAt((k + 0.5) * per / n);
+      const ny = Math.min(Math.max(y, cy - straight / 2), cy + straight / 2), dx = cx - x, dyy = ny - y;   // fața spre cel mai apropiat punct de pe axa mesei
+      const r = THREE.MathUtils.radToDeg(Math.atan2(dx, -dyy));
+      put(execChair(), x, y, r, 1, null).userData.seat = true;
+      if (k % 7 === 2 && seated < 3) { put(seatedStudent(seated + 5, 0.03), x, y, r, 1, null, false).userData.noFoot = true; seated++; }
+    }
+    E13_SEATS = n;
   }
   put(flagStand('ro'), 7.75, 12.95, 0, 1, info('Steagurile României și Uniunii Europene', 'Sală de protocol', [], 'Protocol'), false).userData.noFoot = true; put(flagStand('eu'), 8.2, 12.95, 0, 1, null, false).userData.noFoot = true;
   put(framedPrint('img/concept/ext-fata.jpg', 1.0, 0.62), 12.27, 16.4, -90, 1, null, false, 1.65);
@@ -1462,7 +1491,6 @@ export function buildEquipment(scene) {
       E05: { fixed: [28.8, 30.2, 31.6].flatMap(y => [0.85, 2.1, 3.35].map(x => [x, y])), mk: k => pcDesk(k % 2 ? 'bms' : 'code', 50 + k, 1.2), w: 1.2, d: 0.75, seats: 1, face: 180, title: 'Posturi PC – achiziție și analiză date HeV', disc: D.HEV, luc: ['Monitorizare BMS, date invertor', 'Simulare propulsie hibridă / electrică'] },
       E12: { fixed: [34.35, 35.75, 37.15].flatMap(y => [0.85, 2.1, 3.95].map(x => [x, y])), mk: k => pcDesk('cad', 70 + k, 1.2), w: 1.2, d: 0.75, seats: 1, face: 180, title: 'Laborator CAD – posturi PC', disc: D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, luc: ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Pregătirea modelelor pentru imprimare 3D (slicing)'] },
       E14: { fixed: [5.55, 6.9, 8.25, 9.6, 10.95].flatMap(y => [8.25, 9.5, 11.6].map(x => [x, y])), mk: (k, n) => studentDesk(1.2, n), w: 1.2, d: 0.65, seats: 2, face: 180, title: 'Bănci duble – 15 × 2 = 30 locuri', disc: 'Seminarii, cursuri pe grupe, colocvii', luc: ['Seminarii la disciplinele de specialitate', 'Susțineri de proiecte și referate'] },
-      E13: { fixed: [14.55, 15.9, 17.25, 18.6, 19.95].flatMap(y => [8.25, 9.5, 11.6].map(x => [x, y])), mk: (k, n) => studentDesk(1.2, n), w: 1.2, d: 0.65, seats: 2, face: 180, title: 'Bănci duble – 15 × 2 = 30 locuri (sală reconfigurabilă pentru protocol)', disc: 'Seminarii · întâlniri cu delegații oficiale · ședințe', luc: ['Seminarii, susțineri de proiecte', 'Prezentări și videoconferințe pentru delegații oficiale', 'Ședințe de catedră / de departament'] },
     };
     // 3 cursanți așezați în fiecare laborator (E01 îi are deja pe mesele cu laptop): pe scaunele unor mese alese din loc în loc
     function seatStudents(id, desks) {
