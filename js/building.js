@@ -14,8 +14,8 @@ function mats() {
   M.hpl = new THREE.MeshStandardMaterial({ map: T.hpl([1, 3]), roughness: 0.55 });
   M.teal = new THREE.MeshStandardMaterial({ color: 0x127c8a, roughness: 0.45, metalness: 0.2 });
   M.white = new THREE.MeshStandardMaterial({ color: 0xf2f1ec, roughness: 0.6 });
-  M.facadeW = new THREE.MeshStandardMaterial({ map: T.paint([3, 3], '#f1f0eb'), roughness: 0.85 });   // tencuială albă (ca în masterplan)
-  M.facadeAnth = new THREE.MeshStandardMaterial({ map: T.fiber([3, 3], '#4b5056'), roughness: 0.7, metalness: 0.05 });   // fibrociment grafit (parter)
+  M.facadeW = new THREE.MeshStandardMaterial({ map: T.fiber([3,3],'#eeeae2'), roughness: 0.85 });   // tencuială albă (ca în masterplan)
+  M.facadeAnth = new THREE.MeshStandardMaterial({ map: T.fiber([3, 3], '#45494c'), roughness: 0.58, metalness: 0.08 });   // fibrociment grafit (parter)
   M.wainscot = new THREE.MeshStandardMaterial({ map: T.paint([2, 1], '#8e959b'), roughness: 0.7 });
   M.lineY = new THREE.MeshStandardMaterial({ color: 0xf2c200, roughness: 0.45 });
   M.duct = new THREE.MeshStandardMaterial({ color: 0xd5dadd, roughness: 0.5, metalness: 0.35 });
@@ -23,7 +23,7 @@ function mats() {
   M.base = new THREE.MeshStandardMaterial({ color: 0x4d555d, roughness: 0.8 });
   M.slab = new THREE.MeshStandardMaterial({ color: 0xb9b6ae, roughness: 0.95 });
   M.deck = new THREE.MeshStandardMaterial({ color: 0xc3c9ce, roughness: 0.5, metalness: 0.35 });
-  M.steel = new THREE.MeshStandardMaterial({ color: 0x5d6a75, roughness: 0.45, metalness: 0.6 });
+  M.steel = new THREE.MeshStandardMaterial({ color: 0x62676a, roughness: 0.45, metalness: 0.6 });
   M.alu = new THREE.MeshStandardMaterial({ color: 0x3a4148, roughness: 0.35, metalness: 0.7 });
   M.glass = new THREE.MeshPhysicalMaterial({ color: 0xbfd6e4, roughness: 0.05, metalness: 0.0, transmission: 0.0, transparent: true, opacity: 0.28, envMapIntensity: 1.4, side: THREE.DoubleSide, depthWrite: false });
   M.doorLeaf = new THREE.MeshStandardMaterial({ color: 0xd8d4cc, roughness: 0.6 });
@@ -31,15 +31,15 @@ function mats() {
   M.tile = new THREE.MeshStandardMaterial({ map: T.tiles([1, 1]), roughness: 0.35 });
   M.tileWall = new THREE.MeshStandardMaterial({ map: T.tiles([1, 1], '#f1f1ee'), roughness: 0.3 });
   M.ceiling = new THREE.MeshStandardMaterial({ map: T.ceiling([1, 1]), roughness: 0.95, emissive: 0xffffff, emissiveIntensity: 0.32 });
-  M.led = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfffaf0, emissiveIntensity: 1.6 });
+  M.led = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfffcf5, emissiveIntensity: 1.6 });
   M.stair = new THREE.MeshStandardMaterial({ color: 0x55606a, roughness: 0.55, metalness: 0.6 });
   M.grating = new THREE.MeshStandardMaterial({ color: 0x8d969d, roughness: 0.5, metalness: 0.7 });
   M.ok = true; return M;
 }
 function floorMat(kind, w, d) {
   const m = mats();
-  if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map: T.epoxy([w / 4, d / 4]), roughness: 0.22, metalness: 0.0, clearcoat: 0.8, clearcoatRoughness: 0.12 });
-  if (kind === 'vinyl') return new THREE.MeshStandardMaterial({ map: T.vinyl([w / 3, d / 3]), roughness: 0.5 });
+  if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map:T.concrete([w/3,d/3]),roughness:.43,metalness:0,clearcoat:.25,clearcoatRoughness:.4 });
+  if (kind === 'vinyl') return new THREE.MeshStandardMaterial({map:T.tiles([w/1.2,d/2.4],'#d8d5cc'),roughness:.52});
   if (kind === 'tile') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2]), roughness: 0.3 });
   if (kind === 'parquet') return new THREE.MeshStandardMaterial({ map: T.wood([w / 1.4, d / 0.35]), color: 0xd9c3a5, roughness: 0.45 });
   if (kind === 'stone') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2], '#cfcac0'), roughness: 0.35 });
@@ -71,13 +71,26 @@ export function buildBuilding(scene){
   const fl=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat(rm.floor,w,d));fl.rotation.x=-Math.PI/2;fl.position.set((x0+x1)/2,base+.008,-(y0+y1)/2);add(fl,false);
   if(!rm.ceil)continue;
   const ce=new THREE.Mesh(new THREE.PlaneGeometry(w,d),rm.ceil==='deck'?m.deck:m.ceiling);ce.rotation.x=Math.PI/2;ce.position.set((x0+x1)/2,base+rm.h,-(y0+y1)/2);add(ce,false);
-  for(let x=x0+.6;x<x1-.25;x+=2.2)for(let y=y0+.6;y<y1-.25;y+=2.8){const le=new THREE.Mesh(new THREE.PlaneGeometry(.45,.45),m.led);le.rotation.x=Math.PI/2;le.position.set(x,base+rm.h-.02,-y);add(le,false);}
+  for(let x=x0+.8;x<x1-.5;x+=2.5)for(let y=y0+1;y<y1-.6;y+=3){
+   const industrial=rm.ceil==='deck',le=new THREE.Mesh(new THREE.PlaneGeometry(industrial?.13:.58,industrial?1.55:.58),m.led);
+   le.rotation.x=Math.PI/2;le.position.set(x,base+rm.h-(industrial?.45:.02),-y);add(le,false);
+   if(industrial)boxXY(x-.1,y-.85,x+.1,y+.85,base+rm.h-.43,base+rm.h-.36,m.alu,false);
+  }
  }
  // Walls, openings and collision bounds come from the same R06 data.
  for(const [x0,y0,x1,y1,lvl,ext,ops] of WALLS){
   const base=LEVEL_H[lvl],top=ext?(lvl?PARAPET:H1):(lvl?ROOF-.3:4.5),along=x1-x0>=y1-y0?'x':'y';
   const lo=along==='x'?x0:y0,hi=along==='x'?x1:y1;
-  const segment=(a,b,z0,z1)=>{if(b-a<.001||z1-z0<.001)return;const r=along==='x'?[a,y0,b,y1]:[x0,a,x1,b];boxXY(...r,base+z0,base+z1,ext?m.facadeW:m.paint);};
+  const segment=(a,b,z0,z1)=>{
+   if(b-a<.001||z1-z0<.001)return;const r=along==='x'?[a,y0,b,y1]:[x0,a,x1,b];
+   const workshop=lvl===0&&(y0+y1)/2>7&&(y0+y1)/2<35.2;
+   const draw=(lo,hi,inside)=>{
+    if(hi-lo<.001)return;let material=inside;
+    if(ext){material=Array(6).fill(inside);const face={front:4,back:5,left:1,right:0}[ext];material[face]=lvl===0?m.facadeAnth:m.facadeW;}
+    boxXY(...r,base+lo,base+hi,material);
+   };
+   if(workshop&&z0<1.7){draw(z0,Math.min(z1,1.7),m.wainscot);draw(Math.max(z0,1.7),z1,m.paint);}else draw(z0,z1,m.paint);
+  };
   const collision=(a,b)=>{if(b-a>.001)colliders[lvl].push(along==='x'?{x0:a,y0,x1:b,y1}:{x0,y0:a,x1,y1:b});};
   let cur=lo;
   for(const [a,b,zb,zt,type] of ops){segment(cur,a,0,top-base);segment(a,b,0,zb);segment(a,b,zt,top-base);collision(cur,a);if(!['door','slide','gate','void'].includes(type))collision(a,b);opening(along,a,b,x0,y0,x1,y1,base,zb,zt,type,ext,lvl);cur=b;}
@@ -146,6 +159,47 @@ export function buildBuilding(scene){
     }
   }
 
+ // Details read from img/concept: cladding joints, exposed workshop structure,
+ // neutral industrial lighting, yellow safety lines and gate protection.
+ const joint=new THREE.MeshStandardMaterial({color:0x676b6d,roughness:.7});
+ for(const[x0,y0,x1,y1,lvl,ext,ops]of WALLS){
+  if(!ext)continue;const ax=x1-x0>y1-y0?'x':'y',lo=ax==='x'?x0:y0,hi=ax==='x'?x1:y1,base=LEVEL_H[lvl];
+  const drawJoint=(a,b,z0,z1)=>{
+   const side=ext==='front'?-.14:ext==='back'?BD+.14:ext==='left'?-.14:BW+.14;
+   if(ax==='x')boxXY(a,side-.008,b,side+.008,base+z0,base+z1,joint,false);
+   else boxXY(side-.008,a,side+.008,b,base+z0,base+z1,joint,false);
+  };
+  for(const z of[lvl?1.0:1.6,lvl?2.8:3.2]){
+   let cur=lo;for(const[a,b,zb,zt]of ops.filter(o=>z>o[2]&&z<o[3])){if(a>cur)drawJoint(cur,a,z,z+.012);cur=b;}if(cur<hi)drawJoint(cur,hi,z,z+.012);
+  }
+  for(let a=lo+3;a<hi-.3;a+=3){
+   let cur=0;for(const o of ops.filter(o=>a>o[0]&&a<o[1]).sort((a,b)=>a[2]-b[2])){if(o[2]>cur)drawJoint(a,a+.012,cur,o[2]);cur=o[3];}
+   const top=lvl?PARAPET-H1:H1;if(cur<top)drawJoint(a,a+.012,cur,top);
+  }
+ }
+ for(const rm of ROOMS.filter(r=>r.ceil==='deck')){
+  const[u0,v0,u1,v1]=rm.plan;
+  for(let u=u0+1;u<u1-.5;u+=3){
+   boxP(u-.045,v0,u+.045,v1,4.22,4.45,m.steel);
+   boxP(u-.14,v0,u+.14,v1,4.2,4.24,m.steel);
+   boxP(u-.14,v0,u+.14,v1,4.43,4.47,m.steel);
+  }
+  // Duct along the room's long axis, hung clear of working and walking zones.
+  const tube=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,u1-u0-.8,20),m.duct);
+  const[x,y]=toWorld((u0+u1)/2,v1-.45);tube.position.set(x,3.98,-y);tube.rotation.x=Math.PI/2;add(tube);
+ }
+ const stripe=(u0,v0,u1,v1)=>boxP(u0,v0,u1,v1,.014,.018,m.lineY);
+ for(const[a,b]of[[20.8,24.2],[27,30.1],[31.6,34.7]]){
+  stripe(a,3.4,a+.08,11.9);stripe(b-.08,3.4,b,11.9);stripe(a,3.4,b,3.48);
+ }
+ const yellow=new THREE.MeshStandardMaterial({color:0xe7b600,roughness:.5});
+ for(const u of[20.45,24.55,28.95,33.05]){
+  for(let k=0;k<5;k++)boxP(u-.075,12.78,u+.075,12.93,k*.2,(k+1)*.2,k%2?m.alu:yellow);
+ }
+ // Wall lamps at pedestrian entrances; no geometry is added inside the clear door openings.
+ for(const[u,v]of[[-.15,7.05],[13.9,12.66],[40.15,1.9]]){
+  boxP(u-.09,v-.04,u+.09,v+.04,2.55,2.8,m.alu);boxP(u-.07,v-.05,u+.07,v+.05,2.59,2.64,m.led);
+ }
  // Internal S1: 28 risers, two 1.40 m flights, clear lower/upper landing.
  const railMat=m.steel;
  const rail=(u0,v0,h0,u1,v1,h1)=>{

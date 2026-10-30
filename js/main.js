@@ -22,7 +22,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffe
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.78;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.94;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // soarele e fix: umbrele se calculează o singură dată
 document.getElementById('app').appendChild(renderer.domElement);
 
@@ -54,7 +54,7 @@ let HQ = !/Mobi|Android/i.test(navigator.userAgent);
 const draw = () => HQ ? composer.render() : renderer.render(scene, camera);
 
 // lumini
-scene.add(new THREE.HemisphereLight(0xdfeaff, 0x6b6250, 0.35));
+scene.add(new THREE.HemisphereLight(0xdfeaff, 0x817a6e, 0.55));
 const sun = new THREE.DirectionalLight(0xfff1dc, 2.6);
 sun.position.set(-30, 45, 40); sun.target.position.set(10, 0, -10);
 sun.castShadow = true; sun.shadow.mapSize.set(qs.has('cam') ? 2048 : 4096, qs.has('cam') ? 2048 : 4096); sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.02;
@@ -71,7 +71,7 @@ for (const rm of ROOMS) {
   }
 }
 const PL = [];
-for (let i = 0; i < 6; i++) { const L = new THREE.PointLight(0xfff6ea, 0, 0, 2); scene.add(L); PL.push(L); }
+for (let i = 0; i < 6; i++) { const L = new THREE.PointLight(0xfffbf3, 0, 0, 2); scene.add(L); PL.push(L); }
 function placeLights() {
   const lvl = (typeof player !== 'undefined' && player.h > 2.6) ? 1 : 0;
   const px = typeof player !== 'undefined' ? player.x : 10, py = typeof player !== 'undefined' ? player.y : 0;

@@ -54,6 +54,12 @@ GitHub Pages folosește rădăcina ramurii configurate în Settings → Pages. P
 
 Lățimile sunt nominale, iar golurile din model includ rezerva tocurilor pentru WC și lift. Finisajele, pragurile, barele de sprijin, protecția scărilor, evacuarea, numărul obiectelor sanitare și sarcinile planșeelor trebuie detaliate și verificate de proiectanți. Documentele și imaginile vechi din `docs/` sau `img/concept/` rămân referințe vizuale și pot arăta compartimentarea anterioară.
 
+## Aspect după imaginile concept
+
+Referințele existente `img/concept/ext-fata.jpg`, `ext-spate.jpg`, `itp-1.jpg`, `srv-1.jpg`, `p03.jpg`, `e01.jpg` și `sala.jpg` ghidează finisajele: parter antracit / etaj alb cald, rosturi de placare, vitraje late cu rame închise, beton satinat în ateliere și dale neutre în laboratoare, soclu interior gri, grinzi și tubulatură aparente, LED-uri liniare, marcaje galbene și protecții la porți. Bancurile cu subansamble P03 și panoul de scule din service folosesc modelele detaliate existente. P03 păstrează accesul pietonal; porțile de hală rămân exclusiv la ITP și service.
+
+Acestea sunt adaptări 3D ale limbajului vizual, fără promisiunea unei reproduceri fotografice identice. Amprenta, compartimentarea, accesele și circulațiile R06 sunt păstrate; vitrajele sunt extinse în interiorul traveilor camerelor. Validarea randării rămâne limitată de lipsa WebGL în browserul de verificare.
+
 ## Atribuire și active
 
 Autoturismele folosesc un model 3D real: „2020 Mazda 3 Hatchback” de OUTPISTON (Sketchfab), licență [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), în varianta fără sigle pregătită de proiectul freaxnx01/game-rhyflitzer (detalii în `models/hatchback.LICENSE.md`). Licența permite doar utilizare necomercială, cu atribuire. Cerul și reflexiile exterioare folosesc panorama HDR „Quarry 01” de la Poly Haven (CC0), iar gazonul folosește textura din exemplele three.js. Celelalte echipamente sunt modelate simplificat (volumetrie la scară reală, materiale PBR, lumină naturală și artificială). Nu sunt modele foto-realiste ale mărcilor concrete.
