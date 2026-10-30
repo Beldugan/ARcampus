@@ -1,12 +1,13 @@
 // Echipamente – modelate din primitive la dimensiuni reale; fiecare are o fișă (disciplină, lucrări, sursă)
 import * as THREE from 'three';
 import {buildVehicle} from './vehicles.js';
+import {transmissionCutaway,brakeCorner,emissionsCart,opticalHeadlightTester,tabletopTools,detailEngine,stampedSamples,cadPrototype,teachingWheel,bodyInWhite,detailSuspensionRig} from './mechanical-detail.js';
 import { T, labelTex, screenTex } from './textures.js';
 import { LEVEL_H, toWorld } from './plan-r06.js';
 import { GLTFLoader } from 'three/addons/GLTFLoader.js';
 import * as BGU from 'three/addons/BufferGeometryUtils.js';
 import { MeshoptDecoder } from 'three/addons/meshopt_decoder.module.js';
-import { engineStandF1C, seatedStudent, standingStudent, workshopBench, boardTable, execChair, credenza, videoWall, flagStand, bookcase, plant, loungeChair, coffeeTable, rug, pendantLine, framedPrint, tableSetting } from './detail.js';
+import { engineF1C, engineStandF1C, seatedStudent, standingStudent, workshopBench, boardTable, execChair, credenza, videoWall, flagStand, bookcase, plant, loungeChair, coffeeTable, rug, pendantLine, framedPrint, tableSetting } from './detail.js';
 
 const C = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.6, metalness: 0.1 }, o));
 const MAT = {
@@ -127,26 +128,8 @@ function pit(len = 6.5, w = 1.1) {
   for (let i = 0; i < 9; i++) B(g, 0.04, 0.035, w - 0.2, MAT.grey, -len / 2 + 0.8 + i * 0.6, 0, 0);
   return g;
 }
-function headlightTester() {
-  const g = new THREE.Group();
-  B(g, 0.08, 0.02, 2.4, MAT.steel, 0, 0, 0);
-  B(g, 0.62, 0.1, 0.55, MAT.dark, 0, 0.06, 0); for (const [x, z] of [[-0.26, -0.22], [0.26, -0.22], [-0.26, 0.22], [0.26, 0.22]]) Cy(g, 0.06, 0.05, MAT.rubber, x, 0.06, z, 'z', 14);
-  B(g, 0.1, 1.95, 0.1, MAT.dark, 0, 0.16, 0); B(g, 0.32, 0.06, 0.16, MAT.dark, 0.08, 2.08, 0); B(g, 0.12, 0.08, 0.1, MAT.dark, 0.2, 2.02, 0);
-  B(g, 0.5, 0.42, 0.5, C(0x2b2f33, { roughness: 0.4 }), 0.12, 0.72, 0);
-  B(g, 0.01, 0.3, 0.36, C(0xcfd5da, { emissive: 0x222222, roughness: 0.1 }), 0.375, 0.78, 0);
-  B(g, 0.3, 0.2, 0.01, C(0x9fb3c4, { roughness: 0.1, metalness: 0.4 }), 0.12, 0.9, 0.255);
-  return g;
-}
-function gasCart() {
-  const g = new THREE.Group();
-  B(g, 0.6, 0.04, 0.5, MAT.dark, 0, 0.15, 0); for (const [x, z] of [[-0.25, -0.2], [0.25, -0.2], [-0.25, 0.2], [0.25, 0.2]]) Cy(g, 0.05, 0.05, MAT.rubber, x, 0.0, z, 'x', 12);
-  for (const [x, z] of [[-0.27, -0.22], [0.27, -0.22], [-0.27, 0.22], [0.27, 0.22]]) B(g, 0.03, 1.0, 0.03, MAT.grey, x, 0.15, z);
-  B(g, 0.55, 0.2, 0.45, C(0xe8e8e6), 0, 0.2, 0); plate(g, 'Analizor gaze', '4 componente + λ', 0.4, 0, 0.32, 0.226, 0, '#2c3e50');
-  B(g, 0.55, 0.22, 0.45, C(0xd5dbe0), 0, 0.5, 0); plate(g, 'Opacimetru', 'MAC', 0.4, 0, 0.62, 0.226, 0, '#2c3e50');
-  B(g, 0.6, 0.04, 0.5, MAT.dark, 0, 1.15, 0); screen(g, 0.5, 0.32, 'itp', 3, 0, 1.2, 0.05, 0, -0.1);
-  Cy(g, 0.012, 2.4, C(0x3a3a3a), 0.2, 0.3, 0.3, 'y', 8);
-  return g;
-}
+function headlightTester() { return opticalHeadlightTester(); }
+function gasCart() { return emissionsCart(); }
 function itpDesk() {
   const g = new THREE.Group();
   B(g, 1.6, 0.04, 0.75, MAT.white, 0, 0.73, 0); for (const x of [-0.75, 0.75]) B(g, 0.05, 0.73, 0.7, MAT.grey, x, 0, 0);
@@ -185,7 +168,7 @@ function twoPostLift(withCar = true, carColor = 0xe6e9ec, model='duster') {
   if (withCar) { const c = car(carColor,model); c.position.y = lift - 0.19; g.add(c); }   // pragul caroseriei (y≈0,19 în model) pe tampoane
   return g;
 }
-function workbench(len = 2.0, panelLen = len) { return workshopBench(len, panelLen, Math.round(len * 10)); }   // banc de atelier realist – vezi detail.js
+function workbench(len = 2.0, panelLen = len) { const g=workshopBench(len,panelLen,Math.round(len*10));const tools=tabletopTools('electric');tools.position.set(.5,.91,.08);g.add(tools);return g; }   // banc de atelier realist – vezi detail.js
 function toolCabinet(color = MAT.red) {
   const g = new THREE.Group(); B(g, 0.75, 1.0, 0.48, color, 0, 0.08, 0);
   for (let i = 0; i < 7; i++) { B(g, 0.7, 0.115, 0.01, color, 0, 0.12 + i * 0.13, 0.245); B(g, 0.4, 0.015, 0.02, MAT.steel, 0, 0.18 + i * 0.13, 0.255); }
@@ -352,7 +335,7 @@ function pcDesk2(seed = 1, n = 2, kind = 'cad') {   // masă dublă 1,6 m cu 2 p
     B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), x + (i ? 0.22 : -0.22), 0, -0.1);
     const c = officeChair(); c.position.set(x, 0, 0.62); c.rotation.y = Math.PI; g.add(c); (g.userData.chairs ||= []).push([x, 0.62]);
   }
-  g.userData.desk = [1.6, 0.75]; return g;
+  const prototype=cadPrototype();prototype.position.set(0,.765,.27);prototype.scale.setScalar(.65);g.add(prototype);g.userData.desk = [1.6, 0.75]; return g;
 }
 function labScope(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.17, 0.13, C(0xd9dcdf, { roughness: 0.5 }), 0, 0, 0); screen(g, 0.17, 0.11, 'scope', seed, -0.06, 0.03, 0.066); for (let i = 0; i < 6; i++) Cy(g, 0.01, 0.01, C(0x333), 0.07 + (i % 2) * 0.05, 0.04 + Math.floor(i / 2) * 0.04, 0.07, 'z', 10); for (let i = 0; i < 4; i++) Cy(g, 0.007, 0.012, [MAT.yellow, C(0x22aaee), C(0xdd44aa), MAT.green][i], -0.12 + i * 0.045, 0.015, 0.07, 'z', 10); return g; }
 function benchPSU() { const g = new THREE.Group(); B(g, 0.22, 0.13, 0.25, C(0x2b2f33), 0, 0, 0); B(g, 0.09, 0.04, 0.005, C(0x0a0a0a), -0.05, 0.08, 0.126); plate(g, '12.00 V', '', 0.08, -0.05, 0.1, 0.13, 0, '#300'); Cy(g, 0.008, 0.012, MAT.red, 0.06, 0.03, 0.13, 'z', 8); Cy(g, 0.008, 0.012, MAT.black, 0.085, 0.03, 0.13, 'z', 8); return g; }
@@ -485,6 +468,7 @@ function labDesk(seed = 0, students = [], n = 2) {
   [[0x111111, -0.03], [0xc0392b, 0.0], [0xf2b705, 0.04], [0x2e7d32, 0.07]].forEach(([c, dx], i) => deskLead(g, [[dx - 0.03, 0.775, -0.06], [dx + 0.02, 0.77, 0.12], [dx + 0.08 + i * 0.02, 0.745, 0.38], [dx + 0.1 + i * 0.03, 0.45, 0.39], [dx + 0.06 + i * 0.04, 0.18 + i * 0.04, 0.33], [dx - 0.05, 0.6, 0.36]], c));
   probeCable(g, [0.27, 0.79, -0.11], [0.6, 0.76, 0.3]); probeCable(g, [0.33, 0.79, -0.11], [0.7, 0.3, 0.38], 0x1a1a1a);
   for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.02]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.12 + dx, 0.765, 0.15), new THREE.Vector3(0.18 + dx, 0.77, 0.28), new THREE.Vector3(0.24 + dx, 0.74, 0.37), new THREE.Vector3(0.26 + dx, 0.35, 0.4), new THREE.Vector3(0.12 + dx, 0.05, 0.35)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 30, 0.0035, 6), c)); }
+  const handtools=tabletopTools();handtools.position.set(-.37,.745,.24);handtools.scale.setScalar(.48);g.add(handtools);
   // scaune; pe locul din stânga poate sta un cursant (cu fața spre laptop)
   g.userData.desk = [1.6, 0.75]; g.userData.chairs = (n === 1 ? [-0.38] : [-0.38, 0.4]).map(x => [x, x < 0 && students.length ? 0.58 : 0.66]);
   for (const x of (n === 1 ? [-0.38] : [-0.38, 0.4])) {
@@ -643,7 +627,8 @@ function rackCabinet() { const g = new THREE.Group(); B(g, 0.6, 1.8, 0.6, C(0x3a
 // roată reală (anvelopă + jantă din aliaj) preluată din modelul 3D al autoturismului; axa roții = axa locală z
 function realWheel(parent, x, y, z, ry = 0, scale = 1) {
   const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; g.scale.setScalar(scale); parent.add(g);
-  CAR_MODEL.then(src => { if (!src) return; const w = src.getObjectByName('wheel_FL'); if (!w) return; const c = w.clone(true); c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.traverse(o => { if (o.isMesh) { o.castShadow = true; if (CARMAT[o.material.name]) o.material = CARMAT[o.material.name](); } }); g.add(c); });
+  const fallback=teachingWheel();g.add(fallback);
+  CAR_MODEL.then(src => { if (!src) return; const w = src.getObjectByName('wheel_FL'); if (!w) return; fallback.visible=false;const c = w.clone(true); c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.traverse(o => { if (o.isMesh) { o.castShadow = true; if (CARMAT[o.material.name]) o.material = CARMAT[o.material.name](); } }); g.add(c); });
   return g;
 }
 function halfCarRig() {   // punte completă pe platformă de încercări (după imaginea concept „Dinamică”)
@@ -666,7 +651,7 @@ function halfCarRig() {   // punte completă pe platformă de încercări (după
   B(g, 1.7, 0.06, 0.08, fr, 0, 1.08, 0);
   for (let i = 0; i < 4; i++) tube(g, [-0.2 + i * 0.12, 0.47, 0.18], [-0.6 + i * 0.3, 0.06, 0.75], 0.006, C(0xd32f2f));   // cabluri traductoare
   plate(g, 'Stand suspensie – punte completă', 'excitație verticală · confort · ținută de drum', 0.9, 0, 0.2, 0.81, 0, '#1d2b3a');
-  return g;
+  return detailSuspensionRig(g);
 }
 function tireCage() {   // stand de încercare a pneurilor: dulap albastru pe roți, cușcă din plasă, roată reală
   const g = new THREE.Group(); const blue = C(0x1f3f78, { metalness: 0.3, roughness: 0.45 }), fr = C(0xc9cdd1, { metalness: 0.75, roughness: 0.3 });
@@ -889,7 +874,11 @@ function engineRotStand(kind = 'MPI', cut = true) {
   for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + 0.78; const arm = B(g, 0.02, 0.32, 0.04, SF, 0.24, 1.08 - 0.16, 0); arm.position.set(0.24, 1.08 + Math.sin(a) * 0.12 - 0.16, Math.cos(a) * 0.12); arm.rotation.x = a; }
   B(g, 0.06, 0.1, 0.1, MAT.dark, 0.6, 1.0, 0.07);                                                        // reductor cu manivelă
   Cy(g, 0.01, 0.18, MAT.steel, 0.66, 1.05, 0.15, 'z', 8);
-  const em = engineModel(kind); em.scale.setScalar(1.3); em.position.set(-0.22, 0.6, 0); g.add(em);
+  const em = kind==='MPI'?engineF1C():detailEngine(engineModel(kind));
+  if(kind==='MPI'){
+   const b=new THREE.Box3().setFromObject(em),sz=b.getSize(new THREE.Vector3()),center=b.getCenter(new THREE.Vector3());
+   const k=Math.min(.88/sz.x,.87/sz.y,.7/sz.z);em.scale.setScalar(k);em.position.set(-.22-center.x*k,.6-b.min.y*k,-center.z*k);
+  }else{em.scale.setScalar(1.3);em.position.set(-.22,.6,0);}g.add(em);
   return g;
 }
 function cylHeadsBench(len = 2.2) {   // banc cu chiulase, ax cu came și scule (ca în imaginea concept)
@@ -915,23 +904,7 @@ function enginePartsBench(len = 2.2) {
   return g;
 }
 // ---- CCA: carcasă secționată cu arbori și roți dințate vizibile
-function gearboxCut() {   // cutie de viteze manuală 5+R secționată: carcasă aluminiu nervurată, clopot ambreiaj, arbori cu roți dințate, sincronizatoare, furci, rulmenți
-  const g = new THREE.Group(), alu = C(0xb4b9bd, { metalness: 0.8, roughness: 0.42 }), ring = C(0xb08d3c, { metalness: 0.85, roughness: 0.3 });
-  const back = slab(0.62, 0.22, 0.4, 0.04, alu, 0.006); back.rotation.x = Math.PI / 2; back.position.set(0, 0.24, -0.11); back.rotation.x = 0; back.position.set(0, 0.02, -0.12); g.add(back);   // jumătatea spate (cuvă)
-  for (let i = 0; i < 7; i++) B(g, 0.012, 0.36, 0.02, alu, -0.27 + i * 0.09, 0.04, -0.235);                  // nervuri
-  for (const [w, h, x, y] of [[0.62, 0.025, 0, 0.42], [0.62, 0.025, 0, 0.02], [0.025, 0.42, -0.3, 0.02], [0.025, 0.42, 0.3, 0.02]]) B(g, w, h, 0.02, CUT, x, y, -0.005);
-  const bell = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.13, 0.16, 36, 1, true, Math.PI * 0.5, Math.PI), new THREE.MeshStandardMaterial({ color: 0xb4b9bd, metalness: 0.8, roughness: 0.42, side: THREE.DoubleSide })); bell.rotation.z = Math.PI / 2; bell.position.set(-0.39, 0.3, 0.0); g.add(bell);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.01, 6, 36, Math.PI), CUT); rim.rotation.y = Math.PI / 2; rim.rotation.z = Math.PI / 2; rim.position.set(-0.47, 0.3, 0); g.add(rim);
-  Cy(g, 0.016, 0.85, GEARM, -0.05, 0.3, 0.03, 'x', 12); Cy(g, 0.018, 0.6, GEARM, 0, 0.13, 0.03, 'x', 12);   // arbore primar / secundar
-  for (const x of [-0.27, 0.27]) for (const y of [0.3, 0.13]) { const b = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 20), GEARM); b.rotation.y = Math.PI / 2; b.position.set(x, y, 0.03); g.add(b); }   // rulmenți
-  const pairs = [[0.028, 0.068, 0.2], [0.04, 0.058, 0.12], [0.052, 0.046, -0.02], [0.062, 0.036, -0.1], [0.072, 0.026, -0.18]];
-  for (const [r1, r2, x] of pairs) { gear(g, r1, Math.max(10, Math.round(r1 * 320)), 0.026, x, 0.3, 0.03); gear(g, r2 + 0.03, Math.round((r2 + 0.03) * 320), 0.026, x, 0.13, 0.03); }
-  for (const x of [0.06, -0.14]) { Cy(g, 0.05, 0.034, C(0xc9cdd1, { metalness: 0.9, roughness: 0.25 }), x, 0.13, 0.03, 'x', 24); for (const dx of [-0.02, 0.02]) Cy(g, 0.045, 0.006, ring, x + dx, 0.13, 0.03, 'x', 24); const fk = new THREE.Mesh(new THREE.TorusGeometry(0.052, 0.006, 6, 20, Math.PI), C(0x6f767c, { metalness: 0.7 })); fk.rotation.y = Math.PI / 2; fk.position.set(x, 0.13, 0.03); g.add(fk); }   // sincronizatoare + furci
-  Cy(g, 0.008, 0.5, GEARM, 0, 0.22, -0.05, 'x', 8); B(g, 0.03, 0.12, 0.03, C(0x2b2f33), 0.1, 0.42, -0.08); Cy(g, 0.012, 0.18, GEARM, 0.1, 0.54, -0.08, 'y', 8); const knob = new THREE.Mesh(new THREE.SphereGeometry(0.025, 14, 10), C(0x111111)); knob.position.set(0.1, 0.72, -0.08); g.add(knob);   // tijă + maneta
-  gear(g, 0.1, 50, 0.022, 0.12, 0.0, 0.05, 'x', ring);                                                       // coroana diferențialului (jos)
-  for (const x of [-0.25, 0.25]) B(g, 0.05, 0.04, 0.28, C(0x2b2f33), x, -0.02, -0.06);                         // suport
-  return g;
-}
+function gearboxCut() { return transmissionCutaway(); }
 let clutchN = 0;
 function clutch() {   // alternativ: mecanism de presiune cu arc diafragmă / disc de ambreiaj cu arcuri de amortizare și garnituri de fricțiune (pe suport)
   const g = new THREE.Group(), st = C(0x8a9196, { metalness: 0.8, roughness: 0.38 }), y = 0.16; const n = clutchN++ % 2;
@@ -1001,38 +974,13 @@ function wheelHub() {   // roată completă (jantă de aliaj + anvelopă) pe sup
   return g;
 }
 let brakeN = 0;
-function brakeKit() {   // alternativ: frână disc (disc ventilat, etrier flotant cu plăcuțe și furtun) / cilindru de frână pneumatic cu acumulator (tip 24/24) + levier de reglare + ax S
-  const g = new THREE.Group(), n = brakeN++ % 2, y = 0.17;
-  B(g, 0.2, 0.02, 0.16, C(0x2b2f33), 0, 0, 0); B(g, 0.03, y, 0.05, C(0x2b2f33), 0, 0.02, -0.05);
-  if (n === 0) {
-    Cy(g, 0.15, 0.01, C(0x8f9397, { metalness: 0.85, roughness: 0.42 }), 0, y, 0, 'z', 40); Cy(g, 0.15, 0.01, C(0x8f9397, { metalness: 0.85, roughness: 0.42 }), 0, y, 0.026, 'z', 40);
-    for (let i = 0; i < 30; i++) { const a = i / 30 * Math.PI * 2; B(g, 0.004, 0.05, 0.016, C(0x55595e, { metalness: 0.7 }), Math.cos(a) * 0.125, y + Math.sin(a) * 0.125 - 0.025, 0.013).rotation.z = a - Math.PI / 2; }   // nervuri de ventilare
-    Cy(g, 0.07, 0.045, C(0x5d6266, { metalness: 0.7 }), 0, y, 0.035, 'z', 28); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; Cy(g, 0.006, 0.03, GEARM, Math.cos(a) * 0.045, y + Math.sin(a) * 0.045, 0.065, 'z', 6); }
-    const cal = new THREE.Group(); cal.position.set(0.1, y + 0.08, 0.013); cal.rotation.z = -0.65; g.add(cal);
-    B(cal, 0.13, 0.07, 0.08, MAT.red, 0, -0.035, 0); Cy(cal, 0.028, 0.03, MAT.red, 0, 0.0, 0.05, 'z', 16); B(cal, 0.1, 0.04, 0.006, C(0x2b2b2b), 0, -0.01, 0.017); B(cal, 0.1, 0.04, 0.006, C(0x2b2b2b), 0, -0.01, -0.017);
-    g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0.14, y + 0.13, 0.06), new THREE.Vector3(0.2, y + 0.2, 0.08), new THREE.Vector3(0.22, y + 0.05, 0.05)]), 16, 0.006, 8), C(0x111111)));
-  } else {
-    const c = new THREE.Group(); c.position.set(0, y, 0.02); g.add(c); const dome = C(0x1b1d20, { metalness: 0.4, roughness: 0.45 });
-    for (const [z, r] of [[-0.05, 0.1], [0.05, 0.1]]) { const d = new THREE.Mesh(new THREE.SphereGeometry(r, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2), dome); d.rotation.x = z < 0 ? -Math.PI / 2 : Math.PI / 2; d.scale.set(1, 0.45, 1); d.position.z = z * 0.3; c.add(d); }
-    const band = new THREE.Mesh(new THREE.TorusGeometry(0.102, 0.008, 8, 30), GEARM); c.add(band); Cy(c, 0.008, 0.18, GEARM, 0, -0.11, 0, 'y', 8);   // colier + tijă
-    Cy(c, 0.012, 0.03, C(0xb08d3c), 0.06, 0.06, 0.06, 'z', 8); Cy(c, 0.012, 0.03, C(0xb08d3c), -0.06, 0.06, 0.06, 'z', 8);   // racorduri aer
-    B(g, 0.03, 0.14, 0.015, C(0xd4a017, { metalness: 0.5 }), 0, y - 0.24, 0.02); Cy(g, 0.015, 0.2, GEARM, 0, y - 0.3, -0.05, 'z', 10);   // levier de reglare + ax S
-  }
-  return g;
-}
+function brakeKit() { return brakeCorner(); }
 function biwShell() {
   const g = new THREE.Group(); const fr = C(0x1f3f78, { metalness: 0.4, roughness: 0.45 });
   for (const z of [-0.55, 0.55]) { B(g, 3.4, 0.08, 0.08, fr, 0, 0.12, z); for (const x of [-1.5, 1.5]) Cy(g, 0.06, 0.04, MAT.rubber, x, 0.06, z, 'z', 14); }
   for (const x of [-1.4, -0.5, 0.5, 1.4]) { B(g, 0.08, 0.08, 1.18, fr, x, 0.12, 0); B(g, 0.06, 0.32, 0.06, fr, x, 0.2, -0.45); B(g, 0.06, 0.32, 0.06, fr, x, 0.2, 0.45); }
   const proxy = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.5, 1.8), new THREE.MeshBasicMaterial()); proxy.position.y = 1.1; proxy.visible = false; g.add(proxy);
-  const zinc = new THREE.MeshPhysicalMaterial({ color: 0xc3c8cc, metalness: 0.85, roughness: 0.38, clearcoat: 0.3, side: THREE.DoubleSide });
-  CAR_MODEL.then(src => {
-    if (!src) return; const m = src.clone(true);
-    const hide = [];
-    m.traverse(o => { if (/^wheel_/.test(o.name)) hide.push(o); if (o.isMesh) { if (o.material.name === 'Paint') { o.material = zinc; o.castShadow = true; o.receiveShadow = true; } else hide.push(o); } });
-    hide.forEach(o => o.visible = false);
-    m.position.y = 0.33; g.add(m);
-  });
+  const shell=bodyInWhite();shell.position.y=.38;g.add(shell);
   return g;
 }
 function doorStand() {
@@ -1045,12 +993,7 @@ function doorStand() {
   B(g, 0.02, 0.2, 0.9, C(0x9aa0a6, { metalness: 0.7 }), 0.03, 0.62, 0);                // bară anti-intruziune
   return g;
 }
-function sheetParts() {   // table de piese din tablă (lonjeroane, suporți, întărituri) pe masa de lucru
-  const g = steelTable(1.8, 0.8, 0.85); const z = C(0xc3c8cc, { metalness: 0.85, roughness: 0.35 });
-  for (const [w, h, d, x, zz, ry] of [[0.5, 0.05, 0.12, -0.55, -0.15, 0.2], [0.3, 0.12, 0.18, -0.1, 0.2, -0.4], [0.42, 0.03, 0.25, 0.4, -0.1, 0.1], [0.22, 0.08, 0.12, 0.65, 0.22, 0.6], [0.35, 0.06, 0.1, 0.05, -0.22, 0.0]]) { const m = B(g, w, h, d, z, x, 0.85, zz); m.rotation.y = ry; }
-  B(g, 0.3, 0.03, 0.04, C(0x2b2f33), 0.3, 0.86, 0.28); Cy(g, 0.02, 0.25, C(0xd4a017), -0.4, 0.88, 0.25, 'x', 8);   // ciocan / dorn
-  return g;
-}
+function sheetParts() { const g=steelTable(1.8,.8,.85);const parts=stampedSamples();parts.position.y=.85;g.add(parts);return g; }
 
 // HeV – după imaginea concept: masă cu cadru de oțel, carcasă de policarbonat transparentă, module de celule, bare și cabluri HV portocalii
 function steelTable(w, d, h = 0.85) {
@@ -1106,7 +1049,7 @@ function emotorBench() {
   const shell = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.3, 40, 1, true, Math.PI * 0.5, Math.PI * 1.5), new THREE.MeshStandardMaterial({ color: 0xaeb3b7, metalness: 0.8, roughness: 0.35, side: THREE.DoubleSide })); shell.rotation.z = Math.PI / 2; m.add(shell);
   for (let i = 0; i < 9; i++) { const f = new THREE.Mesh(new THREE.TorusGeometry(0.153, 0.006, 6, 40, Math.PI * 1.5), alu); f.rotation.y = Math.PI / 2; f.rotation.x = Math.PI * 0.5; f.position.x = -0.13 + i * 0.033; m.add(f); }   // aripioare
   for (const sx of [-1, 1]) { const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.02, 40), alu); sc.rotation.z = Math.PI / 2; sc.position.x = sx * 0.16; m.add(sc); }   // scuturi
-  const stator = new THREE.Mesh(new THREE.CylinderGeometry(0.138, 0.138, 0.2, 40, 1, false), lam); stator.rotation.z = Math.PI / 2; m.add(stator);
+  const stator = new THREE.Mesh(new THREE.CylinderGeometry(0.138, 0.138, 0.2, 40, 1, false, Math.PI*.5, Math.PI*1.5), lam); stator.rotation.z = Math.PI / 2; m.add(stator);
   for (const sx of [-1, 1]) { const ew = new THREE.Mesh(new THREE.TorusGeometry(0.105, 0.026, 10, 36), cu); ew.rotation.y = Math.PI / 2; ew.position.x = sx * 0.115; m.add(ew); }   // capete de bobină
   for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; B(m, 0.2, 0.012, 0.012, cu, 0, Math.sin(a) * 0.115 - 0.006, Math.cos(a) * 0.115); }   // conductoare în crestături
   const rotor = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.2, 32), C(0x6f767c, { metalness: 0.85, roughness: 0.3 })); rotor.rotation.z = Math.PI / 2; m.add(rotor);
@@ -1303,7 +1246,7 @@ export function buildEquipment(scene) {
  const put=(obj,u,v,angle,lvl,name='',disc='',collide=true,h=0)=>{
   const[x,y]=toWorld(u,v);obj.position.set(x,LEVEL_H[lvl]+h,-y);obj.rotation.y=THREE.MathUtils.degToRad(90+angle);
   obj.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
-  const info=name?{name,disc,lucrari:['Amplasare propusă în planul R09; verificare cu fișa utilajului.'],sursa:'AR_Campus_Planuri_Memoriu_R09.pdf · A01/A02',desc:'Studiu conceptual, fără certificare de conformitate.'}:null;
+  const info=name?{name,disc,lucrari:['Amplasare propusă în planul R09; verificare cu fișa utilajului.'],sursa:'Plan R09 · fotografii concept · modele 3D proprii R10',desc:'Studiu conceptual, fără certificare de conformitate.'}:null;
   if(info)obj.userData.info=info;obj.userData.plan={u,v,angle};root.add(obj);items.push({obj,lvl,collide,info});return obj;
  };
  const table=(u,v,lvl,pc=false,seed=1)=>put(pc?pcDesk2(seed,2):studentDesk(1.6,2),u,v,0,lvl,pc?'Post dublu CAD':'Masă dublă de seminar',pc?D.CAD:'Seminar');
@@ -1349,7 +1292,7 @@ export function buildEquipment(scene) {
  for(const [i,u]of[8.3,10.5,12.7,14.9].entries())put(standMobil(i===3?'diag':'meca',i+1),u,11.65,0,1,'Stand mobil diagnosticare / mecatronică '+(i+1),D.MAM1);
  put(engineStandF1C(),17.9,11.1,0,1,'Motor F1C pe stand rotativ',D.DA);
  // HeV: central working aisle between desk row and low-voltage teaching equipment.
- for(const u of[21.9,24.5,27.1])table(u,8.9,1,true,40+u);
+ for(const u of[21.9,24.5,27.1]){const desk=table(u,8.9,1,true,40+u);const kit=tabletopTools('electric');kit.position.set(0,.77,.05);kit.scale.setScalar(.5);desk.add(kit);}
  put(batteryMockup(),21,11.25,0,1,'Baterie didactică ≤60 V',D.HEV);
  put(emotorBench(),24,11.25,0,1,'Motor electric + invertor',D.HEV);
  put(displayTable([hybridCut],'Transmisie hibridă'),27.1,11.15,0,1,'Transmisie hibridă',D.HEV);
@@ -1376,7 +1319,7 @@ export function buildEquipment(scene) {
  const occupied={};let person=0;
  for(const it of items.filter(it=>it.lvl===1&&it.obj.userData.chairs)){
   const{u,v}=it.obj.userData.plan,room=v<6?'cca-dyn':u<19.5?'meca':u<29.5?'hev':'cad';
-  if((occupied[room]||0)>=2)continue;
+  if((occupied[room]||0)>=4)continue;
   const[cx,cz]=it.obj.userData.chairs[0],student=seatedStudent(person++%5);student.position.set(cx,0,cz);student.rotation.y=Math.PI;it.obj.add(student);occupied[room]=(occupied[room]||0)+1;
  }
  for(const[u,v,angle,lvl,variant]of[[31.3,6.2,90,0,5],[31.3,8.1,90,0,6],[24.5,7.2,-90,0,5],[10.7,8.8,180,0,3]]){

@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/BufferGeometryUtils.js';
 
-const PROPS = ['type', 'color', 'emissive', 'emissiveIntensity', 'roughness', 'metalness', 'map', 'normalMap', 'roughnessMap', 'metalnessMap', 'alphaMap', 'emissiveMap', 'aoMap',
+const PROPS = ['type', 'color', 'emissive', 'emissiveIntensity', 'roughness', 'metalness', 'map', 'bumpMap', 'bumpScale', 'normalMap', 'roughnessMap', 'metalnessMap', 'alphaMap', 'emissiveMap', 'aoMap',
   'transparent', 'opacity', 'side', 'depthWrite', 'depthTest', 'alphaTest', 'clearcoat', 'clearcoatRoughness', 'transmission', 'thickness', 'ior', 'sheen', 'envMapIntensity',
   'vertexColors', 'flatShading', 'wireframe', 'polygonOffset', 'polygonOffsetFactor', 'polygonOffsetUnits', 'toneMapped', 'fog', 'blending', 'specularIntensity'];
 function matKey(m) {

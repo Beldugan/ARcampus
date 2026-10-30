@@ -1,3 +1,4 @@
+import {engineF1C} from './detail.js';
 // Project-authored, simplified study models inspired by common vehicle types.
 // These are separate geometries, not resized copies of the bundled Mazda mesh.
 import * as THREE from 'three';
@@ -72,7 +73,7 @@ export function buildVehicle(kind,color=0xb8bec3,{openHood=false}={}){
  if(spec.tail==='suv')for(const side of[-1,1])box(1.85,.045,.035,trim,-.25,H+.015,side*(W/2-.25));
  if(openHood){
   box(.8,.18,W-.45,trim,front-.57,belt+.05,0);
-  for(let i=0;i<4;i++)box(.12,.18,.34,chrome,front-.8+i*.14,belt+.18,0);
+  const engine=engineF1C();const eb=new THREE.Box3().setFromObject(engine),size=eb.getSize(new THREE.Vector3()),center=eb.getCenter(new THREE.Vector3());const scale=Math.min(.78/size.x,.44/size.y,1.05/size.z);engine.scale.setScalar(scale);engine.position.set(front-.57-center.x*scale,belt+.05-eb.min.y*scale,-center.z*scale);g.add(engine);
   const hood=box(.95,.035,W-.3,paint,front-.65,belt+.52,0);hood.rotation.z=-.85;
  }
  return g;

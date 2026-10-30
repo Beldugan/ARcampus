@@ -29,4 +29,4 @@ document.addEventListener('webglcontextlost', event => {
   event.preventDefault();
   reportRenderError(new Error('Contextul WebGL a fost întrerupt.'));
 }, true);
-import('./main.js?v=r09-render-2').catch(reportRenderError);
+import('./main.js?v=r10-detail-1').catch(reportRenderError);

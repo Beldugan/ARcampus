@@ -40,6 +40,7 @@ function mats() {
 function floorMat(kind, w, d) {
   const m = mats();
   if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map:T.concrete([w/3,d/3]),bumpMap:T.concreteRelief([w/3,d/3]),bumpScale:.003,roughnessMap:T.concreteRelief([w/3,d/3]),roughness:.55,metalness:0,clearcoat:.22,clearcoatRoughness:.28 });
+  if (kind === 'labConcrete') return new THREE.MeshPhysicalMaterial({map:T.concrete([w/4,d/4]),bumpMap:T.concreteRelief([w/4,d/4]),bumpScale:.0008,color:0xe5e6e3,roughness:.48,clearcoat:.12,clearcoatRoughness:.35});
   if (kind === 'vinyl') return new THREE.MeshStandardMaterial({map:T.tiles([w/1.2,d/2.4],'#d8d5cc'),roughness:.52});
   if (kind === 'tile') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2]), roughness: 0.3 });
   if (kind === 'parquet') return new THREE.MeshStandardMaterial({ map: T.wood([w / 1.4, d / 0.35]), color: 0xd9c3a5, roughness: 0.45 });
@@ -69,7 +70,7 @@ export function buildBuilding(scene){
  for(const rm of ROOMS){
   if(/S$/.test(rm.id))continue;
   const [x0,y0,x1,y1]=rm.r,base=LEVEL_H[rm.lvl],w=x1-x0,d=y1-y0;
-  const fl=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat(rm.floor,w,d));fl.rotation.x=-Math.PI/2;fl.position.set((x0+x1)/2,base+.008,-(y0+y1)/2);add(fl,false);
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat(rm.lvl===1&&['E02','E04','E05'].includes(rm.id)?'labConcrete':rm.floor,w,d));fl.rotation.x=-Math.PI/2;fl.position.set((x0+x1)/2,base+.008,-(y0+y1)/2);add(fl,false);
   if(!rm.ceil)continue;
   const ce=new THREE.Mesh(new THREE.PlaneGeometry(w,d),rm.ceil==='deck'?m.deck:m.ceiling);ce.rotation.x=Math.PI/2;ce.position.set((x0+x1)/2,base+rm.h,-(y0+y1)/2);add(ce,false);
   for(let x=x0+.8;rm.id!=='P03'&&x<x1-.5;x+=2.5)for(let y=y0+1;y<y1-.6;y+=3){
