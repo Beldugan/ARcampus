@@ -7,12 +7,14 @@ import { RenderPass } from '../lib/three/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from '../lib/three/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from '../lib/three/jsm/postprocessing/OutputPass.js';
 import { T } from './textures.js';
+import { toWorld } from './plan-r06.js';
 import { buildBuilding, surfacesAt, ROOMS, LEVEL_H, LIFT, STAIR, H1, BW, BD } from './building.js';
 import { buildEquipment, CAR_MODEL } from './equipment.js';
 import { buildSite, LOT18_CARS } from './site.js';
 import { mergeStatic } from './perf.js';
 
 const qs = new URLSearchParams(location.search);
+let planView=null, savedTourPose=null;
 const EYE = 1.65, RADIUS = 0.28;
 
 // ------------------------------------------------------------ randare
@@ -127,7 +129,7 @@ setPose(START);
 
 const overlay = null;   // fără ecran de start: turul pornește direct, privirea se face cu clic + tragere
 document.body.classList.add('free');
-renderer.domElement.addEventListener('mousedown', e => { if (!lockMode) { dragLook = true; lastX = e.clientX; lastY = e.clientY; } });
+renderer.domElement.addEventListener('mousedown', e => { if (!lockMode && planView===null) { dragLook = true; lastX = e.clientX; lastY = e.clientY; } });
 addEventListener('mouseup', () => dragLook = false);
 addEventListener('mousemove', e => {
   if (!dragLook || lockMode) return;
@@ -145,34 +147,26 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => keys[e.code] = false);
 
 // ------------------------------------------------------------ puncte de teleportare
-const TP = [
-  { name: 'Exterior · stradă', x: 6.25, y: -13, h: 0, yaw: 0 },
-  { name: 'P01 · Stație ITP', x: 10.5, y: 22.4, h: 0, yaw: 90 },
-  { name: 'P02 · Service student', x: 10.8, y: 30.5, h: 0, yaw: 90 },
-  { name: 'P03 · Laborator motoare', x: 6.0, y: 8.2, h: 0, yaw: 0 },
-  { name: 'P04 · Hol de intrare', x: 3.2, y: 1.2, h: 0, yaw: 0 },
-  { name: 'E01 · Diagnosticare + Mecatronică', x: 4.4, y: 8.0, h: H1, yaw: 0 },
-  { name: 'E02 · CCA', x: 8.2, y: 22.2, h: H1, yaw: 0 },
-  { name: 'E03 · Dinamică', x: 4.4, y: 17.4, h: H1, yaw: 0 },
-  { name: 'E04 · Caroserii', x: 8.2, y: 31.3, h: H1, yaw: 0 },
-  { name: 'E05 · HeV', x: 4.4, y: 25.4, h: H1, yaw: 0 },
-  { name: 'E12 · Sală CAD', x: 4.4, y: 33.4, h: H1, yaw: 0 },
-  { name: 'E13 · Seminar 30 / protocol', x: 11.6, y: 20.8, h: H1, yaw: 180 },
-  { name: 'E14 · Seminar 30 locuri', x: 11.6, y: 11.8, h: H1, yaw: 180 },
-  { name: 'Scara S1 (spatele clădirii)', x: 10.2, y: 46.5, h: 0, yaw: 180 },
-  { name: 'Curtea ITP / service (vest)', x: -9.0, y: 14.0, h: 0, yaw: -90 },
-  { name: 'Parcarea · lotul 18', x: -24.0, y: 4.0, h: 0, yaw: 0 },
+const tp=(name,u,v,h=0,yaw=0)=>{const[x,y]=toWorld(u,v);return{name,x,y,h,yaw};};
+const TP=[
+ tp('Exterior · stradă',-8,6.2),tp('P01 · ITP didactic',20.3,7.5,0,90),tp('P02 · Service',27,5.3,0,90),
+ tp('P03 · Motoare',7.6,8,0,0),tp('Nucleu parter / WC',4.9,5.7,0,-90),
+ tp('E01 · Mecatronică',7.8,8.1,H1),tp('E02 · CCA',23.8,4,H1),tp('E03 · Dinamică',15.8,8,H1),
+ tp('E04 · Caroserii',31.8,4,H1),tp('E05 · HeV',23.8,8,H1),tp('E12 · CAD · 8 posturi',31.8,8,H1),
+ tp('E13 · Seminar · 18 locuri',19.9,4.4,H1),tp('E14 · Seminar · 18 locuri',11.9,4.4,H1),
+ tp('Nucleu etaj / WC',5.3,6.25,H1,90),tp('WC adaptat parter',4.5,3.55,0,90),tp('WC adaptat etaj',4.5,3.55,H1,90),
+ tp('S1 · Scara interioară',1,6.1,0,-90),tp('S2 · Scara exterioară',44.1,6.5,0,180),
+ tp('E15 · Fabricație aditivă',37.4,8,H1),{name:'Curte ITP / service',x:-9,y:14,h:0,yaw:-90},{name:'Parcare lot 18',x:-24,y:4,h:0,yaw:0}
 ];
 const tpList = document.getElementById('tplist');
 TP.forEach((t, i) => { const b = document.createElement('button'); b.textContent = (i < 9 ? (i + 1) + '. ' : '') + t.name; b.onclick = () => teleport(t); tpList.appendChild(b); });
-function teleport(t) { setPose({ x: t.x, y: t.y, h: t.h, yawDeg: t.yaw, pitch: -0.05 }); }
+function teleport(t) { if(planView!==null)setPlanView(null);setPose({ x: t.x, y: t.y, h: t.h, yawDeg: t.yaw, pitch: -0.05 }); }
 
-function useLift() {
-  const nearLift = player.x > LIFT.x0 - 0.2 && player.x < LIFT.x1 + 1.8 && player.y > LIFT.y0 - 0.3 && player.y < LIFT.y1 + 0.3;
-  if (!nearLift) { flash('Liftul este în holul de intrare, lângă grupurile sanitare.'); return; }
-  const up = player.h < 2;
-  setPose({ x: 3.9, y: 6.0, h: up ? H1 : 0, yawDeg: -90, pitch: 0 });
-  flash(up ? 'Etaj +4,80' : 'Parter ±0,00');
+function useLift(){
+ if(planView!==null)setPlanView(null);
+ const[x,y]=LIFT.approach;
+ if(Math.hypot(player.x-x,player.y-y)>2.0){flash('Liftul se accesează din galeria nucleului, lângă WC-ul adaptat.');return;}
+ const up=player.h<2;setPose({x,y,h:up?H1:0,yawDeg:90,pitch:0});flash(up?'Etaj +4,80':'Parter ±0,00');
 }
 
 // ------------------------------------------------------------ deplasare + coliziuni
@@ -184,6 +178,7 @@ function blocked(x, y, lvl) {
   return false;
 }
 function update(dt) {
+  if(planView!==null)return;
   if (overlay && !overlay.classList.contains('hidden')) return;
   const fwd = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
   const side = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
@@ -215,17 +210,7 @@ function update(dt) {
   }
   camera.position.set(player.x, player.h + EYE, -player.y);
 }
-function blockedOutside(x, y) {
-  // la sol: spațiul de sub scara S1 (rampa 1 de unde depășește 0,5 m, podestul de întoarcere, rampa 2, podestul superior) și ecranele de lamele
-  const [A0, A1] = STAIR.laneA;
-  if (x > STAIR.x0 - RADIUS && x < STAIR.x1 + RADIUS && y > STAIR.y0 - RADIUS && y < STAIR.y1 + RADIUS) {
-    if (y > A0 + RADIUS && y < A1 - RADIUS && x < STAIR.xa + 0.85) return false;   // zona de acces + începutul rampei 1 (sub 0,5 m)
-    return true;
-  }
-  if (y > 43.6 && y < 43.8 + RADIUS && x > 7.35 && x < 13.5) return true;
-  if (x > 13.3 && x < 13.5 + RADIUS && y > 40.1 && y < 43.8) return true;
-  return false;
-}
+function blockedOutside(x,y){return false;} // stair surfaces and guard boundaries constrain movement
 // ------------------------------------------------------------ uși cu deschidere automată
 function updateDoors(dt) {
   let moving = false;
@@ -236,7 +221,7 @@ function updateDoors(dt) {
     const target = near ? 1 : 0;
     const step = Math.sign(target - d.ang) * Math.min(Math.abs(target - d.ang), dt * 1.6); if (step) moving = true; d.ang += step;
     const delta = d.ang * Math.PI / 2 * (d.along === 'x' ? d.side : -d.side);
-    d.pivot.rotation.y = d.baseRot + delta;
+    if(d.sliding){d.pivot.position.copy(d.closedPosition);if(d.along==='x')d.pivot.position.x-=d.ang*d.travel;else d.pivot.position.z+=d.ang*d.travel;}else d.pivot.rotation.y = d.baseRot + delta;
   }
   return moving;
 }
@@ -280,13 +265,28 @@ function pick() {
 
 // ------------------------------------------------------------ HUD: încăpere + minimap
 const roomEl = document.getElementById('room');
+function setPlanView(level){
+ if(level===null){
+  planView=null;renderer.clippingPlanes=[];renderer.shadowMap.enabled=true;
+  if(savedTourPose)setPose(savedTourPose);savedTourPose=null;
+ }else{
+  if(planView===null)savedTourPose={x:player.x,y:player.y,h:player.h,yaw:camera.rotation.y,pitch:camera.rotation.x};
+  planView=level;renderer.clippingPlanes=[new THREE.Plane(new THREE.Vector3(0,-1,0),LEVEL_H[level]+1.15)];renderer.shadowMap.enabled=false;
+  player.h=LEVEL_H[level];camera.position.set(BW/2,LEVEL_H[level]+42,-BD/2);camera.lookAt(BW/2,LEVEL_H[level],-BD/2);
+ }
+ for(const button of document.querySelectorAll('[data-view]'))button.setAttribute('aria-pressed',String(button.dataset.view===(level===null?'tour':String(level))));
+ renderer.shadowMap.needsUpdate=true;dirty=true;
+}
+for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>setPlanView(button.dataset.view==='tour'?null:Number(button.dataset.view)));
+
 function currentRoom() {
+  if(planView!==null)return 'PLAN '+(planView?'ETAJ +4,80':'PARTER ±0,00')+' · R06 · vedere secționată la +1,15 m';
   const lvl = player.h > 2.6 ? 1 : 0;
   for (const r of ROOMS) if (r.lvl === lvl && player.x >= r.r[0] && player.x <= r.r[2] && player.y >= r.r[1] && player.y <= r.r[3]) return r.name;
-  if (player.x > 4.8 && player.x < 13.6 && player.y > 39.9 && player.y < 44) return 'Scara exterioară acoperită S1 (spatele clădirii)';
+  if (player.x > 4.8 && player.x < 13.6 && player.y > 39.9 && player.y < 44) return 'Scara exterioară S2 (R06)';
   if (player.x < -16.5 && player.x > -33 && player.y > -2 && player.y < 42) return 'Lotul 18 · parcare (vest)';
   if (player.x < 0 && player.x >= -16.5 && player.y > 0) return 'Curte de manevră · acces ITP și service student';
-  if (player.y > BD) return 'Spatele clădirii · alee pietonală · scara S1';
+  if (player.y > BD) return 'Spatele clădirii · alee pietonală · scara S2';
   if (player.y < -16) return 'Strada · vis-a-vis clădirea UMC și lacul';
   if (player.y < 0) return 'Platforma frontală · intrarea principală';
   return 'Lotul 21 · exterior';
@@ -332,7 +332,7 @@ function drawMap() {
     mctx.fillStyle = '#1d2b3a'; mctx.font = `${Math.max(9, s * 0.75)}px Arial`; mctx.textAlign = 'center';
     if ((r.r[2] - r.r[0]) > 3.5 && (r.r[3] - r.r[1]) > 3) mctx.fillText(r.id, X((r.r[0] + r.r[2]) / 2), Y((r.r[1] + r.r[3]) / 2) + 4);
   }
-  mctx.strokeStyle = '#fff'; mctx.lineWidth = 2; mctx.strokeRect(X(0), Y(BD), BW * s, BD * s);
+  mctx.strokeStyle = '#fff'; mctx.lineWidth = 1; mctx.strokeRect(X(0), Y(BD), BW * s, BD * s);
   mctx.strokeStyle = '#e8742b'; mctx.strokeRect(X(STAIR.x0), Y(STAIR.y1), (STAIR.x1 - STAIR.x0) * s, (STAIR.y1 - STAIR.y0) * s);
   mctx.fillStyle = '#9fc0d6'; mctx.fillRect(X(LIFT.x0), Y(LIFT.y1), (LIFT.x1 - LIFT.x0) * s, (LIFT.y1 - LIFT.y0) * s);
   mctx.fillStyle = '#fff'; mctx.font = 'bold 11px Arial'; mctx.textAlign = 'left'; mctx.fillText(lvl ? 'ETAJ +4,80' : 'PARTER ±0,00', 6, 14);
@@ -373,5 +373,5 @@ if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawD
   });
 }
 // acces pentru testare automată (fără efect în utilizare)
-window.APP = { player, keys, update, setPose, camera, blocked, ROOMS, items };
+window.APP = { player, keys, update, updateDoors, useLift, setPose, camera, blocked, ROOMS, items, colliders, eqBoxes, doors, scene, surfacesAt, teleport, TP, setPlanView };
 window.PERF = () => { const c = {}; scene.traverse(o => { if (o.isMesh) { let r = o; while (r.parent && r.parent !== scene) r = r.parent; c[r.name || r.type] = (c[r.name || r.type] || 0) + 1; } }); renderer.render(scene, camera); return { meshes: c, calls: renderer.info.render.calls, tris: renderer.info.render.triangles, progs: renderer.info.programs.length, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }; };

@@ -6,8 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Corp Campus AR · tur virtual 3D</title>
-<link rel="stylesheet" href="css/style.css?v=1793342941">
+<title>Corp Campus AR · tur virtual 3D · R06</title>
+<link rel="stylesheet" href="css/style.css?v=r06">
 <script type="importmap">
 { "imports": { "three": "./lib/three/three.module.js", "three/addons/": "./lib/three/addons/" } }
 </script>
@@ -15,6 +15,7 @@
 <body>
 <div id="app"></div>
 <div id="crosshair"></div>
+<nav id="views" aria-label="Mod de vizualizare"><button data-view="tour" aria-pressed="true">Tur 3D</button><button data-view="0" aria-pressed="false">Plan parter</button><button data-view="1" aria-pressed="false">Plan etaj</button></nav>
 <div id="room" class="hud"></div>
 <canvas id="minimap" width="240" height="240"></canvas>
 <div id="card" class="hidden"></div>
@@ -25,7 +26,7 @@
   <div id="tplist"></div>
 </div>
 <div id="keys">
-  <div class="kh">Navigare</div>
+  <div class="kh">AR CAMPUS · R06</div><div class="kf">Studiu conceptual · planuri R06<br>S1 interioară · S2 exterioară</div>
   <div><kbd>↑</kbd><kbd>↓</kbd> / <kbd>W</kbd><kbd>S</kbd> înainte · înapoi</div>
   <div><kbd>←</kbd><kbd>→</kbd> rotire · <kbd>A</kbd><kbd>D</kbd> pas lateral</div>
   <div><b>clic + trage</b> cu mouse-ul – privire</div>
@@ -34,6 +35,6 @@
   <div><kbd>C</kbd> / <kbd>N</kbd> imagine concept · <kbd>Q</kbd> calitate</div>
   <div class="kf">Privește un echipament pentru fișa lui<br><kbd>H</kbd> ascunde acest panou</div>
 </div>
-<script type="module" src="js/main.js?v=1793342941"></script>
+<script type="module" src="js/main.js?v=r06"></script>
 </body>
 </html>

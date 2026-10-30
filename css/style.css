@@ -50,3 +50,9 @@ body.capture #concept{display:none}
 #keys kbd{background:#eef3f5;color:#1d2b3a;border-color:#9fb0ba;font-size:11px;padding:0 4px;min-width:18px}
 body.capture #keys{display:none}
 @media (max-width:900px){#keys{display:none}}
+
+#views {position:fixed;top:16px;left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:5px;border-radius:12px;background:rgba(24,40,51,.94);z-index:20;box-shadow:0 4px 20px #0003;}
+#views button {border:0;border-radius:8px;padding:9px 14px;background:transparent;color:#eaf0f3;cursor:pointer;font:600 13px Arial;white-space:nowrap;}
+#views button[aria-pressed=true] {background:#25888b;color:white;}
+#views button:focus-visible {outline:2px solid #fff;}
+@media(max-width:650px){#views{top:8px;}#views button{padding:8px;font-size:11px;}}
