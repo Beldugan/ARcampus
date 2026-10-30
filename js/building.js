@@ -331,7 +331,16 @@ export function buildBuilding(scene) {
   { const sm = new THREE.MeshStandardMaterial({ color: 0xe9e8e3, roughness: 0.6 }); for (const [x0, y0, x1, y1] of [[-0.05, -0.05, BW + 0.05, 0.25], [-0.05, BD - 0.25, BW + 0.05, BD + 0.05], [-0.05, 0.25, 0.25, BD - 0.25], [BW - 0.25, 0.25, BW + 0.05, BD - 0.25]]) boxXY(x0, y0, x1, y1, PARAPET, PARAPET + 0.06, sm); }   // șorț atic (doar pe contur)
   boxXY(0.4, 0.4, BW - 0.4, BD - 0.4, ROOF, ROOF + 0.08, new THREE.MeshStandardMaterial({ color: 0x9a9d9f, roughness: 0.9 }), false);   // membrană
   const plinth = new THREE.MeshStandardMaterial({ color: 0x8c9196, roughness: 0.85 });
-  for (const [x0, y0, x1, y1] of [[-0.04, -0.04, BW + 0.04, 0.0], [-0.04, BD, BW + 0.04, BD + 0.04], [-0.04, 0, 0, BD], [BW, 0, BW + 0.04, BD]]) boxXY(x0, y0, x1, y1, 0, 0.45, plinth, false);   // soclu gri
+  // soclu gri pe conturul exterior, întrerupt la porți și uși (fără praguri la intrări)
+  for (const [x0, y0, x1, y1, lvl, ext, ops] of WALLS) {
+    if (lvl !== 0 || !ext) continue;
+    const horiz = (x1 - x0) >= (y1 - y0), a0 = horiz ? x0 - 0.04 : y0, a1 = horiz ? x1 + 0.04 : y1;
+    const cuts = ops.filter(o => o[2] < 0.05).map(o => [o[0], o[1]]).sort((a, b) => a[0] - b[0]);
+    let cur = a0; const segs = [];
+    for (const [a, b] of cuts) { segs.push([cur, a]); cur = b; } segs.push([cur, a1]);
+    const off = ext === 'front' ? [-0.04, 0] : ext === 'back' ? [BD, BD + 0.04] : ext === 'left' ? [-0.04, 0] : [BW, BW + 0.04];
+    for (const [a, b] of segs) if (b - a > 0.01) { if (horiz) boxXY(a, off[0], b, off[1], 0, 0.45, plinth, false); else boxXY(off[0], a, off[1], b, 0, 0.45, plinth, false); }
+  }
   for (const [x0, y0, x1, y1] of [[-0.06, -0.06, BW + 0.06, 0.0], [-0.06, BD, BW + 0.06, BD + 0.06], [-0.06, 0, 0, BD], [BW, 0, BW + 0.06, BD]]) boxXY(x0, y0, x1, y1, 4.62, 4.8, m.white, false);   // brâu între niveluri
   // panouri fotovoltaice: două câmpuri pe toată lungimea acoperișului, înclinate spre sud, cu culoar de mentenanță la mijloc
   const pv = new THREE.MeshStandardMaterial({ color: 0x1b2638, roughness: 0.22, metalness: 0.6 }), pvF = new THREE.MeshStandardMaterial({ color: 0xc9ced2, metalness: 0.8, roughness: 0.3 });
