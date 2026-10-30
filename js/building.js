@@ -16,6 +16,7 @@ function mats() {
   M.hpl = new THREE.MeshStandardMaterial({ map: T.hpl([1, 3]), roughness: 0.55 });
   M.teal = new THREE.MeshStandardMaterial({ color: 0x127c8a, roughness: 0.45, metalness: 0.2 });
   M.white = new THREE.MeshStandardMaterial({ color: 0xf2f1ec, roughness: 0.6 });
+  M.facadeW = new THREE.MeshStandardMaterial({ map: T.paint([3, 3], '#f1f0eb'), roughness: 0.85 });   // tencuială albă (ca în masterplan)
   M.facadeAnth = new THREE.MeshStandardMaterial({ map: T.fiber([3, 3], '#4b5056'), roughness: 0.7, metalness: 0.05 });   // fibrociment grafit (parter)
   M.wainscot = new THREE.MeshStandardMaterial({ map: T.paint([2, 1], '#8e959b'), roughness: 0.7 });
   M.lineY = new THREE.MeshStandardMaterial({ color: 0xf2c200, roughness: 0.45 });
@@ -50,74 +51,66 @@ function floorMat(kind, w, d) {
 // ------------------------------------------------------------------ date geometrice (DXF)
 // pereți: [x0,y0,x1,y1, nivel, ext?, goluri[]]  goluri: [a,b,zb,zt,tip]  (a,b în lungul peretelui)
 // tip: 'door' (trecere), 'win' (fereastră), 'gate' (poartă secțională deschisă), 'gateC' (închisă), 'void'
-export const BW = 25.0, BD = 20.0;   // amprentă 25 × 20 m = 500 m²
+export const BW = 12.5, BD = 40.0;   // amprentă 12,50 × 40,00 m = 500 m² (bloc lung, ca în masterplanul campusului): latura scurtă la stradă, latura lungă (vest) spre lotul 18
+// ferestre regulate (goluri verticale) pe o porțiune de perete: n ferestre centrate, lățime w
+function winRow(a, b, w = 1.3, zb = 0.9, zt = 2.6, step = 2.6) { const n = Math.max(1, Math.floor((b - a) / step)); const p = (b - a) / n; const o = []; for (let i = 0; i < n; i++) { const c = a + p * (i + 0.5); o.push([c - w / 2, c + w / 2, zb, zt, 'win']); } return o; }
 export const WALLS = [
-  // ---------- PARTER (h 0..4.80) – accesul vehiculelor în ITP și service se face din spate (dinspre parcarea lotului 18)
-  // fațada principală: vitrină mare a laboratorului de motoare + intrarea principală
-  [0, 0, 25, 0.2, 0, 'front', [[0.7, 19.3, 0.15, 3.95, 'win'], [20.9, 22.9, 0, 2.6, 'door'], [23.2, 24.5, 0.15, 3.95, 'win']]],
-  [0, 19.8, 25, 20, 0, 'back', [[1.3, 4.9, 0, 3.8, 'gate'], [6.75, 9.95, 0, 3.8, 'gate'], [11.15, 14.35, 0, 3.8, 'gateC'], [15.6, 17.6, 0, 2.4, 'door'], [18.0, 19.5, 0.95, 2.7, 'win'], [20.3, 21.4, 0, 2.2, 'door']]],
-  [0, 0.2, 0.2, 19.8, 0, 'left', [[1.0, 5.4, 0.95, 3.6, 'win'], [8.0, 9.6, 2.2, 3.6, 'win'], [12.0, 13.6, 2.2, 3.6, 'win'], [16.0, 17.6, 2.2, 3.6, 'win']]],
-  [24.8, 0.2, 25, 19.8, 0, 'right', [[1.6, 4.4, 0.95, 3.4, 'win'], [7.3, 8.9, 1.6, 2.6, 'win'], [10.9, 11.9, 1.8, 2.6, 'win'], [13.5, 14.5, 1.8, 2.6, 'win'], [16.1, 17.1, 1.8, 2.6, 'win'], [18.3, 19.3, 1.8, 2.6, 'win']]],
-  [0.2, 5.85, 15.15, 6.0, 0, null, [[0.6, 1.5, 0, 2.1, 'door'], [8.6, 12.2, 1.0, 2.4, 'win'], [13.6, 14.6, 0, 2.1, 'door']]],   // lab. motoare | ITP + service (geam de vizualizare service)
-  [6.0, 6.0, 6.15, 19.8, 0, null, [[7.0, 7.9, 0, 2.1, 'door']]],                           // ITP | service (spații separate – RNTR 1 art. 9)
-  [6.15, 8.4, 8.6, 8.55, 0, null, [[7.3, 8.2, 0, 2.1, 'door']]], [8.45, 6.0, 8.6, 8.4, 0, null, []],   // magazie piese service (RNTR 9 cap. II pct. 9 b)
-  [15.0, 6.0, 15.15, 19.8, 0, null, [[9.0, 10.2, 0, 2.1, 'door']]],                        // service | lab. motoare (aripa estică)
-  [19.85, 0.2, 20.0, 19.8, 0, null, [[2.2, 3.4, 0, 2.2, 'door'], [12.0, 13.0, 0, 2.1, 'door']]],   // lab. motoare | hol + coridor
-  [21.6, 6.0, 21.75, 19.8, 0, null, [[7.5, 8.5, 0, 2.1, 'door'], [10.6, 11.5, 0, 2.1, 'door'], [13.2, 14.1, 0, 2.1, 'door'], [15.8, 16.9, 0, 2.1, 'door'], [18.4, 19.3, 0, 2.1, 'door']]],
-  [21.75, 6.0, 24.8, 6.15, 0, null, []], [21.75, 10.0, 24.8, 10.15, 0, null, []], [21.75, 12.6, 24.8, 12.75, 0, null, []],
-  [21.75, 15.2, 24.8, 15.35, 0, null, []], [21.75, 17.8, 24.8, 17.95, 0, null, []],
-  // ---------- ETAJ (h 4.80..7.90; pereții exteriori până la atic 8.60)
-  [0, 0, 25, 0.2, 1, 'front', [[0.8, 6.2, 0.9, 2.6, 'win'], [7.3, 12.7, 0.9, 2.6, 'win'], [13.9, 19.2, 0.9, 2.6, 'win'], [20.5, 24.3, 0.9, 2.6, 'win']]],
-  [0, 19.8, 25, 20, 1, 'back', [[1.4, 5.6, 0.9, 2.6, 'win'], [14.3, 18.5, 0.9, 2.6, 'win'], [20.6, 24.2, 0.9, 2.6, 'win']]],
-  [0, 0.2, 0.2, 19.8, 1, 'left', [[2.0, 4.0, 0.9, 2.6, 'win'], [5.4, 7.4, 0.9, 2.6, 'win'], [12.5, 14.5, 0.9, 2.6, 'win'], [16.1, 18.1, 0.9, 2.6, 'win']]],
-  [24.8, 0.2, 25, 19.8, 1, 'right', [[2.0, 4.0, 0.9, 2.6, 'win'], [5.4, 7.4, 0.9, 2.6, 'win'], [9.3, 10.5, 0, 2.2, 'door'], [13.0, 15.0, 0.9, 2.6, 'win'], [16.5, 18.5, 0.9, 2.6, 'win']]],
-  [6.63, 0.2, 6.78, 8.8, 1, null, []],
-  [13.22, 0.2, 13.37, 8.8, 1, null, []],
-  [19.8, 0.2, 19.95, 8.8, 1, null, []],
-  [0.2, 8.8, 24.8, 8.95, 1, null, [[4.8, 5.85, 0, 2.1, 'door'], [8.0, 9.05, 0, 2.1, 'door'], [14.6, 15.65, 0, 2.1, 'door'], [21.4, 22.45, 0, 2.1, 'door']]],
-  [0.2, 10.95, 24.8, 11.1, 1, null, [[5.0, 6.05, 0, 2.1, 'door'], [11.0, 12.1, 0, 2.1, 'door'], [15.0, 16.05, 0, 2.1, 'door'], [21.4, 22.45, 0, 2.1, 'door']]],
-  [7.6, 11.1, 7.75, 19.8, 1, null, []],
-  [12.25, 11.1, 12.4, 19.8, 1, null, []],
-  [19.8, 11.1, 19.95, 19.8, 1, null, []],
-  [10.6, 11.1, 10.75, 19.8, 1, null, [[11.55, 12.55, 0, 2.1, 'door'], [14.45, 15.35, 0, 2.1, 'door'], [16.6, 17.5, 0, 2.1, 'door'], [18.55, 19.35, 0, 2.1, 'door']]],
-  [7.75, 13.9, 10.6, 14.05, 1, null, []],
-  [7.75, 16.05, 10.6, 16.2, 1, null, []],
-  [7.75, 18.2, 10.6, 18.35, 1, null, []],
+  // ---------- PARTER (h 0..4.80) – porțile ITP și service pe latura lungă de vest, spre curtea de manevră și lotul 18
+  [0, 0, BW, 0.2, 0, 'front', [[0.7, 1.8, 0.9, 2.8, 'win'], [2.2, 4.2, 0, 2.6, 'door'], [8.0, 9.0, 1.8, 2.6, 'win'], [10.4, 11.4, 1.8, 2.6, 'win']]],
+  [0, BD - 0.2, BW, BD, 0, 'back', [[1.2, 2.6, 1.8, 2.6, 'win'], [5.6, 6.8, 1.8, 2.6, 'win'], [10.0, 11.0, 0, 2.2, 'door']]],
+  [0, 0.2, 0.2, BD - 0.2, 0, 'left', [[1.2, 2.6, 0.9, 2.8, 'win'], ...winRow(7.6, 18.8, 1.5, 0.9, 3.2, 2.8), [20.5, 24.1, 0, 3.8, 'gate'], [26.6, 29.8, 0, 3.8, 'gate'], [31.2, 34.4, 0, 3.8, 'gate'], [36.6, 37.8, 1.8, 2.6, 'win']]],
+  [BW - 0.2, 0.2, BW, BD - 0.2, 0, 'right', [[0.8, 1.6, 1.8, 2.6, 'win'], [3.1, 3.9, 1.8, 2.6, 'win'], [5.6, 6.4, 1.8, 2.6, 'win'], ...winRow(7.6, 18.8, 1.5, 0.9, 3.2, 2.8), [20.0, 22.0, 2.2, 3.6, 'win'], [22.8, 24.8, 2.2, 3.6, 'win'], ...winRow(25.9, 35.2, 1.8, 2.0, 3.6, 3.1), [36.8, 37.8, 1.8, 2.6, 'win']]],
+  [0.2, 7.2, BW - 0.2, 7.35, 0, null, [[5.6, 6.8, 0, 2.1, 'door']]],                                   // hol | laborator motoare
+  [7.0, 0.2, 7.15, 7.2, 0, null, [[0.7, 1.7, 0, 2.1, 'door'], [3.0, 3.9, 0, 2.1, 'door'], [5.6, 6.5, 0, 2.1, 'door']]],   // hol | grupuri sanitare
+  [7.15, 2.3, BW - 0.2, 2.45, 0, null, []], [7.15, 4.6, BW - 0.2, 4.75, 0, null, []],
+  [2.5, 4.6, 5.25, 4.75, 0, null, []], [2.5, 4.75, 2.65, 7.2, 0, null, []], [5.1, 4.75, 5.25, 7.2, 0, null, [[5.4, 6.5, 0, 2.1, 'door']]],   // puțul liftului
+  [0.2, 19.0, BW - 0.2, 19.15, 0, null, [[10.6, 11.5, 0, 2.1, 'door']]],                               // laborator motoare | ITP
+  [0.2, 25.6, BW - 0.2, 25.75, 0, null, [[10.8, 11.7, 0, 2.1, 'door']]],                               // ITP | service (spații separate, ușă de serviciu)
+  [0.2, 35.3, BW - 0.2, 35.45, 0, null, [[1.6, 2.5, 0, 2.1, 'door'], [5.6, 6.5, 0, 2.1, 'door'], [9.6, 10.5, 0, 2.1, 'door']]],   // service | magazie, vestiar, tehnic
+  [4.2, 35.45, 4.35, BD - 0.2, 0, null, []], [8.2, 35.45, 8.35, BD - 0.2, 0, null, []],
+  // ---------- ETAJ (h 4.80..7.90; pereții exteriori până la atic 8.60) – hol central de 2,00 m în lungul clădirii, săli pe ambele laturi
+  [0, 0, BW, 0.2, 1, 'front', [[1.2, 2.4, 1.6, 2.4, 'win'], [5.55, 6.95, 0.9, 2.6, 'win'], [9.0, 10.4, 1.6, 2.4, 'win']]],
+  [0, BD - 0.2, BW, BD, 1, 'back', [[1.0, 2.3, 0.9, 2.6, 'win'], [3.1, 4.4, 0.9, 2.6, 'win'], [5.65, 6.85, 0, 2.2, 'door'], [8.0, 9.3, 0.9, 2.6, 'win'], [10.4, 11.7, 0.9, 2.6, 'win']]],
+  [0, 0.2, 0.2, BD - 0.2, 1, 'left', [[0.8, 1.6, 1.6, 2.4, 'win'], [3.2, 4.0, 1.6, 2.4, 'win'], ...winRow(7.35, 16.6), ...winRow(16.75, 24.6), ...winRow(24.75, 32.6), ...winRow(32.75, 39.8)]],
+  [BW - 0.2, 0.2, BW, BD - 0.2, 1, 'right', [[1.2, 2.4, 1.6, 2.4, 'win'], ...winRow(3.55, 12.4), ...winRow(12.55, 21.4), ...winRow(21.55, 30.4), ...winRow(30.55, 39.8)]],
+  [5.1, 0.2, 5.25, BD - 0.2, 1, null, [[0.9, 1.8, 0, 2.1, 'door'], [3.2, 4.1, 0, 2.1, 'door'], [5.4, 6.5, 0, 2.1, 'door'], [8.0, 9.05, 0, 2.1, 'door'], [17.4, 18.45, 0, 2.1, 'door'], [25.4, 26.45, 0, 2.1, 'door'], [33.4, 34.45, 0, 2.1, 'door']]],
+  [7.25, 0.2, 7.4, BD - 0.2, 1, null, [[1.3, 2.2, 0, 2.1, 'door'], [4.0, 5.05, 0, 2.1, 'door'], [11.2, 12.25, 0, 2.1, 'door'], [13.0, 14.05, 0, 2.1, 'door'], [20.2, 21.25, 0, 2.1, 'door'], [22.0, 23.05, 0, 2.1, 'door'], [31.0, 32.05, 0, 2.1, 'door']]],
+  [0.2, 2.35, 5.1, 2.5, 1, null, []], [0.2, 4.6, 5.1, 4.75, 1, null, []], [0.2, 7.2, 5.1, 7.35, 1, null, []], [2.5, 4.75, 2.65, 7.2, 1, null, []],
+  [0.2, 16.6, 5.1, 16.75, 1, null, []], [0.2, 24.6, 5.1, 24.75, 1, null, []], [0.2, 32.6, 5.1, 32.75, 1, null, []],
+  [7.4, 3.4, BW - 0.2, 3.55, 1, null, []], [7.4, 12.4, BW - 0.2, 12.55, 1, null, []], [7.4, 21.4, BW - 0.2, 21.55, 1, null, []], [7.4, 30.4, BW - 0.2, 30.55, 1, null, []],
 ];
 
+const H1C = 4.80;
 // încăperi: id, nume, nivel, dreptunghi, pardoseală, tavan (h liber), plăcuța de pe ușă (sign), hol/coridor (hall)
 export const ROOMS = [
-  { id: 'P01', name: 'P01 · Stație ITP (clasa a II-a, ≤ 3,5 t) – 80 m²', sign: ['STAȚIE ITP', 'clasa a II-a · acces din parcare'], lvl: 0, r: [0.2, 6.0, 6.0, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
-  { id: 'P02', name: 'P02 · Service student (2 posturi) – 113 m²', sign: ['SERVICE STUDENT', '2 posturi · acces din parcare'], lvl: 0, r: [6.15, 8.55, 15.0, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
-  { id: 'P02', name: 'P02 · Service student (2 posturi) – 113 m²', sign: ['SERVICE STUDENT', '2 posturi · acces din parcare'], lvl: 0, r: [8.6, 6.0, 15.0, 8.55], floor: 'epoxy', ceil: 'deck', h: 4.45 },   // fâșia de lângă magazie (geamul spre lab. motoare)
-  { id: 'P12', name: 'P12 · Magazie piese service', sign: ['MAGAZIE PIESE', 'service'], lvl: 0, r: [6.15, 6.0, 8.45, 8.4], floor: 'epoxy', ceil: 'tiles', h: 3.0 },
-  { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI) – 176 m²', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [0.2, 0.2, 19.85, 5.85], floor: 'epoxy', ceil: 'deck', h: 4.45 },
-  { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI) – 176 m²', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [15.15, 5.85, 19.85, 19.8], floor: 'epoxy', ceil: 'deck', h: 4.45 },
-  { id: 'P04', name: 'P04 · Hol de intrare', sign: ['HOL INTRARE', 'Corp Campus AR'], hall: true, lvl: 0, r: [20.0, 0.2, 24.8, 6.0], floor: 'stone', ceil: 'tiles', h: 3.0 },
-  { id: 'P09', name: 'P09 · Coridor anexe', hall: true, lvl: 0, r: [20.0, 6.0, 21.6, 19.8], floor: 'stone', ceil: 'tiles', h: 2.8 },
-  { id: 'P10', name: 'P10 · Vestiar studenți', sign: ['VESTIAR', 'studenți'], lvl: 0, r: [21.75, 6.15, 24.8, 10.0], floor: 'tile', ceil: 'tiles', h: 2.8 },
-  { id: 'P07', name: 'P07 · WC femei', sign: ['WC FEMEI', '♀'], lvl: 0, r: [21.75, 10.15, 24.8, 12.6], floor: 'tile', ceil: 'tiles', h: 2.8, wc: true },
-  { id: 'P08', name: 'P08 · WC bărbați', sign: ['WC BĂRBAȚI', '♂'], lvl: 0, r: [21.75, 12.75, 24.8, 15.2], floor: 'tile', ceil: 'tiles', h: 2.8, wc: true },
-  { id: 'P05', name: 'P05 · WC persoane cu dizabilități', sign: ['WC ACCESIBIL', '♿'], lvl: 0, r: [21.75, 15.35, 24.8, 17.8], floor: 'tile', ceil: 'tiles', h: 2.8, wc: true },
-  { id: 'P11', name: 'P11 · Cameră tehnică', sign: ['CAMERĂ TEHNICĂ', 'acces personal autorizat'], lvl: 0, r: [21.75, 17.95, 24.8, 19.8], floor: 'tile', ceil: 'tiles', h: 2.8 },
-  { id: 'E01', name: 'E01 · Diagnosticare + Mecatronică', sign: ['E01 · DIAGNOSTICARE', 'Mecatronica automobilului'], lvl: 1, r: [0.2, 0.2, 6.63, 8.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E02', name: 'E02 · CCA – Calculul și construcția autovehiculelor', sign: ['E02 · CCA', 'Construcția autovehiculelor'], lvl: 1, r: [6.78, 0.2, 13.22, 8.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E03', name: 'E03 · Dinamica autovehiculelor', sign: ['E03 · DINAMICĂ', 'Dinamica autovehiculelor'], lvl: 1, r: [13.37, 0.2, 19.8, 8.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E12', name: 'E12 · Sală CAD / seminar', sign: ['E12 · SALĂ CAD', 'Grafică asistată · seminar'], lvl: 1, r: [19.95, 0.2, 24.8, 8.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E06', name: 'E06 · Hol principal', hall: true, lvl: 1, r: [0.2, 8.95, 24.8, 10.95], floor: 'stone', ceil: 'tiles', h: 2.7 },
-  { id: 'E04', name: 'E04 · Caroserii și structuri portante', sign: ['E04 · CAROSERII', 'Structuri portante'], lvl: 1, r: [0.2, 11.1, 7.6, 19.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E07', name: 'WC accesibil (etaj)', sign: ['WC ACCESIBIL', '♿'], lvl: 1, r: [7.75, 11.1, 10.6, 13.9], floor: 'tile', ceil: 'tiles', h: 2.6, wc: true },
-  { id: 'E08', name: 'WC femei (etaj)', sign: ['WC FEMEI', '♀'], lvl: 1, r: [7.75, 14.05, 10.6, 16.05], floor: 'tile', ceil: 'tiles', h: 2.6, wc: true },
-  { id: 'E09', name: 'WC bărbați (etaj)', sign: ['WC BĂRBAȚI', '♂'], lvl: 1, r: [7.75, 16.2, 10.6, 18.2], floor: 'tile', ceil: 'tiles', h: 2.6, wc: true },
-  { id: 'E10', name: 'Tehnic / curățenie', sign: ['TEHNIC', 'curățenie'], lvl: 1, r: [7.75, 18.35, 10.6, 19.8], floor: 'tile', ceil: 'tiles', h: 2.7 },
-  { id: 'E11', name: 'Hol 1,50 m', hall: true, lvl: 1, r: [10.75, 11.1, 12.25, 19.8], floor: 'stone', ceil: 'tiles', h: 2.7 },
-  { id: 'E05', name: 'E05 · HeV – Autovehicule hibride și electrice', sign: ['E05 · HeV', 'Hibride și electrice'], lvl: 1, r: [12.4, 11.1, 19.8, 19.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
-  { id: 'E13', name: 'E13 · Sală de protocol – întâlniri oficiale și ședințe', sign: ['E13 · SALĂ DE PROTOCOL', 'Delegații oficiale · ședințe'], lvl: 1, r: [19.95, 11.1, 24.8, 19.8], floor: 'parquet', ceil: 'tiles', h: 2.75 },
+  { id: 'P04', name: 'P04 · Hol de intrare', sign: ['HOL INTRARE', 'Corp Campus AR'], hall: true, lvl: 0, r: [0.2, 0.2, 7.0, 7.2], floor: 'stone', ceil: 'tiles', h: 3.0 },
+  { id: 'P05', name: 'P05 · WC persoane cu dizabilități', sign: ['WC ACCESIBIL', '♿'], lvl: 0, r: [7.15, 0.2, 12.3, 2.3], floor: 'tile', ceil: 'tiles', h: 2.8, wc: true },
+  { id: 'P07', name: 'P07 · WC femei', sign: ['WC FEMEI', '♀'], lvl: 0, r: [7.15, 2.45, 12.3, 4.6], floor: 'tile', ceil: 'tiles', h: 2.8, wc: true },
+  { id: 'P08', name: 'P08 · WC bărbați', sign: ['WC BĂRBAȚI', '♂'], lvl: 0, r: [7.15, 4.75, 12.3, 7.2], floor: 'tile', ceil: 'tiles', h: 2.8, wc: true },
+  { id: 'P03', name: 'P03 · Laborator motoare (PCMAI + CCMAI)', sign: ['LABORATOR MOTOARE', 'PCMAI · CCMAI · Diagnosticare'], lvl: 0, r: [0.2, 7.35, 12.3, 19.0], floor: 'epoxy', ceil: 'deck', h: 4.45 },
+  { id: 'P01', name: 'P01 · Stație ITP (clasa a II-a, ≤ 3,5 t)', sign: ['STAȚIE ITP', 'clasa a II-a · acces din curte'], lvl: 0, r: [0.2, 19.15, 12.3, 25.6], floor: 'epoxy', ceil: 'deck', h: 4.45 },
+  { id: 'P02', name: 'P02 · Service student (2 posturi)', sign: ['SERVICE STUDENT', '2 posturi · acces din curte'], lvl: 0, r: [0.2, 25.75, 12.3, 35.3], floor: 'epoxy', ceil: 'deck', h: 4.45 },
+  { id: 'P12', name: 'P12 · Magazie piese service', sign: ['MAGAZIE PIESE', 'service'], lvl: 0, r: [0.2, 35.45, 4.2, 39.8], floor: 'epoxy', ceil: 'tiles', h: 3.0 },
+  { id: 'P10', name: 'P10 · Vestiar', sign: ['VESTIAR', 'studenți · personal'], lvl: 0, r: [4.35, 35.45, 8.2, 39.8], floor: 'tile', ceil: 'tiles', h: 2.8 },
+  { id: 'P11', name: 'P11 · Cameră tehnică', sign: ['CAMERĂ TEHNICĂ', 'acces personal autorizat'], lvl: 0, r: [8.35, 35.45, 12.3, 39.8], floor: 'tile', ceil: 'tiles', h: 2.8 },
+  { id: 'E07', name: 'WC accesibil (etaj)', sign: ['WC ACCESIBIL', '♿'], lvl: 1, r: [0.2, 0.2, 5.1, 2.35], floor: 'tile', ceil: 'tiles', h: 2.6, wc: true },
+  { id: 'E08', name: 'WC femei (etaj)', sign: ['WC FEMEI', '♀'], lvl: 1, r: [0.2, 2.5, 5.1, 4.6], floor: 'tile', ceil: 'tiles', h: 2.6, wc: true },
+  { id: 'E10', name: 'Ghenă tehnică', lvl: 1, r: [0.2, 4.75, 2.5, 7.2], floor: 'tile', ceil: 'tiles', h: 2.6 },
+  { id: 'E09', name: 'WC bărbați (etaj)', sign: ['WC BĂRBAȚI', '♂'], lvl: 1, r: [7.4, 0.2, 12.3, 3.4], floor: 'tile', ceil: 'tiles', h: 2.6, wc: true },
+  { id: 'E06', name: 'E06 · Hol etaj', hall: true, lvl: 1, r: [5.25, 0.2, 7.25, 39.8], floor: 'stone', ceil: 'tiles', h: 2.7 },
+  { id: 'E01', name: 'E01 · Diagnosticare + Mecatronică', sign: ['E01 · DIAGNOSTICARE', 'Mecatronica automobilului'], lvl: 1, r: [0.2, 7.35, 5.1, 16.6], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E03', name: 'E03 · Dinamica autovehiculelor', sign: ['E03 · DINAMICĂ', 'Dinamica autovehiculelor'], lvl: 1, r: [0.2, 16.75, 5.1, 24.6], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E05', name: 'E05 · HeV – Autovehicule hibride și electrice', sign: ['E05 · HeV', 'Hibride și electrice'], lvl: 1, r: [0.2, 24.75, 5.1, 32.6], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E12', name: 'E12 · Laborator CAD și fabricație aditivă', sign: ['E12 · CAD', 'Grafică asistată · imprimare 3D'], lvl: 1, r: [0.2, 32.75, 5.1, 39.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E14', name: 'E14 · Sală de seminar (30 locuri)', sign: ['E14 · SEMINAR', '30 de locuri'], lvl: 1, r: [7.4, 3.55, 12.3, 12.4], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E13', name: 'E13 · Sală de seminar și protocol (30 locuri)', sign: ['E13 · SEMINAR / PROTOCOL', '30 de locuri · întâlniri oficiale'], lvl: 1, r: [7.4, 12.55, 12.3, 21.4], floor: 'parquet', ceil: 'tiles', h: 2.75 },
+  { id: 'E02', name: 'E02 · CCA – Calculul și construcția autovehiculelor', sign: ['E02 · CCA', 'Construcția autovehiculelor'], lvl: 1, r: [7.4, 21.55, 12.3, 30.4], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
+  { id: 'E04', name: 'E04 · Caroserii și structuri portante', sign: ['E04 · CAROSERII', 'Structuri portante'], lvl: 1, r: [7.4, 30.55, 12.3, 39.8], floor: 'vinyl', ceil: 'tiles', h: 2.75 },
 ];
 // suprafețe utile calculate din plan (sumă pe dreptunghiurile fiecărei încăperi) și capacitatea maximă conform ARACIS –
 // Metodologia de evaluare externă, partea I, standardele 1.4.1.6 / 1.4.3.6: săli de curs ≥ 1 m²/loc, seminar ≥ 1,4 m²/loc,
 // laboratoare de informatică (și de specialitate cu calculatoare) ≥ 2,5 m²/loc, laboratoare cu caracter tehnic ≥ 4 m²/loc.
-export const ARACIS_NORM = { P01: 4, P02: 4, P03: 4, E01: 4, E02: 4, E03: 4, E04: 4, E05: 4, E12: 2.5 };
+export const ARACIS_NORM = { P01: 4, P02: 4, P03: 4, E01: 4, E02: 4, E03: 4, E04: 4, E05: 4, E12: 2.5, E13: 1.4, E14: 1.4 };
 export const ROOM_AREA = {}; for (const r of ROOMS) ROOM_AREA[r.id] = (ROOM_AREA[r.id] || 0) + (r.r[2] - r.r[0]) * (r.r[3] - r.r[1]);
 const fmtRo = v => (Math.round(v * 10) / 10).toFixed(1).replace('.', ',').replace(',0', '');
 for (const r of ROOMS) {
@@ -129,10 +122,10 @@ for (const r of ROOMS) {
 export function roomAt(x, y, lvl) { return ROOMS.find(r => r.lvl === lvl && x >= r.r[0] && x <= r.r[2] && y >= r.r[1] && y <= r.r[3]) || null; }
 export const LEVEL_H = [H0, H1];
 
-// scara S1 exterioară, pe latura de est: urcă dinspre fațada principală spre spate, în linie dreaptă
-// rampa 1: y −0,90 → 3,30 (±0,00 → +2,40), podest y 3,30–4,80, rampa 2: y 4,80 → 9,00 (→ +4,80), podest superior y 9,00–11,00
-export const STAIR = { x0: 25.0, x1: 26.85, y0: -0.9, y1: 11.0, lane0: 25.25, lane1: 26.75 };
-export const LIFT = { x0: 25.2, x1: 27.6, y0: 11.1, y1: 13.5 };
+// scara S1 exterioară, în SPATELE clădirii (spre parc), în U: rampa 1 pe culoarul exterior (y 42,05–43,55) urcă spre est ±0,00 → +2,40,
+// podest de întoarcere x 11,80–13,30, rampa 2 pe culoarul de lângă fațadă (y 40,25–41,75) urcă spre vest +2,40 → +4,80, podest superior x 5,00–7,60 în dreptul ușii holului etajului
+export const STAIR = { x0: 5.0, x1: 13.3, y0: 40.0, y1: 43.6, laneA: [42.05, 43.55], laneB: [40.25, 41.75], xa: 7.6, xb: 11.8 };
+export const LIFT = { x0: 2.65, x1: 5.1, y0: 4.75, y1: 7.2 };   // lift interior, în holul de intrare (parter) / la capătul holului (etaj)
 
 // ------------------------------------------------------------------ construcție
 export function buildBuilding(scene) {
@@ -191,15 +184,15 @@ export function buildBuilding(scene) {
     }
   }
   const lineY = (x0, y0, x1, y1) => { const g = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, y1 - y0), m.lineY); g.rotation.x = -Math.PI / 2; g.position.set((x0 + x1) / 2, 0.009, -(y0 + y1) / 2); root.add(g); };
-  for (const x of [1.25, 4.95]) lineY(x - 0.06, 6.2, x + 0.06, 19.7);                 // culoar ITP (axa 3,10)
-  for (const [a, b] of [[6.55, 10.25], [10.85, 14.6]]) { lineY(a, 9.0, a + 0.1, 19.6); lineY(b - 0.1, 9.0, b, 19.6); lineY(a, 9.0, b, 9.1); }   // posturi service marcate (RNTR 9 def. v)
+  for (const y of [20.4, 24.2]) lineY(0.4, y - 0.06, 12.0, y + 0.06);                // culoar ITP (axa y 22,30, intrare prin poarta de vest)
+  for (const [a, b] of [[26.5, 29.9], [31.1, 34.5]]) { lineY(0.4, a, 9.8, a + 0.1); lineY(0.4, b - 0.1, 9.8, b); lineY(9.7, a, 9.8, b); }   // posturi service marcate (RNTR 9 def. v)
   // placă pe sol sub tot parterul (fără goluri spre teren la praguri)
   boxXY(0, 0, BW, BD, -0.05, 0.002, m.slab, false);
   // planșeu peste parter + acoperiș
   boxXY(0, 0, BW, BD, 4.50, 4.80, m.slab);
   boxXY(0, 0, BW, BD, ROOF - 0.30, ROOF, m.slab);
   // tavan hală ITP + service: tablă cutată + grinzi + corpuri high-bay
-  for (const [x0, y0, x1, y1, lamps] of [[0.2, 6.0, 6.0, 19.8, 'lin'], [6.15, 6.0, 15.0, 19.8, 'lin'], [0.2, 0.2, 19.85, 5.85, 'bell'], [15.15, 5.85, 19.85, 19.8, 'bell']]) {
+  for (const [x0, y0, x1, y1, lamps] of [[0.2, 19.15, 12.3, 25.6, 'lin'], [0.2, 25.75, 12.3, 35.3, 'lin'], [0.2, 7.35, 12.3, 19.0, 'bell']]) {
     const w = x1 - x0, d = y1 - y0, cy = (y0 + y1) / 2;
     const deck = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m.deck); deck.rotation.x = Math.PI / 2; deck.position.set((x0 + x1) / 2, 4.49, -cy); add(deck, false);
     const longX = w > d;   // tabla cutată / grinzile se orientează după direcția lungă
@@ -223,8 +216,8 @@ export function buildBuilding(scene) {
   }
   // stâlpi metalici HEA pe pereții halelor (ca în imaginile concept), gri deschis
   const colM = new THREE.MeshStandardMaterial({ color: 0x4a5258, roughness: 0.45, metalness: 0.5 });
-  for (let y = 2.5; y < 19.5; y += 4.5) for (const [x, sx, yMin] of [[0.2, 1, 0], [6.0, -1, 6.3], [6.15, 1, 8.8], [15.0, -1, 6.3], [15.15, 1, 6.3], [19.85, -1, 0]]) {
-    if (y < yMin) continue;
+  for (const y of [9.6, 14.2, 18.4, 26.2, 30.45, 34.8]) for (const [x, sx] of [[0.2, 1], [12.3, -1]]) {
+    if (sx > 0 && ((y > 19 && y < 25.7) || (y > 26.4 && y < 34.6))) continue;   // fără stâlpi în dreptul porților
     const xi = sx > 0 ? x : x - 0.26;
     boxXY(xi, y - 0.13, xi + 0.26, y - 0.11, 0, 4.4, colM); boxXY(xi, y + 0.11, xi + 0.26, y + 0.13, 0, 4.4, colM); boxXY(sx > 0 ? xi : xi + 0.24, y - 0.12, sx > 0 ? xi + 0.02 : xi + 0.26, y + 0.12, 0, 4.4, colM);
     boxXY(xi + 0.12, y - 0.12, xi + 0.14, y + 0.12, 0, 4.4, colM);
@@ -264,7 +257,7 @@ export function buildBuilding(scene) {
     if (ext) {
       // material diferit pe fața exterioară
       const arr = [m.paint, m.paint, m.paint, m.paint, m.paint, m.paint];
-      const fac = h0 < 4.5 ? m.facadeAnth : m.facade;
+      const fac = m.facadeW;
       if (ext === 'front') arr[4] = fac; if (ext === 'back') arr[5] = fac;
       if (ext === 'left') arr[1] = fac; if (ext === 'right') arr[0] = fac;
       mat = arr;
@@ -334,83 +327,65 @@ export function buildBuilding(scene) {
     }
   }
 
-  // ---- exterior: soclu, atic, copertine, firme
-  boxXY(-0.05, -0.05, BW + 0.05, BD + 0.05, PARAPET, PARAPET + 0.06, m.alu);                 // șorț atic
-  boxXY(0.4, 0.4, BW - 0.4, BD - 0.4, ROOF, ROOF + 0.08, new THREE.MeshStandardMaterial({ color: 0x2e3338, roughness: 0.9 }), false); // membrană
-  // panouri fotovoltaice pe acoperiș
-  const pv = new THREE.MeshStandardMaterial({ color: 0x1b2638, roughness: 0.25, metalness: 0.6 });
-  for (let i = 0; i < 7; i++) for (let j = 0; j < 4; j++) {
-    const g = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.04, 3.4), pv); g.position.set(2.2 + i * 3.1, ROOF + 0.45, -(2.6 + j * 4.2)); g.rotation.x = 0.18; g.castShadow = true; root.add(g);
+  // ---- exterior: bloc alb cu ferestre regulate, atic, panouri fotovoltaice pe acoperiș (ca în imaginile masterplanului)
+  { const sm = new THREE.MeshStandardMaterial({ color: 0xe9e8e3, roughness: 0.6 }); for (const [x0, y0, x1, y1] of [[-0.05, -0.05, BW + 0.05, 0.25], [-0.05, BD - 0.25, BW + 0.05, BD + 0.05], [-0.05, 0.25, 0.25, BD - 0.25], [BW - 0.25, 0.25, BW + 0.05, BD - 0.25]]) boxXY(x0, y0, x1, y1, PARAPET, PARAPET + 0.06, sm); }   // șorț atic (doar pe contur)
+  boxXY(0.4, 0.4, BW - 0.4, BD - 0.4, ROOF, ROOF + 0.08, new THREE.MeshStandardMaterial({ color: 0x9a9d9f, roughness: 0.9 }), false);   // membrană
+  const plinth = new THREE.MeshStandardMaterial({ color: 0x8c9196, roughness: 0.85 });
+  for (const [x0, y0, x1, y1] of [[-0.04, -0.04, BW + 0.04, 0.0], [-0.04, BD, BW + 0.04, BD + 0.04], [-0.04, 0, 0, BD], [BW, 0, BW + 0.04, BD]]) boxXY(x0, y0, x1, y1, 0, 0.45, plinth, false);   // soclu gri
+  for (const [x0, y0, x1, y1] of [[-0.06, -0.06, BW + 0.06, 0.0], [-0.06, BD, BW + 0.06, BD + 0.06], [-0.06, 0, 0, BD], [BW, 0, BW + 0.06, BD]]) boxXY(x0, y0, x1, y1, 4.62, 4.8, m.white, false);   // brâu între niveluri
+  // panouri fotovoltaice: două câmpuri pe toată lungimea acoperișului, înclinate spre sud, cu culoar de mentenanță la mijloc
+  const pv = new THREE.MeshStandardMaterial({ color: 0x1b2638, roughness: 0.22, metalness: 0.6 }), pvF = new THREE.MeshStandardMaterial({ color: 0xc9ced2, metalness: 0.8, roughness: 0.3 });
+  for (const x0 of [1.0, 7.0]) for (let y = 1.3; y < BD - 1.6; y += 2.05) for (let k = 0; k < 2; k++) {
+    const g = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.035, 1.7), pv); g.position.set(x0 + 1.15 + k * 2.25, ROOF + 0.42, -(y + 0.85)); g.rotation.x = 0.2; g.castShadow = true; root.add(g);
+    const f = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.02, 1.74), pvF); f.position.set(x0 + 1.15 + k * 2.25, ROOF + 0.395, -(y + 0.85)); f.rotation.x = 0.2; root.add(f);
   }
-  // echipamente pe acoperiș (vizibile din exterior): centrală de tratare a aerului, guri de ventilație, coș
   const roofEq = new THREE.MeshStandardMaterial({ color: 0xc9ced2, metalness: 0.6, roughness: 0.4 });
-  boxXY(9.0, 14.5, 13.0, 16.5, ROOF, ROOF + 1.3, roofEq); for (const x of [9.6, 10.6, 11.6, 12.4]) { const f = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.05, 24), new THREE.MeshStandardMaterial({ color: 0x3a3f44 })); f.position.set(x, ROOF + 1.33, -15.5); root.add(f); }
-  for (const [x, y] of [[3, 3], [17, 4], [22, 12], [6, 15]]) { const v = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.7, 16), roofEq); v.position.set(x, ROOF + 0.35, -y); v.castShadow = true; root.add(v); const c = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.2, 16), roofEq); c.position.set(x, ROOF + 0.8, -y); root.add(c); }
-  // bandă dintre niveluri pe fațade
-  for (const [x0, y0, x1, y1] of [[-0.03, -0.03, BW + 0.03, 0.03], [-0.03, BD - 0.03, BW + 0.03, BD + 0.03]]) boxXY(x0, y0, x1, y1, 4.5, 4.8, m.facadeAnth, false);
-  for (const [x0, y0, x1, y1] of [[-0.03, 0, 0.03, BD], [BW - 0.03, 0, BW + 0.03, BD]]) boxXY(x0, y0, x1, y1, 4.5, 4.8, m.facadeAnth, false);
-  // ---- fațadă de clădire universitară (nu de hală): cadru alb în consolă, lamele HPL verticale, copertină de intrare, accent turcoaz
-  // cadru alb care încadrează banda de ferestre a etajului pe fațada principală și pe spate
-  for (const [y0, y1] of [[-0.45, 0.0], [BD, BD + 0.45]]) {
-    boxXY(0.4, y0, 19.6, y1, 4.62, 4.8, m.white); boxXY(0.4, y0, 19.6, y1, 7.55, 7.75, m.white);
-    boxXY(0.4, y0, 0.6, y1, 4.62, 7.75, m.white); boxXY(19.4, y0, 19.6, y1, 4.62, 7.75, m.white);
-  }
-  // fâșie verticală turcoaz la joncțiunea cu intrarea principală și scara
-  boxXY(19.75, -0.12, 20.25, 0.02, 0, PARAPET, m.teal); boxXY(24.7, -0.12, 25.0, 0.02, 0, PARAPET, m.teal);
-  // copertină intrare principală: placă albă, intrados din lemn, inscripție
-  boxXY(20.3, -2.2, 24.7, 0.0, 3.2, 3.45, m.white); boxXY(20.35, -2.15, 24.65, -0.05, 3.18, 3.2, m.hpl, false);
-  for (const x of [20.45, 24.55]) boxXY(x - 0.05, -2.1, x + 0.05, -2.0, 0, 3.2, m.alu);
-  const big = (txt, sub, x, y, h, w, ry = 0) => { const mm = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 8), new THREE.MeshStandardMaterial({ map: labelTex(sub ? [txt, sub] : [txt], { w: 2048, h: 256, bg: '#f2f1ec', fg: '#1d2b3a', font: 'bold 110px Arial', sub: '64px Arial' }), roughness: 0.6 })); mm.position.set(x, h, -y); mm.rotation.y = ry; root.add(mm); };
-  // inscripție luminoasă pe copertină
-  const lt = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.24), new THREE.MeshStandardMaterial({ map: labelTex(['INTRARE · AUTOVEHICULE RUTIERE'], { w: 1024, h: 64, bg: '#f2f1ec', fg: '#127c8a', font: 'bold 44px Arial' }), roughness: 0.5 })); lt.position.set(22.5, 3.325, 2.21); root.add(lt);
-  // stâlpișori de protecție galben-negru la porțile din spate (acces din parcare)
+  boxXY(5.4, 36.0, 7.1, 38.6, ROOF, ROOF + 1.2, roofEq);                                                        // centrală de tratare a aerului (ventilație hale)
+  for (const y of [21.5, 30.0, 12.0]) { const v = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.8, 16), roofEq); v.position.set(6.25, ROOF + 0.4, -y); root.add(v); }
+  // intrarea principală de la stradă: ușă vitrată, copertină albă, inscripție
+  boxXY(1.6, -1.8, 4.8, 0.0, 3.05, 3.25, m.white); boxXY(1.65, -1.75, 4.75, -0.05, 3.03, 3.05, m.hpl, false);
+  const lt = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 0.18), new THREE.MeshStandardMaterial({ map: labelTex(['INTRARE · AUTOVEHICULE RUTIERE'], { w: 1024, h: 64, bg: '#f2f1ec', fg: '#127c8a', font: 'bold 44px Arial' }), roughness: 0.5 })); lt.position.set(3.2, 3.15, 1.81); root.add(lt);
+  // stâlpișori galben-negru și firme deasupra porților de pe latura de vest (spre curtea de manevră și lotul 18)
   const yel = new THREE.MeshStandardMaterial({ color: 0xf2c200, roughness: 0.5 }), blk = new THREE.MeshStandardMaterial({ color: 0x1b1b1b, roughness: 0.6 });
-  for (const x of [1.0, 5.2, 6.45, 10.25, 10.85, 14.65]) for (let k = 0; k < 4; k++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.25, 16), k % 2 ? blk : yel); c.position.set(x, 0.125 + k * 0.25, -(BD + 0.35)); c.castShadow = true; root.add(c); }
+  for (const y of [20.25, 24.35, 26.35, 30.05, 30.95, 34.65]) for (let k = 0; k < 4; k++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.25, 16), k % 2 ? blk : yel); c.position.set(-0.35, 0.125 + k * 0.25, -y); c.castShadow = true; root.add(c); }
   const sign = (txt, sub, x, y, h, w, rotY = 0, bg = '#1d2b3a', fg = '#fff') => {
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 4), new THREE.MeshStandardMaterial({ map: labelTex(sub ? [txt, sub] : [txt], { bg, fg }), roughness: 0.6 }));
     mesh.position.set(x, h, -y); mesh.rotation.y = rotY; root.add(mesh); return mesh;
   };
-  // firme pe fațada din spate, deasupra porților (accesul vehiculelor)
-  sign('STAȚIE ITP', 'clasa a II-a · RAR', 3.1, BD + 0.06, 4.25, 2.4, Math.PI);
-  sign('SERVICE STUDENT', 'FIMIM · Autovehicule Rutiere', 10.55, BD + 0.06, 4.3, 3.0, Math.PI);
-  sign('LABORATOR MOTOARE', 'acces echipamente', 16.6, BD + 0.06, 2.85, 1.6, Math.PI);
+  sign('STAȚIE ITP', 'clasa a II-a · RAR', -0.06, 22.3, 4.3, 2.4, -Math.PI / 2);
+  sign('SERVICE STUDENT', 'FIMIM · Autovehicule Rutiere', -0.06, 30.5, 4.3, 3.0, -Math.PI / 2);
 
-  // ---- scara exterioară S1 (stilizată): vange din oțel grafit, trepte cu placare HPL lemn, balustradă din sticlă cu mână curentă inox,
-  //      ecran de lamele verticale HPL pe latura exterioară, copertină albă cu intrados din lemn și bandă turcoaz
-  const L0 = STAIR.lane0, L1 = STAIR.lane1;
+  // ---- scara exterioară S1 în spatele clădirii (în U): vange din oțel grafit, trepte cu placare HPL, balustradă din sticlă cu mână curentă inox,
+  //      ecran de lamele HPL pe laturile exterioare, copertină albă
   const graf = new THREE.MeshStandardMaterial({ color: 0x33383d, roughness: 0.45, metalness: 0.55 });
   const inox = new THREE.MeshStandardMaterial({ color: 0xd5d9dd, roughness: 0.2, metalness: 0.9 });
   const glassB = new THREE.MeshPhysicalMaterial({ color: 0xd8e8ee, transparent: true, opacity: 0.22, roughness: 0.03, clearcoat: 1, side: THREE.DoubleSide, depthWrite: false });
-  const tread = (y, h) => { boxXY(L0, y, L1, y + 0.30, h - 0.06, h - 0.02, graf); boxXY(L0 + 0.02, y + 0.01, L1 - 0.02, y + 0.29, h - 0.02, h, m.hpl); };
-  for (let k = 0; k < 15; k++) tread(-0.9 + k * 0.28, (k + 1) * 0.16);
-  for (let k = 0; k < 15; k++) tread(4.80 + k * 0.28, 2.40 + (k + 1) * 0.16);
-  boxXY(25.0, 3.30, 26.85, 4.80, 2.30, 2.36, graf); boxXY(25.02, 3.32, 26.83, 4.78, 2.36, 2.40, m.hpl);      // podest +2,40
-  boxXY(25.0, 9.0, 26.85, 11.1, 4.70, 4.76, graf); boxXY(25.02, 9.02, 26.83, 11.08, 4.76, 4.80, m.hpl);      // podest +4,80
-  for (const [x, y] of [[26.8, -0.85], [26.8, 3.3], [26.8, 4.8], [26.8, 9.0], [26.8, 11.0], [25.05, 3.3], [25.05, 4.8], [25.05, 11.0]]) boxXY(x - 0.07, y - 0.07, x + 0.07, y + 0.07, 0, 7.6, graf);
+  const [A0, A1] = STAIR.laneA, [B0, B1] = STAIR.laneB, XA = STAIR.xa, XB = STAIR.xb;
+  const tread = (x0, x1, y0, y1, h) => { boxXY(x0, y0, x1, y1, h - 0.06, h - 0.02, graf); boxXY(x0 + 0.01, y0 + 0.02, x1 - 0.01, y1 - 0.02, h - 0.02, h, m.hpl); };
+  for (let k = 0; k < 15; k++) tread(XA + k * 0.28, XA + k * 0.28 + 0.3, A0, A1, (k + 1) * 0.16);                 // rampa 1: spre est
+  for (let k = 0; k < 15; k++) tread(XB - (k + 1) * 0.28 - 0.02, XB - k * 0.28, B0, B1, 2.40 + (k + 1) * 0.16);    // rampa 2: spre vest
+  boxXY(XB, B0, 13.3, A1, 2.30, 2.36, graf); boxXY(XB + 0.02, B0 + 0.02, 13.28, A1 - 0.02, 2.36, 2.40, m.hpl);     // podest de întoarcere +2,40
+  boxXY(5.0, 40.0, XA, B1, 4.70, 4.76, graf); boxXY(5.02, 40.02, XA, B1 - 0.02, 4.76, 4.80, m.hpl);                 // podest superior +4,80
   const run = Math.hypot(4.2, 2.4), ang = Math.atan2(2.4, 4.2);
-  for (const [y0, h0] of [[-0.9, 0], [4.8, 2.4]]) for (const x of [L0 - 0.05, L1 + 0.05]) {
-    const st = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.32, run + 0.2), graf); st.position.set(x, h0 + 1.2 - 0.16, -(y0 + 2.1)); st.rotation.x = ang; add(st);   // vangă
-    const geo = new THREE.PlaneGeometry(4.2, 0.95); const pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setY(i, pos.getY(i) + pos.getX(i) / 4.2 * 2.4);
-    geo.computeVertexNormals(); const gp = new THREE.Mesh(geo, glassB); gp.position.set(x, h0 + 1.2 + 0.5, -(y0 + 2.1)); gp.rotation.y = Math.PI / 2; add(gp, false, false);   // sticlă
-    const hr = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, run, 12), inox); hr.position.set(x, h0 + 1.2 + 1.0, -(y0 + 2.1)); hr.rotation.x = -(Math.PI / 2 - ang); add(hr, false);   // mână curentă
-  }
-  for (const [y0, y1, h] of [[3.3, 4.8, 2.4], [9.0, 11.1, 4.8]]) { boxXY(26.82, y0, 26.86, y1, h + 0.05, h + 1.0, glassB, false); const hr = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, y1 - y0, 12), inox); hr.rotation.x = Math.PI / 2; hr.position.set(26.84, h + 1.02, -(y0 + y1) / 2); add(hr, false); }
-  // ecran de lamele verticale HPL pe latura exterioară (de la +0,40 până sub copertină), lasă vederea liberă printre lamele
-  for (let y = -0.9; y < 11.15; y += 0.22) boxXY(27.02, y, 27.12, y + 0.05, 0.4, 7.5, m.hpl, true);
-  boxXY(27.0, -0.95, 27.14, 11.2, 0.3, 0.4, graf); boxXY(27.0, -0.95, 27.14, 11.2, 7.5, 7.55, graf);
-  // copertină: placă albă cu intrados din lemn și bandă turcoaz
-  boxXY(24.9, -1.2, 27.3, 11.3, 7.6, 7.85, m.white); boxXY(24.95, -1.15, 27.25, 11.25, 7.56, 7.6, m.hpl, false);
-  boxXY(24.9, -1.25, 27.3, -1.2, 7.6, 7.85, m.teal, false);
-  sign('SCARA S1', 'acces etaj · laboratoare', 26.05, -1.3, 2.6, 1.4, 0, '#127c8a');
-  // lift exterior pentru persoane cu dizabilități
+  const flight = (y, h0, dir) => {   // vangă + parapet de sticlă + mână curentă pe o latură a rampei
+    const cx = (XA + XB) / 2, rz = dir > 0 ? ang : -ang;
+    const st = new THREE.Mesh(new THREE.BoxGeometry(run + 0.2, 0.32, 0.08), graf); st.position.set(cx, h0 + 1.2 - 0.16, -y); st.rotation.z = rz; add(st);
+    const gp = new THREE.Mesh(new THREE.BoxGeometry(run, 0.95, 0.012), glassB); gp.position.set(cx, h0 + 1.2 + 0.55, -y); gp.rotation.z = rz; add(gp, false, false);
+    const hr = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, run, 12), inox); hr.position.set(cx, h0 + 1.2 + 1.03, -y); hr.rotation.z = Math.PI / 2 + rz; add(hr, false);
+  };
+  flight(A1 + 0.04, 0, 1); flight(A0 - 0.04, 0, 1); flight(B1 + 0.04, 2.4, -1);
+  for (const [x, y] of [[XA, A1], [XB, A1], [13.25, A1], [13.25, B0], [5.05, B1], [XA, B1]]) boxXY(x - 0.07, y - 0.07, x + 0.07, y + 0.07, 0, 7.6, graf);
+  for (const [x0, y0, x1, y1, h] of [[13.24, B0, 13.28, A1, 2.4], [5.0, B1 - 0.02, XA, B1 + 0.02, 4.8]]) boxXY(x0, y0, x1, y1, h + 0.05, h + 1.0, glassB, false);
+  for (let x = 7.4; x < 13.4; x += 0.22) boxXY(x, 43.65, x + 0.05, 43.75, 0.4, 7.5, m.hpl, true);                  // ecran de lamele spre parc
+  for (let y = 40.2; y < 43.7; y += 0.22) boxXY(13.38, y, 13.48, y + 0.05, 0.4, 7.5, m.hpl, true);
+  boxXY(4.8, 40.0, 13.6, 43.9, 7.6, 7.85, m.white); boxXY(4.85, 40.05, 13.55, 43.85, 7.56, 7.6, m.hpl, false);   // copertină
+  boxXY(4.8, 43.85, 13.6, 43.9, 7.6, 7.85, m.teal, false);
+  sign('SCARA S1', 'acces etaj · laboratoare', 7.25, 43.95, 2.6, 1.4, Math.PI, '#127c8a');
+  // lift interior (puț în holul de intrare): placă de cabină pe ambele niveluri, indicatoare lângă ușă
   const LF = LIFT;
-  boxXY(LF.x0, LF.y0, LF.x1, LF.y1, 0, 8.2, m.glass, false);
-  for (const [x, y] of [[LF.x0, LF.y0], [LF.x1, LF.y0], [LF.x0, LF.y1], [LF.x1, LF.y1]]) boxXY(x - 0.05, y - 0.05, x + 0.05, y + 0.05, 0, 8.2, m.alu);
-  boxXY(LF.x0, LF.y0, LF.x1, LF.y1, 8.2, 8.4, m.alu);
-  const cab = boxXY(LF.x0 + 0.2, LF.y0 + 0.2, LF.x1 - 0.2, LF.y1 - 0.2, 0.05, 0.12, m.steel); cab.name = 'cabinaLift';
-  sign('LIFT', 'apăsați E', 26.4, 11.05, 6.6, 1.2, 0, '#2e6fb0');
-  sign('LIFT', 'apăsați E', 26.4, 13.55, 2.5, 1.2, Math.PI, '#2e6fb0');
+  for (const h of [0, H1]) { const cab = boxXY(LF.x0 + 0.05, LF.y0 + 0.05, LF.x1 - 0.05, LF.y1 - 0.05, h + 0.01, h + 0.04, m.steel, false); cab.name = 'cabinaLift'; }
+  sign('LIFT', 'apăsați E', LF.x1 + 0.17, 4.95, 2.45, 0.7, Math.PI / 2, '#2e6fb0');
+  sign('LIFT', 'apăsați E', LF.x1 + 0.17, 4.95, H1 + 2.45, 0.7, Math.PI / 2, '#2e6fb0');
 
   return { root, colliders, doors };
 }
@@ -421,9 +396,10 @@ export function surfacesAt(x, y) {
   const inB = x >= 0 && x <= BW && y >= 0 && y <= BD;
   if (inB) { out.push(H0, H1); return out; }
   out.push(0);  // teren
-  if (x >= STAIR.lane0 && x <= STAIR.lane1 && y >= -0.9 && y <= 3.3) out.push(Math.max(0, (y + 0.9) / 4.2 * 2.4));
-  if (x >= 25.0 && x <= 26.85 && y >= 3.3 && y <= 4.8) out.push(2.40);
-  if (x >= STAIR.lane0 && x <= STAIR.lane1 && y >= 4.8 && y <= 9.0) out.push(2.40 + (y - 4.8) / 4.2 * 2.4);
-  if (x >= 25.0 && x <= 26.85 && y >= 9.0 && y <= 11.1) out.push(4.80);
+  const [A0, A1] = STAIR.laneA, [B0, B1] = STAIR.laneB, XA = STAIR.xa, XB = STAIR.xb;
+  if (y >= A0 && y <= A1 && x >= XA && x <= XB) out.push(Math.max(0, (x - XA) / 4.2 * 2.4));       // rampa 1
+  if (x >= XB && x <= 13.3 && y >= B0 && y <= A1) out.push(2.40);                                  // podest de întoarcere
+  if (y >= B0 && y <= B1 && x >= XA && x <= XB) out.push(2.40 + (XB - x) / 4.2 * 2.4);              // rampa 2
+  if (x >= 5.0 && x <= XA && y >= 39.95 && y <= B1) out.push(4.80);                                // podest superior
   return out;
 }

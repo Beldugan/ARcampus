@@ -80,7 +80,6 @@ function placeLights() {
 buildSite(scene);
 const { colliders, doors } = buildBuilding(scene);
 // autoturisme parcate în parcarea din spate și pe lotul 18 (obstacole)
-for (const x of [2.56, 8.56, 11.56, 17.56]) colliders[0].push({ x0: x - 0.95, y0: 29.85, x1: x + 0.95, y1: 34.15 });
 for (const [x, y] of LOT18_CARS) colliders[0].push({ x0: x - 2.15, y0: y - 0.95, x1: x + 2.15, y1: y + 0.95 });
 const { items } = buildEquipment(scene);
 const eqBoxes = [[], []];
@@ -96,7 +95,7 @@ const pickRoots = scene.children.filter(o => o.name === 'cladire' || o.name === 
 // ------------------------------------------------------------ control
 const controls = new PointerLockControls(camera, document.body);
 const player = { x: 10, y: -7.5, h: 0, yaw: 0, pitch: 0 };
-const START = { x: 9.5, y: -11.5, h: 0, yaw: 0, pitch: 0.08 };
+const START = { x: 6.25, y: -13, h: 0, yaw: 0, pitch: 0.08 };
 const keys = {};
 let lockMode = false, dragLook = false, lastX = 0, lastY = 0;
 
@@ -140,32 +139,33 @@ addEventListener('keyup', e => keys[e.code] = false);
 
 // ------------------------------------------------------------ puncte de teleportare
 const TP = [
-  { name: 'Exterior · stradă', x: 9.5, y: -11.5, h: 0, yaw: 0 },
-  { name: 'P01 · Stație ITP', x: 3.1, y: 7.0, h: 0, yaw: 0 },
-  { name: 'P02 · Service student', x: 10.5, y: 9.6, h: 0, yaw: 0 },
-  { name: 'P03 · Laborator motoare', x: 1.2, y: 3.0, h: 0, yaw: -90 },
-  { name: 'P04 · Hol de intrare', x: 22.4, y: 1.4, h: 0, yaw: 0 },
-  { name: 'E01 · Diagnosticare + Mecatronică', x: 5.6, y: 8.3, h: H1, yaw: 180 },
-  { name: 'E02 · CCA', x: 10.0, y: 8.0, h: H1, yaw: 180 },
-  { name: 'E03 · Dinamică', x: 16.6, y: 8.2, h: H1, yaw: 180 },
-  { name: 'E04 · Caroserii', x: 3.9, y: 11.8, h: H1, yaw: 0 },
-  { name: 'E05 · HeV', x: 16.0, y: 11.8, h: H1, yaw: 0 },
-  { name: 'E12 · Sală CAD', x: 22.0, y: 8.2, h: H1, yaw: 180 },
-  { name: 'E13 · Sală de protocol', x: 22.0, y: 12.2, h: H1, yaw: 0 },
-  { name: 'Scara S1 (de la fațadă)', x: 26.0, y: -3.5, h: 0, yaw: 0 },
-  { name: 'Porțile ITP / service (parcare)', x: 8.0, y: 27, h: 0, yaw: 180 },
-  { name: 'Parcarea din spate', x: 10, y: 33, h: 0, yaw: 180 },
-  { name: 'Parcarea · lotul 18 (stânga)', x: -13.25, y: -0.5, h: 0, yaw: 0 },
+  { name: 'Exterior · stradă', x: 6.25, y: -13, h: 0, yaw: 0 },
+  { name: 'P01 · Stație ITP', x: 10.5, y: 22.4, h: 0, yaw: 90 },
+  { name: 'P02 · Service student', x: 10.8, y: 30.5, h: 0, yaw: 90 },
+  { name: 'P03 · Laborator motoare', x: 6.0, y: 8.2, h: 0, yaw: 0 },
+  { name: 'P04 · Hol de intrare', x: 3.2, y: 1.2, h: 0, yaw: 0 },
+  { name: 'E01 · Diagnosticare + Mecatronică', x: 4.4, y: 8.0, h: H1, yaw: 0 },
+  { name: 'E02 · CCA', x: 8.2, y: 22.2, h: H1, yaw: 0 },
+  { name: 'E03 · Dinamică', x: 4.4, y: 17.4, h: H1, yaw: 0 },
+  { name: 'E04 · Caroserii', x: 8.2, y: 31.3, h: H1, yaw: 0 },
+  { name: 'E05 · HeV', x: 4.4, y: 25.4, h: H1, yaw: 0 },
+  { name: 'E12 · Sală CAD', x: 4.4, y: 33.4, h: H1, yaw: 0 },
+  { name: 'E13 · Seminar 30 / protocol', x: 11.6, y: 20.8, h: H1, yaw: 180 },
+  { name: 'E14 · Seminar 30 locuri', x: 11.6, y: 11.8, h: H1, yaw: 180 },
+  { name: 'Scara S1 (spatele clădirii)', x: 10.2, y: 46.5, h: 0, yaw: 180 },
+  { name: 'Curtea ITP / service (vest)', x: -9.0, y: 14.0, h: 0, yaw: -90 },
+  { name: 'Parcarea · lotul 18', x: -24.0, y: 4.0, h: 0, yaw: 0 },
 ];
 const tpList = document.getElementById('tplist');
 TP.forEach((t, i) => { const b = document.createElement('button'); b.textContent = (i < 9 ? (i + 1) + '. ' : '') + t.name; b.onclick = () => teleport(t); tpList.appendChild(b); });
 function teleport(t) { setPose({ x: t.x, y: t.y, h: t.h, yawDeg: t.yaw, pitch: -0.05 }); }
 
 function useLift() {
-  const nearLift = player.x > 24.3 && player.x < 28.2 && player.y > 9.0 && player.y < 14.4;
-  if (!nearLift) { flash('Liftul este pe latura de est, la capătul scării S1.'); return; }
-  if (player.h > 2) setPose({ x: 26.4, y: 14.1, h: 0, yawDeg: 180, pitch: 0 }); else setPose({ x: 25.9, y: 10.2, h: H1, yawDeg: 90, pitch: 0 });
-  flash(player.h > 2 ? 'Etaj +4,80' : 'Parter ±0,00');
+  const nearLift = player.x > LIFT.x0 - 0.2 && player.x < LIFT.x1 + 1.8 && player.y > LIFT.y0 - 0.3 && player.y < LIFT.y1 + 0.3;
+  if (!nearLift) { flash('Liftul este în holul de intrare, lângă grupurile sanitare.'); return; }
+  const up = player.h < 2;
+  setPose({ x: 3.9, y: 6.0, h: up ? H1 : 0, yawDeg: -90, pitch: 0 });
+  flash(up ? 'Etaj +4,80' : 'Parter ±0,00');
 }
 
 // ------------------------------------------------------------ deplasare + coliziuni
@@ -199,7 +199,7 @@ function update(dt) {
       if (best === null) return false;
       const insideNext = nx > 0 && nx < BW && ny > 0 && ny < BD;
       if (!insideNext) {
-        if (best > 0.3 && !(nx > 24.95 && nx < 26.85 && ny > -1.0 && ny < 11.1)) return false;   // pe scară / podeste
+        if (best > 0.3 && !(nx > STAIR.x0 && nx < STAIR.x1 && ny > STAIR.y0 - 0.05 && ny < STAIR.y1)) return false;   // pe scară / podeste
         if (best <= 0.3 && blockedOutside(nx, ny)) return false;
       }
       player.x = nx; player.y = ny; player.h = best; return true;
@@ -209,13 +209,14 @@ function update(dt) {
   camera.position.set(player.x, player.h + EYE, -player.y);
 }
 function blockedOutside(x, y) {
-  // la sol: liftul și spațiul de sub scară (rampa 1 de unde depășește 0,5 m, podestul, rampa 2, podestul superior)
-  if (x > LIFT.x0 - RADIUS && x < LIFT.x1 + RADIUS && y > LIFT.y0 - RADIUS && y < LIFT.y1 + RADIUS) return true;
-  if (x > 25.0 - RADIUS && x < 26.85 + RADIUS && y > 3.3 - RADIUS && y < 11.1 + RADIUS) return true;
-  if (x > 26.95 - RADIUS && x < 27.2 + RADIUS && y > -0.95 && y < 11.25) return true;   // ecranul de lamele al scării
-  if (x > STAIR.lane0 - RADIUS && x < STAIR.lane1 + RADIUS && y > -0.9 && y < 3.3 && (y + 0.9) / 4.2 * 2.4 > 0.5) return true;
-  if (x > 25.0 - RADIUS && x < STAIR.lane0 && y > -0.9 && y < 3.3) return true;   // laterala rampei spre clădire
-  if (x > STAIR.lane1 && x < 26.85 + RADIUS && y > -0.1 && y < 3.3) return true;
+  // la sol: spațiul de sub scara S1 (rampa 1 de unde depășește 0,5 m, podestul de întoarcere, rampa 2, podestul superior) și ecranele de lamele
+  const [A0, A1] = STAIR.laneA;
+  if (x > STAIR.x0 - RADIUS && x < STAIR.x1 + RADIUS && y > STAIR.y0 - RADIUS && y < STAIR.y1 + RADIUS) {
+    if (y > A0 + RADIUS && y < A1 - RADIUS && x < STAIR.xa + 0.85) return false;   // zona de acces + începutul rampei 1 (sub 0,5 m)
+    return true;
+  }
+  if (y > 43.6 && y < 43.8 + RADIUS && x > 7.35 && x < 13.5) return true;
+  if (x > 13.3 && x < 13.5 + RADIUS && y > 40.1 && y < 43.8) return true;
   return false;
 }
 // ------------------------------------------------------------ uși cu deschidere automată
@@ -256,16 +257,18 @@ const roomEl = document.getElementById('room');
 function currentRoom() {
   const lvl = player.h > 2.6 ? 1 : 0;
   for (const r of ROOMS) if (r.lvl === lvl && player.x >= r.r[0] && player.x <= r.r[2] && player.y >= r.r[1] && player.y <= r.r[3]) return r.name;
-  if (player.x > 24.9 && player.x < 28 && player.y > -1 && player.y < 13.6) return 'Scara exterioară acoperită S1 · lift PMR';
-  if (player.x > -21.6 && player.x < -5 && player.y > -1 && player.y < 21) return 'Lotul 18 · parcare (stânga clădirii) · 16 locuri';
-  if (player.y > 20) return 'Parcare spate · 300 m² (acces ITP / service)';
-  if (player.y < 0) return 'Platforma frontală · strada · lacul';
+  if (player.x > 4.8 && player.x < 13.6 && player.y > 39.9 && player.y < 44) return 'Scara exterioară acoperită S1 (spatele clădirii)';
+  if (player.x < -16.5 && player.x > -33 && player.y > -2 && player.y < 42) return 'Lotul 18 · parcare (vest)';
+  if (player.x < 0 && player.x >= -16.5 && player.y > 0) return 'Curte de manevră · acces ITP și service student';
+  if (player.y > BD) return 'Spatele clădirii · alee pietonală · scara S1';
+  if (player.y < -16) return 'Strada · vis-a-vis clădirea UMC și lacul';
+  if (player.y < 0) return 'Platforma frontală · intrarea principală';
   return 'Lotul 21 · exterior';
 }
 function currentKey() {
   const lvl = player.h > 2.6 ? 1 : 0;
   for (const r of ROOMS) if (r.lvl === lvl && player.x >= r.r[0] && player.x <= r.r[2] && player.y >= r.r[1] && player.y <= r.r[3]) return r.id;
-  return player.y > 20 ? 'SPATE' : 'EXT';
+  return player.y > BD ? 'SPATE' : 'EXT';
 }
 // ------------------------------------------------------------ imagini concept (referință vizuală pe încăpere)
 const CONCEPT = {
@@ -292,20 +295,20 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyN') { cIdx++; cKey && showConcept(cKey); }
 });
 const mm = document.getElementById('minimap'); const mctx = mm.getContext('2d');
-const COL = { P01: '#cfe8eb', P02: '#f6e0cb', P03: '#d9e5f5', E01: '#d9e5f5', E02: '#d9e5f5', E03: '#d9e5f5', E04: '#d9e5f5', E05: '#d9e5f5', E12: '#d9e5f5', E13: '#d9e5f5', P04: '#ececec', P09: '#ececec', E06: '#ececec', E11: '#ececec' };
+const COL = { E14: '#d9e5f5', P01: '#cfe8eb', P02: '#f6e0cb', P03: '#d9e5f5', E01: '#d9e5f5', E02: '#d9e5f5', E03: '#d9e5f5', E04: '#d9e5f5', E05: '#d9e5f5', E12: '#d9e5f5', E13: '#d9e5f5', P04: '#ececec', P09: '#ececec', E06: '#ececec', E11: '#ececec' };
 function drawMap() {
-  const W = mm.width, s = W / 31, ox = 1.5 * s, oy = W - 6 * s;
+  const W = mm.width, s = W / 47, ox = (W - 14 * s) / 2, oy = W - 1.5 * s;
   const X = x => ox + x * s, Y = y => oy - y * s;
   mctx.clearRect(0, 0, W, W); mctx.fillStyle = 'rgba(20,30,40,0.82)'; mctx.fillRect(0, 0, W, W);
   const lvl = player.h > 2.6 ? 1 : 0;
   for (const r of ROOMS.filter(r => r.lvl === lvl)) {
     mctx.fillStyle = COL[r.id] || '#e2e2e2'; mctx.fillRect(X(r.r[0]), Y(r.r[3]), (r.r[2] - r.r[0]) * s, (r.r[3] - r.r[1]) * s);
     mctx.fillStyle = '#1d2b3a'; mctx.font = `${Math.max(9, s * 0.75)}px Arial`; mctx.textAlign = 'center';
-    if ((r.r[2] - r.r[0]) > 3) mctx.fillText(r.id, X((r.r[0] + r.r[2]) / 2), Y((r.r[1] + r.r[3]) / 2) + 4);
+    if ((r.r[2] - r.r[0]) > 3.5 && (r.r[3] - r.r[1]) > 3) mctx.fillText(r.id, X((r.r[0] + r.r[2]) / 2), Y((r.r[1] + r.r[3]) / 2) + 4);
   }
   mctx.strokeStyle = '#fff'; mctx.lineWidth = 2; mctx.strokeRect(X(0), Y(BD), BW * s, BD * s);
-  mctx.strokeStyle = '#e8742b'; mctx.strokeRect(X(25.0), Y(11.1), 1.85 * s, 12.0 * s);
-  mctx.fillStyle = '#9fc0d6'; mctx.fillRect(X(LIFT.x0), Y(LIFT.y1), 2.4 * s, 2.4 * s);
+  mctx.strokeStyle = '#e8742b'; mctx.strokeRect(X(STAIR.x0), Y(STAIR.y1), (STAIR.x1 - STAIR.x0) * s, (STAIR.y1 - STAIR.y0) * s);
+  mctx.fillStyle = '#9fc0d6'; mctx.fillRect(X(LIFT.x0), Y(LIFT.y1), (LIFT.x1 - LIFT.x0) * s, (LIFT.y1 - LIFT.y0) * s);
   mctx.fillStyle = '#fff'; mctx.font = 'bold 11px Arial'; mctx.textAlign = 'left'; mctx.fillText(lvl ? 'ETAJ +4,80' : 'PARTER ±0,00', 6, 14);
   mctx.fillText('stradă ↓', 6, W - 6);
   const px = X(player.x), py = Y(player.y), yaw = camera.rotation.y;
