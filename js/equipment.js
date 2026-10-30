@@ -186,8 +186,67 @@ function toolCabinet(color = MAT.red) {
   for (const [x, z] of [[-0.3, -0.18], [0.3, -0.18], [-0.3, 0.18], [0.3, 0.18]]) Cy(g, 0.04, 0.04, MAT.rubber, x, 0.04, z, 'x', 10);
   B(g, 0.78, 0.03, 0.5, MAT.dark, 0, 1.08, 0); return g;
 }
-function tireChanger() { const g = new THREE.Group(); B(g, 0.8, 0.85, 0.7, MAT.red, 0, 0, 0); Cy(g, 0.32, 0.06, MAT.grey, 0, 0.85, 0.05); B(g, 0.12, 1.2, 0.12, MAT.red, 0, 0.85, -0.35); B(g, 0.6, 0.1, 0.1, MAT.grey, 0.0, 1.95, -0.1); return g; }
-function wheelBalancer() { const g = new THREE.Group(); B(g, 0.65, 0.9, 0.55, MAT.blue, 0, 0, 0); Cy(g, 0.04, 0.3, MAT.steel, 0.45, 0.75, 0, 'x'); B(g, 0.45, 0.3, 0.06, MAT.dark, 0, 1.0, -0.25); const t = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.09, 10, 24), MAT.rubber); t.rotation.y = Math.PI / 2; t.position.set(0.62, 0.75, 0); g.add(t); return g; }
+// mașină de demontat anvelope (tip automată, cu braț basculant): corp roșu cu capac din tablă, platou rotativ cu 4 bacuri de prindere, coloană basculantă cu braț
+// orizontal și ax hexagonal cu cap de montare, detalonator pneumatic lateral cu paletă și tampon de cauciuc, 3 pedale, manometru de umflare cu furtun, roată prinsă pe platou
+function tireChanger() {
+  const g = new THREE.Group(), red = C(0xb3201e, { roughness: 0.4, metalness: 0.25 }), grey = C(0x3a3f44, { metalness: 0.5, roughness: 0.4 }), st = C(0xc9cdd1, { metalness: 0.85, roughness: 0.3 }), blk = C(0x15171a, { roughness: 0.6 });
+  B(g, 0.66, 0.06, 0.95, grey, 0, 0, -0.02);                                                              // soclu
+  B(g, 0.62, 0.74, 0.9, red, 0, 0.06, -0.02); B(g, 0.6, 0.02, 0.84, C(0x2b2f33, { metalness: 0.5 }), 0, 0.8, 0.0);   // corp + capac
+  for (const z of [-0.2, 0.15]) B(g, 0.5, 0.004, 0.012, C(0x8a1712), 0, 0.5, 0.429 + 0 * z);               // nervuri de ranforsare pe față
+  // platou rotativ Ø600 cu 4 bacuri (glisiere radiale)
+  Cy(g, 0.3, 0.04, st, 0, 0.82, 0.08, 'y', 40); Cy(g, 0.1, 0.05, grey, 0, 0.82, 0.08, 'y', 24);
+  for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + Math.PI / 4; const j = new THREE.Group(); j.position.set(Math.cos(a) * 0.2, 0.86, 0.08 + Math.sin(a) * 0.2); j.rotation.y = -a; g.add(j); B(j, 0.14, 0.012, 0.05, st, 0, 0, 0); B(j, 0.04, 0.06, 0.05, grey, 0.05, 0.0, 0); for (let k = 0; k < 4; k++) B(j, 0.004, 0.05, 0.05, C(0x111111), 0.07, 0.005 + k * 0.012, 0); }
+  // roată prinsă pe platou (culcată)
+  const wh = realWheel(g, 0, 0.98, 0.08, 0, 0.95); wh.rotation.x = Math.PI / 2;
+  // coloană basculantă (spate), braț orizontal, ax hexagonal vertical, cap de montare cu bușon de plastic
+  const col = new THREE.Group(); col.position.set(0, 0.82, -0.4); col.rotation.x = -0.06; g.add(col);
+  B(col, 0.18, 1.05, 0.16, red, 0, 0, 0); B(col, 0.22, 0.12, 0.2, grey, 0, 1.0, 0.0);
+  B(col, 0.12, 0.12, 0.62, red, 0, 0.95, 0.33); B(col, 0.1, 0.04, 0.08, blk, 0.0, 1.07, 0.6);            // braț + mâner de blocare
+  Cy(col, 0.025, 0.85, st, 0, 0.42, 0.56, 'y', 6); Cy(col, 0.03, 0.08, blk, 0, 0.9, 0.56, 'y', 12);       // ax hexagonal
+  const head = new THREE.Group(); head.position.set(0, 0.32, 0.56); col.add(head); B(head, 0.07, 0.07, 0.11, C(0x2b2f33, { metalness: 0.7 }), 0, 0, 0.0); B(head, 0.08, 0.03, 0.06, C(0xf2f2ee, { roughness: 0.4 }), 0, -0.02, 0.06);   // cap montare + protecție plastic
+  B(col, 0.08, 0.16, 0.1, blk, 0.0, 0.05, -0.12); Cy(col, 0.04, 0.24, C(0x2b2f33, { metalness: 0.6 }), 0.0, 0.35, -0.12, 'y', 16);   // cilindru pneumatic de basculare
+  // detalonator pe partea dreaptă: tampon de cauciuc pe corp, braț pivotant cu paletă, cilindru pneumatic
+  B(g, 0.03, 0.22, 0.32, C(0x111111, { roughness: 0.9 }), 0.325, 0.3, 0.0);
+  const bb = new THREE.Group(); bb.position.set(0.33, 0.62, -0.3); bb.rotation.z = -0.25; g.add(bb);
+  B(bb, 0.6, 0.06, 0.06, red, 0.3, 0, 0); B(bb, 0.06, 0.2, 0.06, red, 0.58, -0.2, 0); B(bb, 0.02, 0.1, 0.18, st, 0.58, -0.3, 0.06);   // braț + paletă
+  Cy(g, 0.055, 0.42, C(0x2b2f33, { metalness: 0.6 }), 0.4, 0.38, -0.36, 'x', 18); Cy(g, 0.012, 0.3, st, 0.68, 0.38, -0.36, 'x', 8);
+  // 3 pedale (blocare bacuri, rotire platou, detalonare)
+  for (let i = 0; i < 3; i++) { const pd = B(g, 0.07, 0.02, 0.16, grey, -0.15 + i * 0.15, 0.06, 0.5); pd.rotation.x = -0.2; B(g, 0.07, 0.006, 0.14, C(0x111111), -0.15 + i * 0.15, 0.085, 0.5); }
+  // manometru de umflare pe partea stângă, cu furtun spiralat
+  B(g, 0.04, 0.16, 0.12, grey, -0.33, 0.85, 0.3); Cy(g, 0.045, 0.02, st, -0.355, 0.95, 0.3, 'x', 24); const gf = new THREE.Mesh(new THREE.CircleGeometry(0.04, 24), C(0xf5f5f0)); gf.rotation.y = -Math.PI / 2; gf.position.set(-0.366, 0.95, 0.3); g.add(gf);
+  helix(g, 0.035, 0.3, 9, 0.004, C(0x111111), -0.37, 0.5, 0.36);
+  // găleată cu pastă de montaj + pensulă
+  Cy(g, 0.08, 0.14, C(0xf2f2ee, { roughness: 0.5 }), -0.42, 0.0, 0.42, 'y', 18); Cy(g, 0.006, 0.2, C(0xb98a52), -0.42, 0.16, 0.42, 'y', 6);
+  return g;
+}
+// mașină de echilibrat roți: corp cu tavă de greutăți (contragreutăți cu clips și adezive), suporți pentru conuri, ax principal cu filet și piuliță rapidă,
+// con de centrare, braț de măsurare a distanței, capotă de protecție ridicată, monitor pe stâlp, roată montată
+function wheelBalancer() {
+  const g = new THREE.Group(), body = C(0x2a4f7a, { roughness: 0.4, metalness: 0.25 }), grey = C(0x3a3f44, { metalness: 0.5, roughness: 0.4 }), st = C(0xc9cdd1, { metalness: 0.85, roughness: 0.3 }), blk = C(0x15171a, { roughness: 0.6 });
+  B(g, 0.82, 0.06, 0.6, grey, -0.06, 0, 0);                                                              // soclu
+  B(g, 0.78, 0.82, 0.56, body, -0.06, 0.06, 0); B(g, 0.8, 0.03, 0.58, C(0x1b1d20, { roughness: 0.5 }), -0.06, 0.88, 0);   // corp + blat
+  // tavă cu compartimente pentru contragreutăți
+  B(g, 0.6, 0.02, 0.36, C(0x24272a), -0.12, 0.91, 0.03);
+  for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { const x = -0.38 + i * 0.1, z = -0.1 + j * 0.13; B(g, 0.004, 0.04, 0.12, C(0x2b2f33), x - 0.05, 0.93, z); for (let k = 0; k < 3; k++) B(g, 0.06, 0.012, 0.014, j === 2 ? C(0x9aa0a6, { metalness: 0.8 }) : C(0x6a6f74, { metalness: 0.6 }), x, 0.93, z - 0.03 + k * 0.025); }
+  // suporți laterali cu conuri de centrare (stânga)
+  for (let i = 0; i < 3; i++) { Cy(g, 0.012, 0.12, st, -0.47, 0.5 + i * 0.12, 0.1, 'x', 8); Cy(g, 0.045 - i * 0.008, 0.06, st, -0.53, 0.5 + i * 0.12, 0.1, 'x', 16, 0.025 - i * 0.004); }
+  // ax principal Ø40 cu flanșă, con, roată, piuliță rapidă (dreapta)
+  Cy(g, 0.09, 0.03, st, 0.35, 0.62, 0.0, 'x', 28); Cy(g, 0.02, 0.4, st, 0.5, 0.62, 0.0, 'x', 12);
+  Cy(g, 0.06, 0.05, st, 0.42, 0.62, 0.0, 'x', 20, 0.03);
+  realWheel(g, 0.5, 0.62, 0.0, Math.PI / 2, 0.95);
+  Cy(g, 0.05, 0.05, grey, 0.66, 0.62, 0.0, 'x', 16); for (const s of [-1, 1]) B(g, 0.02, 0.1, 0.02, grey, 0.68, 0.62 + s * 0.04, 0);   // piuliță rapidă cu mânere
+  // braț de măsurare a distanței (sub ax), pedală de frână
+  Cy(g, 0.012, 0.25, st, 0.42, 0.45, 0.12, 'x', 8); B(g, 0.03, 0.03, 0.05, blk, 0.55, 0.44, 0.12);
+  B(g, 0.1, 0.02, 0.14, grey, 0.2, 0.06, 0.32);
+  // capotă de protecție ridicată (semicilindru pe braț articulat în spate)
+  const hood = new THREE.Group(); hood.position.set(0.52, 0.95, -0.32); hood.rotation.x = -1.1; g.add(hood);
+  const hm = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.32, 28, 1, true, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x2a4f7a, roughness: 0.45, metalness: 0.2, side: THREE.DoubleSide })); hm.rotation.z = Math.PI / 2; hm.position.set(0, 0, 0.35); hood.add(hm);
+  B(hood, 0.04, 0.04, 0.4, grey, -0.18, 0, 0.15);
+  // monitor pe stâlp (spate), cu valorile dezechilibrului
+  B(g, 0.05, 0.6, 0.05, grey, -0.2, 0.9, -0.25); B(g, 0.46, 0.3, 0.05, blk, -0.2, 1.48, -0.25);
+  const sc = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.26), new THREE.MeshBasicMaterial({ map: (() => { const cv = document.createElement('canvas'); cv.width = 420; cv.height = 260; const x = cv.getContext('2d'); x.fillStyle = '#0b1a2b'; x.fillRect(0, 0, 420, 260); x.strokeStyle = '#3ad1ff'; x.lineWidth = 6; for (const cx of [110, 310]) { x.beginPath(); x.arc(cx, 120, 70, 0, 7); x.stroke(); } x.fillStyle = '#ffe14d'; x.font = 'bold 44px Arial'; x.textAlign = 'center'; x.fillText('15', 110, 136); x.fillText('5', 310, 136); x.fillStyle = '#e8eef5'; x.font = '22px Arial'; x.fillText('INT  g', 110, 225); x.fillText('EXT  g', 310, 225); x.fillText('205/55 R16', 210, 30); const t = new THREE.CanvasTexture(x.canvas); t.colorSpace = THREE.SRGBColorSpace; return t; })() })); sc.position.set(-0.2, 1.63, -0.224); g.add(sc);
+  return g;
+}
 function oilDrainer() { const g = new THREE.Group(); Cy(g, 0.28, 0.9, MAT.yellow, 0, 0.1, 0); Cy(g, 0.03, 0.9, MAT.steel, 0, 1.0, 0); Cy(g, 0.3, 0.12, MAT.dark, 0, 1.9, 0, 'y', 20, 0.18); return g; }
 function jack() { const g = new THREE.Group(); B(g, 0.35, 0.18, 1.1, MAT.red, 0, 0.05, 0); Cy(g, 0.02, 1.0, MAT.steel, 0, 0.25, 0.85, 'z'); return g; }
 function x431() { const g = new THREE.Group(); B(g, 0.5, 0.04, 0.4, MAT.dark, 0, 0.9, 0); for (const [x, z] of [[-0.22, -0.17], [0.22, -0.17], [-0.22, 0.17], [0.22, 0.17]]) B(g, 0.03, 0.9, 0.03, MAT.grey, x, 0, z); B(g, 0.48, 0.03, 0.38, MAT.dark, 0, 0.25, 0); screen(g, 0.3, 0.2, 'diag', 11, 0, 0.95, 0.0, 0, -0.5); B(g, 0.08, 0.05, 0.12, MAT.blue, 0.18, 0.95, 0.1); return g; }
@@ -1218,7 +1277,7 @@ export function buildEquipment(scene) {
   put(cylHeadsBench(2.2), 14.0, 3.4, 0, 0, info('Banc cu chiulase și ax cu came', D.CCMAI, ['Chiulase: camere de ardere, supape, ghiduri', 'Măsurători la axul cu came'], 'Imagine concept „PCMAI + CCMAI”'));
   put(greyCabinets(2.4), 15.5, 13.2, 90, 0, info('Dulapuri de laborator (scule, aparate de măsură)', D.CCMAI + ' · ' + D.PCMAI, ['Micrometre, comparatoare, șublere, chei dinamometrice'], 'Imagine concept'));
   // bănci pentru studenți în locul machetei Smart (4 mese duble, cu fața spre tablă)
-  [[9.3, 2.3], [11.1, 2.3], [9.3, 3.9], [11.1, 3.9]].forEach(([x, y], i) => (put(studentDesk(1.6), x, y, 0, 0, i === 0 ? info('Bănci studenți (8 locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Amenajare P03') : null).userData.seat = 2));
+  [[3.2, 2.3], [5.0, 2.3], [6.8, 2.3], [3.2, 3.9], [5.0, 3.9], [6.8, 3.9], [9.3, 2.3], [11.1, 2.3], [9.3, 3.9], [11.1, 3.9]].forEach(([x, y], i) => (put(studentDesk(1.6), x, y, 0, 0, i === 0 ? info('Bănci studenți (20 de locuri)', D.PCMAI + ' · ' + D.CCMAI, ['Măsurători, referate, proiecte PCMAI / CCMAI'], 'Amenajare P03') : null).userData.seat = 2));
   put(avlStation(), 15.7, 16.9, 90, 0, info('Stația AVL DiTEST (DiScope 200, analizor gaze, opacimetru)', D.DA + ' · ' + D.PCMAI, ['Diagnosticare L1 – motoare termice cu standul AVL', 'L1–L5: semnale, compresie relativă, emisii', 'Achiziția simultană a min. 10 parametri'], 'Caiet de sarcini Laborator Motoare Termice; Ghid AVL'));
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
