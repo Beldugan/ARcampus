@@ -565,7 +565,7 @@ export function framedPrint(url, w = 1.2, h = 0.8) {
 // accesorii pe masa de consiliu: blocnotes, pix, pahar, sticlă de apă, plăcuță cu nume
 export function tableSetting(name) {
   const g = new THREE.Group(); box(g, 0.21, 0.006, 0.297, M(0xf5f5f0), 0, 0.003, 0.0); rod(g, [0.12, 0.008, -0.08], [0.13, 0.008, 0.06], 0.004, P.brass);
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.25, roughness: 0.02, transmission: 0.6, thickness: 0.01 });
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.25, roughness: 0.02 });
   cyl(g, 0.032, 0.1, glass, -0.18, 0.05, -0.12, 'y', 16); cyl(g, 0.035, 0.2, M(0x2a5a7a, { roughness: 0.1, transparent: true, opacity: 0.6 }), -0.26, 0.1, -0.16, 'y', 16); cyl(g, 0.018, 0.03, M(0x111111), -0.26, 0.215, -0.16, 'y', 12);
   if (name) { const pl = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.055), new THREE.MeshBasicMaterial({ map: labelTex([name], 256, 72, '#f4f1ea', '#1d2b3a', 'bold 30px Georgia') })); pl.position.set(0, 0.035, -0.2); pl.rotation.x = -0.35; pl.rotation.y = Math.PI; g.add(pl); }
   return g;

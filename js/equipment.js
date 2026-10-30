@@ -1260,7 +1260,7 @@ function gelPrinter3D() {   // imprimantă cu gel (Gel Dispensing Printing): cam
   Cy(g, 0.012, 0.08, steel, 0.05, H - 0.94, -0.05, 'y', 10);                                        // duză
   const ring = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.012, 8, 24), C(0x7b5cff, { emissive: 0x6a3cff, emissiveIntensity: 2 })); ring.rotation.x = Math.PI / 2; ring.position.set(0.05, H - 0.9, -0.05); g.add(ring);
   // piesa în lucru: panou curb de caroserie (aripă) – coajă subțire, translucidă
-  const gel = new THREE.MeshPhysicalMaterial({ color: 0xe8e2f2, roughness: 0.35, transmission: 0.2, thickness: 0.02 });
+  const gel = new THREE.MeshPhysicalMaterial({ color: 0xe8e2f2, roughness: 0.35, clearcoat: 0.6, transparent: true, opacity: 0.85 });
   const shell = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 16, 0, Math.PI, 0, Math.PI / 2), gel); shell.scale.set(1, 0.9, 0.85); shell.position.set(0, 0.515, -0.02); shell.material.side = THREE.DoubleSide; shell.castShadow = true; g.add(shell);
   B(g, 0.22, 0.32, 0.03, dark, W / 2 - 0.07, 1.25, Dp / 2 + 0.005); const sc = new THREE.Mesh(new THREE.PlaneGeometry(0.19, 0.27), scr('cad', 77)); sc.position.set(W / 2 - 0.07, 1.41, Dp / 2 + 0.022); g.add(sc);
   B(g, 0.08, 0.08, 0.02, C(0xd32f2f), -W / 2 + 0.07, 1.3, Dp / 2 + 0.005);

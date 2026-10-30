@@ -320,7 +320,7 @@ export function buildBuilding(scene) {
       pivot.add(leaf);
       const baseRot = along === 'x' ? 0 : Math.PI / 2;
       if (along === 'x') pivot.position.set(a + 0.06, base, -mid); else pivot.position.set(mid, base, -(a + 0.06));
-      pivot.rotation.y = baseRot; root.add(pivot);
+      pivot.rotation.y = baseRot; pivot.userData.noMerge = true; root.add(pivot);
       doors.push({ pivot, baseRot, along, lvl, cx: along === 'x' ? (a + b) / 2 : mid, cy: along === 'x' ? mid : (a + b) / 2, mid, ang: 0, side: 1 });
       // prag (pardoseală continuă sub ușă)
       rect(a, b, 0, 0.012, m.slab, th + 0.02);

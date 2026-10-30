@@ -22,9 +22,11 @@ Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR a Universi
 | 1 – 9 | teleport în încăperi (lista din dreapta) |
 | M | harta mică · H ascunde panoul cu taste |
 | C / N | mărește imaginea concept a încăperii / trece la următoarea |
-| Q | comută între calitate înaltă (ocluzie ambientală, antialiasing) și calitate rapidă |
+| Q | comută calitatea înaltă (ocluzie ambientală), aplicată automat când stai pe loc; în mers se randează direct, fără post-procesare |
 
 Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropii.
+
+Pentru deplasare fluidă, geometria statică se comasează la încărcare (`js/perf.js`): de la ≈ 25.000 la ≈ 2.400 de apeluri de desenare pe cadru. Umbrele soarelui se calculează o singură dată, iar cadrul se redesenează doar când te miști sau se deschide o ușă.
 
 ### Organizare (500 m² / nivel)
 

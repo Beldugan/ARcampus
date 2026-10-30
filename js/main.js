@@ -10,17 +10,18 @@ import { T } from './textures.js';
 import { buildBuilding, surfacesAt, ROOMS, LEVEL_H, LIFT, STAIR, H1, BW, BD } from './building.js';
 import { buildEquipment, CAR_MODEL } from './equipment.js';
 import { buildSite, LOT18_CARS } from './site.js';
+import { mergeStatic } from './perf.js';
 
 const qs = new URLSearchParams(location.search);
 const EYE = 1.65, RADIUS = 0.28;
 
 // ------------------------------------------------------------ randare
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: qs.has('cam') });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.78;
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;   // soarele e fix: umbrele se calculează o singură dată
 document.getElementById('app').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -90,7 +91,13 @@ for (const it of items) {
   if (tmpBox.max.y - LEVEL_H[it.lvl] < 0.25) continue;        // obiecte joase (plăci în pardoseală) – se calcă pe ele
   eqBoxes[it.lvl].push({ x0: tmpBox.min.x, x1: tmpBox.max.x, y0: -tmpBox.max.z, y1: -tmpBox.min.z });
 }
-const pickRoots = scene.children.filter(o => o.name === 'cladire' || o.name === 'echipamente');
+// după încărcarea modelului de autoturism: casetele echipamentelor (pentru fișe), apoi comasarea geometriei statice
+let OPT_READY = CAR_MODEL.then(() => new Promise(r => setTimeout(r, 0))).then(() => {
+  for (const it of items) it.box = new THREE.Box3().setFromObject(it.obj);
+  if (!qs.has('nomerge')) for (const r of scene.children.filter(o => ['cladire', 'echipamente', 'amplasament'].includes(o.name))) mergeStatic(r);
+  renderer.shadowMap.needsUpdate = true; dirty = true; window.OPT_DONE = true;
+});
+let dirty = true;
 
 // ------------------------------------------------------------ control
 const controls = new PointerLockControls(camera, document.body);
@@ -221,26 +228,45 @@ function blockedOutside(x, y) {
 }
 // ------------------------------------------------------------ uși cu deschidere automată
 function updateDoors(dt) {
+  let moving = false;
   for (const d of doors) {
     const lvlD = d.lvl, lvlP = player.h > 2.6 ? 1 : 0;
     const near = lvlD === lvlP && Math.hypot(player.x - d.cx, player.y - d.cy) < 1.7;
     if (near && d.ang < 0.02) d.side = (d.along === 'x' ? player.y : player.x) < d.mid ? 1 : -1;   // se deschide dinspre tine
     const target = near ? 1 : 0;
-    d.ang += Math.sign(target - d.ang) * Math.min(Math.abs(target - d.ang), dt * 1.6);
+    const step = Math.sign(target - d.ang) * Math.min(Math.abs(target - d.ang), dt * 1.6); if (step) moving = true; d.ang += step;
     const delta = d.ang * Math.PI / 2 * (d.along === 'x' ? d.side : -d.side);
     d.pivot.rotation.y = d.baseRot + delta;
   }
+  return moving;
 }
 
 // ------------------------------------------------------------ informații la privire
 const ray = new THREE.Raycaster(); ray.far = 6;
 const card = document.getElementById('card');
 let lastInfo = null;
+const _hit = new THREE.Vector3();
 function pick() {
   ray.setFromCamera(new THREE.Vector2(0, 0), camera);
-  const hits = ray.intersectObjects(pickRoots, true).filter(h => !(h.object.material && h.object.material.transparent));
-  let info = null;
-  if (hits.length) { let o = hits[0].object; while (o && !o.userData.info) o = o.parent; info = o?.userData.info || null; }
+  const r = ray.ray, lvl = player.h > 2.6 ? 1 : 0;
+  // peretele cel mai apropiat pe direcția privirii (coliziunile 2D ale nivelului) – fișele din spatele lui nu se afișează
+  let wallT = ray.far; const ox = r.origin.x, oy = -r.origin.z, dx = r.direction.x, dy = -r.direction.z;
+  for (const b of colliders[lvl]) {
+    let t0 = 0, t1 = wallT, ok = true;
+    for (const [o, d, lo, hi] of [[ox, dx, b.x0, b.x1], [oy, dy, b.y0, b.y1]]) {
+      if (Math.abs(d) < 1e-9) { if (o < lo || o > hi) { ok = false; break; } continue; }
+      let a = (lo - o) / d, c = (hi - o) / d; if (a > c) [a, c] = [c, a]; t0 = Math.max(t0, a); t1 = Math.min(t1, c); if (t0 > t1) { ok = false; break; }
+    }
+    if (ok && t0 > 0.05) wallT = Math.min(wallT, t0);
+  }
+  let info = null, best = Infinity, bestVol = Infinity;
+  for (const it of items) {
+    if (!it.info || !it.box || it.lvl !== lvl) continue;
+    if (!r.intersectBox(it.box, _hit)) continue;
+    const t = _hit.distanceTo(r.origin); if (t > wallT || t > ray.far) continue;
+    const v = it.box.getSize(_hit).x * _hit.y * _hit.z;
+    if (t < best - 0.15 || (t < best + 0.15 && v < bestVol)) { best = Math.min(best, t); bestVol = v; info = it.info; }
+  }
   if (info !== lastInfo) {
     lastInfo = info;
     if (!info) { card.classList.add('hidden'); return; }
@@ -319,24 +345,33 @@ let flashT = 0; const flashEl = document.getElementById('flash');
 function flash(t) { flashEl.textContent = t; flashEl.classList.remove('hidden'); flashT = 2.5; }
 
 // ------------------------------------------------------------ bucla
-addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); });
-addEventListener('keydown', e => { if (e.code === 'KeyQ') { HQ = !HQ; flash(HQ ? 'Calitate înaltă (umbre de contact)' : 'Calitate rapidă'); } });
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); dirty = true; });
+addEventListener('keydown', e => { if (e.code === 'KeyQ') { HQ = !HQ; flash(HQ ? 'Calitate înaltă (umbre de contact)' : 'Calitate rapidă'); dirty = true; } });
 if (qs.has('cam')) {   // mod captură (pentru imagini statice): ?cam=x,y,h,yawDeg,pitchDeg
   const [x, y, h, yw, pt] = qs.get('cam').split(',').map(Number);
   setPose({ x, y, h, yawDeg: yw, pitch: THREE.MathUtils.degToRad(pt || 0) });
   document.body.classList.add('capture'); card.style.display = 'none';
-  Promise.all([CAR_MODEL, SKY]).then(() => { const p = player; updateEnv(p.x > 0 && p.x < BW && p.y > 0 && p.y < BD); placeLights(); draw(); window.READY = true; });
+  Promise.all([CAR_MODEL, SKY, OPT_READY]).then(() => { const p = player; updateEnv(p.x > 0 && p.x < BW && p.y > 0 && p.y < BD); placeLights(); draw(); window.READY = true; });
 } else {
-  let frame = 0;
+  let frame = 0, lastPose = '', idle = 0, hqDone = false;
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.05);
-    update(dt); updateDoors(dt);
+    update(dt); const doorsMoving = updateDoors(dt);
+    const pose = camera.position.x.toFixed(3) + ',' + camera.position.y.toFixed(3) + ',' + camera.position.z.toFixed(3) + ',' + camera.rotation.x.toFixed(4) + ',' + camera.rotation.y.toFixed(4);
+    const moved = pose !== lastPose; lastPose = pose;
     if (frame++ % 6 === 0) { pick(); roomEl.textContent = currentRoom(); drawMap(); showConcept(currentKey()); }
-    if (frame % 20 === 1) placeLights();
     if (flashT > 0) { flashT -= dt; if (flashT <= 0) flashEl.classList.add('hidden'); }
-    updateEnv(player.x > 0 && player.x < BW && player.y > 0 && player.y < BD);
-    draw();
+    if (moved || doorsMoving || dirty) {
+      if (moved && frame % 10 === 1) placeLights();
+      updateEnv(player.x > 0 && player.x < BW && player.y > 0 && player.y < BD);
+      renderer.render(scene, camera);          // în mișcare: randare directă, fără post-procesare
+      idle = 0; hqDone = false; dirty = false;
+    } else if (!hqDone) {
+      idle += dt;
+      if (idle > 0.25) { placeLights(); if (HQ) composer.render(); else renderer.render(scene, camera); hqDone = true; }   // pe loc: un cadru de calitate (ocluzie ambientală)
+    }
   });
 }
 // acces pentru testare automată (fără efect în utilizare)
 window.APP = { player, keys, update, setPose, camera, blocked, ROOMS, items };
+window.PERF = () => { const c = {}; scene.traverse(o => { if (o.isMesh) { let r = o; while (r.parent && r.parent !== scene) r = r.parent; c[r.name || r.type] = (c[r.name || r.type] || 0) + 1; } }); renderer.render(scene, camera); return { meshes: c, calls: renderer.info.render.calls, tris: renderer.info.render.triangles, progs: renderer.info.programs.length, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }; };
