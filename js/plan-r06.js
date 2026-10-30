@@ -42,8 +42,8 @@ for(const lvl of [0,1]){
  wall(0,0,0,12.5,lvl,'front',lvl?[opening(1,2,'win',1.6,2.5),opening(8.5,9.5,'win',1.6,2.5)]:[opening(5.6,6.8),opening(1,2,'win',1.6,2.5)],.25);
  wall(40,0,40,12.5,lvl,'back',lvl?[opening(5.6,6.8),opening(1,2,'win'),opening(9,10.3,'win',.95,2.7)]:[opening(.55,1.65),opening(6,7,'win',1.7,2.7)],.25);
  wall(0,0,40,0,lvl,'right',wins(1,39),.25);
- const gateOps=[opening(11.3,14.7,'gate',0,3.7),opening(20.8,24.2,'gate',0,3.7),opening(29.3,32.7,'gate',0,3.7)];
- wall(0,12.5,40,12.5,lvl,'left',lvl?wins(1,39):[...wins(1,7),...gateOps,opening(37.4,38.7,'win',1.4,2.7)],.25);
+ const gateOps=[opening(20.8,24.2,'gate',0,3.7),opening(29.3,32.7,'gate',0,3.7)];
+ wall(0,12.5,40,12.5,lvl,'left',lvl?wins(1,39):[...wins(1,7),opening(8.2,9.5,'win',.95,2.7),opening(10.8,12.1,'win',.95,2.7),opening(13.3,14.42,'door'),opening(15.4,16.7,'win',.95,2.7),opening(17.4,18.7,'win',.95,2.7),...gateOps,opening(37.4,38.7,'win',1.4,2.7)],.25);
  wall(6.925,.25,6.925,12.25,lvl,null,[opening(lvl?5.55:.55,lvl?6.95:1.95,'void')]);
  // WC and lift share gallery; no solid lining across openings
  wall(.3,2.65,3.375,2.65,lvl);wall(.3,5.45,3.45,5.45,lvl);
@@ -78,7 +78,7 @@ export const INTERNAL_STAIR={u0:.3,u1:3.5,start:6.9,end:10.54,turn:11.92,lanes:[
 export const STAIR={x0:5.25,x1:11.7,y0:40,y1:44.8};
 export function staircaseHeight(u,v,external=false){
  if(!external){
-  if(u>=.3&&u<=3.5&&v>=5.5&&v<=6.9)return[0,H1];
+  if(u>=0&&u<=3.65&&v>=5.5&&v<=6.9)return[0,H1];
   if(u>=.3&&u<=3.5&&v>=10.54&&v<=11.92)return[2.4];
   if(v>=6.9&&v<=10.54){
    if(u>=.3&&u<=1.7)return[2.4*(v-6.9)/3.64];

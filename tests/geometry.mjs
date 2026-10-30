@@ -14,6 +14,16 @@ const eq=[[],[]];
 for(const it of equipment.items){if(!it.collide)continue;const b=new THREE.Box3().setFromObject(it.obj);if(b.max.y-plan.LEVEL_H[it.lvl]<.25)continue;eq[it.lvl].push({x0:b.min.x,x1:b.max.x,y0:-b.max.z,y1:-b.min.z,name:it.info?.name});}
 const blocked=(u,v,lvl,r=.28)=>{const[x,y]=plan.toWorld(u,v);return [...building.colliders[lvl],...eq[lvl]].some(b=>x+r>b.x0&&x-r<b.x1&&y+r>b.y0&&y-r<b.y1);};
 const faults=[];
+// Regression: enter from the street through the real threshold, not a teleport.
+for(const direction of [1,-1]){
+ let h=0;
+ for(let i=0;i<=400;i++){
+  const u=direction===1?-2+i*.02:6-i*.02,v=6.2;
+  assert(!blocked(u,v,0),`front entry collision at u=${u}`);
+  const[x,y]=plan.toWorld(u,v),candidates=plan.surfacesAt(x,y).filter(z=>z<=h+.45&&z>=h-.6);
+  assert(candidates.length,`front entry has no walking surface at u=${u.toFixed(2)}`);h=Math.max(...candidates);
+ }
+}
 for(const lvl of[0,1]){
  // Continuous routes, rather than isolated destination checks. A walker never teleports through a wall.
  for(const points of [ [[5.4,lvl?6.25:1.3],[5.4,3.55],[2.4,3.55]],[[5.4,3.55],[5.4,9.1],[4.05,9.1],[4.05,10.7]],[[5.4,9.1],[5.8,9.1],[5.8,10.7]],[[5.4,3.55],[4.4,3.55],[4.4,1.4],[1.9,1.4]] ]){
@@ -35,6 +45,12 @@ for(const lvl of [0,1]){
   if(!queue.some(([i,j])=>i*step>a+.2&&i*step<d-.2&&j*step>b+.2&&j*step<e-.2))faults.push('unreachable room '+room.id);
  }
 }
+// P03 facade is pedestrian-scale: no industrial gate, with door and normal windows.
+const west=plan.WALLS.find(w=>w[4]===0&&w[5]==='left');
+assert(!west[6].some(o=>o[4]==='gate'&&o[0]<19),'P03 still has an industrial gate');
+assert(west[6].some(o=>o[4]==='door'&&o[0]>7&&o[1]<19),'P03 needs exterior pedestrian door');
+assert(west[6].filter(o=>o[4]==='win'&&o[0]>7&&o[1]<19).length>=4,'P03 needs normal windows');
+for(let v=11;v<=14;v+=.02){assert(!blocked(13.86,v,0),'P03 pedestrian entry blocked');}
 // Stair surfaces must connect continuously through both flights and intermediate landing.
 for(const external of[false,true]){
  const seq=external?[[44.1,5.84],[44.1,2.2],[42.4,2.2],[42.4,5.84]]:[[1,6.9],[1,10.54],[2.8,10.54],[2.8,6.9]];

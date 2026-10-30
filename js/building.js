@@ -161,7 +161,7 @@ export function buildBuilding(scene){
  }
  flight(.3,1.7,6.9,10.54,0,2.4);flight(2.1,3.5,10.54,6.9,2.4,H1);
  boxP(.3,10.54,3.5,11.92,2.25,2.4,m.stair);
- boxP(.3,5.5,3.5,6.9,4.65,H1,m.stair);
+ boxP(0,5.5,3.65,6.9,4.65,H1,m.stair);
  // upper landing guard towards the first ascending flight; the return flight remains accessible
  rail(.3,6.9,H1+1,1.7,6.9,H1+1);
  rail(.3,11.92,3.4,3.5,11.92,3.4);rail(.3,10.54,3.4,.3,11.92,3.4);rail(3.5,10.54,3.4,3.5,11.92,3.4);
