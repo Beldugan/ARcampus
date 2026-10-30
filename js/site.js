@@ -120,9 +120,6 @@ export function buildSite(scene) {
   for (let x = -26; x <= 40; x += 1.65) box(x - 0.05, -32.9, x + 0.05, -32.82, 0.6, 15.2, frameM, false);
   box(1, -36, 13, -30.5, 0, 4.4, glassU); box(0.5, -36.5, 13.5, -30.0, 4.4, 4.7, umcW);                      // corp de intrare vitrat
   plane(-28, -32.8, 42, -27, mat(T.pavers([20, 2])), 0.032);                                              // esplanada UMC
-  const umc = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshStandardMaterial({ map: labelTex(['UMC'], { w: 512, h: 128, bg: '#14365c', fg: '#ffffff', font: 'bold 96px Arial' }), roughness: 0.5 }));
-  umc.position.set(7, 5.6, 30.45); umc.rotation.y = Math.PI; g.add(umc);
-  const umc2 = umc.clone(); umc2.scale.set(2.2, 2.2, 1); umc2.position.set(7, 13.0, 32.85); g.add(umc2);
   for (let x = -26; x < 42; x += 7) tree(x, -58.5, 0.9);
   // gard bordurat din panouri bordurate de sârmă (verde), arbuști, autoturisme parcate – după imaginile concept
   const fenceM = new THREE.MeshStandardMaterial({ color: 0x2f4a36, roughness: 0.6, metalness: 0.4 });
