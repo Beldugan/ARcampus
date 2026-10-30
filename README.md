@@ -48,7 +48,7 @@ Suprafața netă = suprafața încăperii − amprenta standurilor didactice și
 | P02 Service student | 115,6 m² | 4 | 20 | – (fără mese) |
 | P03 Laborator motoare | 141,0 m² | 4 | 31 | 20 |
 | E01 Diagnosticare + Mecatronică | 45,3 m² | 4 | 9 | 8 |
-| E02 CCA | 43,4 m² | 4 | 7 | 36 taburete la 6 mese mari |
+| E02 CCA | 43,4 m² | 4 | 8 | 30 taburete la 5 mese mari |
 | E03 Dinamică | 38,5 m² | 4 | 7 | 7 |
 | E04 Caroserii | 45,3 m² | 4 | 8 | 7 |
 | E05 HeV | 38,5 m² | 4 | 7 | 7 |

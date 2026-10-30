@@ -1378,7 +1378,7 @@ export function buildEquipment(scene) {
   put(instrumentTable(), 4.2, 7.75, 180, 1, info('Masă cu aparate: generator de semnal, sursă dublă, osciloscop de rezervă', D.DA + ' · ' + D.MAM1, ['Generarea semnalelor de test pentru senzori'], 'Imagine concept'));
   put(whiteboard(2.0), 1.6, 7.4, 180, 1, null, false);
 
-  // ===================== E02 CCA (x 7.4–12.3, y 21.55–30.4) – 6 mese mari de expunere (2 × 3), câte 6 taburete fiecare
+  // ===================== E02 CCA (x 7.4–12.3, y 21.55–30.4) – 5 mese mari de expunere, câte 6 taburete fiecare (locul primei mese, de la ușă, rămâne liber)
   const CCA6 = [[8.85, 23.0], [11.25, 23.0], [8.85, 25.95], [11.25, 25.95], [8.85, 28.9], [11.25, 28.9]];
   const CCA_T = [
     [[gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze', 'Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'],
@@ -1388,7 +1388,8 @@ export function buildEquipment(scene) {
     [[wheelHub, wheelHub], 'Roți · pneuri · butuci', 'Roți, pneuri și butuci de roată', ['Construcția roților și a pneurilor – marcaje, dimensiuni', 'Butuci și rulmenți de roată'], 'Fișa CCA'],
     [[cardanShaft], 'Transmisie longitudinală · cardan', 'Arbori cardanici și articulații (cardanică, homocinetică)', ['Transmisia longitudinală – arbori și articulații', 'Articulații homocinetice ale roților motoare'], 'Fișa CCA'],
   ];
-  CCA6.forEach(([tx, ty], i) => { const [fs, tt, nm, luc, src] = CCA_T[i]; put(displayTable(fs, tt, 1.12), tx, ty, 0, 1, info(nm, D.CCA, luc, src)); for (const dy of [-0.72, 0.72]) for (const dx of [-0.65, 0, 0.65]) put(stool(), tx + dx, ty + dy, 0, 1, null).userData.seat = true; });
+  CCA6.forEach(([tx, ty], i) => { if (i === 0) return;   // prima masă de la intrare a fost scoasă (spațiu liber la ușă)
+    const [fs, tt, nm, luc, src] = CCA_T[i]; put(displayTable(fs, tt, 1.12), tx, ty, 0, 1, info(nm, D.CCA, luc, src)); for (const dy of [-0.72, 0.72]) for (const dx of [-0.65, 0, 0.65]) put(stool(), tx + dx, ty + dy, 0, 1, null).userData.seat = true; });
   put(whiteboard(2.4), 9.9, 21.6, 180, 1, null, false);
   put(poster('gear', 1.2), 8.8, 30.35, 0, 1, null, false); put(poster('susp', 1.2), 10.9, 30.35, 0, 1, null, false);
 
@@ -1480,7 +1481,7 @@ export function buildEquipment(scene) {
   pupil(5, 9.3, 27.2, 90, 0, 0.4); pupil(6, 3.4, 31.4, 0, 0, 0.4); pupil(2, 11.2, 27.3, -90, 0, 0.45);   // service: la elevator, la autoturism, la banc
   pupil(0, 9.7, 9.2, -90, 0, 0.4); pupil(3, 9.7, 12.0, -90, 0, 0.4); pupil(4, 3.9, 17.9, 0, 0, 0.35);   // P03: la standurile de motor, la bancul cu chiulase
   for (const [x, y, v] of [[2.2, 12.2, 1], [4.3, 10.8, 2]]) put(seatedStudent(v), x + 0.4, y + 0.57, 0, 0, null, false);   // P03: 2 la bănci
-  for (const [x, y, r, v] of [[8.85, 22.28, 180, 3], [11.9, 26.67, 0, 4], [8.2, 28.18, 180, 0]]) put(seatedStudent(v, 0.17), x, y, r, 1, null, false);   // CCA: pe taburete
+  for (const [x, y, r, v] of [[11.25, 22.28, 180, 3], [11.9, 26.67, 0, 4], [8.2, 28.18, 180, 0]]) put(seatedStudent(v, 0.17), x, y, r, 1, null, false);   // CCA: pe taburete
   function seatLabs() {
     root.updateMatrixWorld(true);
     const CELL = 0.05, bb = new THREE.Box3();
