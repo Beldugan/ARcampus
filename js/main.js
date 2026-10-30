@@ -83,7 +83,7 @@ function placeLights() {
 buildSite(scene);
 const { colliders, doors } = buildBuilding(scene);
 // autoturisme parcate în parcarea din spate și pe lotul 18 (obstacole)
-for (const [x, y] of LOT18_CARS) colliders[0].push({ x0: x - 2.15, y0: y - 0.95, x1: x + 2.15, y1: y + 0.95 });
+for (const [x, y] of LOT18_CARS) colliders[0].push({ x0: x - 2.4, y0: y - 1.0, x1: x + 2.4, y1: y + 1.0 });
 const { items } = buildEquipment(scene);
 const eqBoxes = [[], []];
 const tmpBox = new THREE.Box3();

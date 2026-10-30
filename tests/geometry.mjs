@@ -68,6 +68,21 @@ for(const external of[false,true]){
 assert(!plan.WALLS.some(w=>w[4]===1&&w[5]==='front'&&w[6].some(o=>o[4]==='door')),'phantom upper door');
 console.log(JSON.stringify({rooms:plan.ROOMS.length,doors:building.doors.length,equipment:equipment.items.length,routeFaults:faults.slice(0,25)},null,2));
 assert.equal(faults.length,0,'geometry access checks failed');
+// Every new vehicle is independently built and bounded to a normal parking space.
+const {buildVehicle,VEHICLE_TYPES}=await import('../js/vehicles.js');
+const meshes=new Set();
+for(const key of Object.keys(VEHICLE_TYPES)){
+ const obj=buildVehicle(key,0x8b949e),bounds=new THREE.Box3().setFromObject(obj),size=bounds.getSize(new THREE.Vector3());
+ assert(size.x>3.7&&size.x<5,'invalid vehicle length '+key);
+ assert(size.z<2.4&&size.y<2,'invalid vehicle envelope '+key);
+ assert.equal(obj.userData.vehicle,key);meshes.add(obj.children[0].geometry.uuid);
+}
+assert.equal(meshes.size,5,'vehicle variants must have separate geometry');
+for(const it of equipment.items.filter(it=>it.obj.userData.person)){
+ const b=new THREE.Box3().setFromObject(it.obj),x=(b.min.x+b.max.x)/2,y=-(b.min.z+b.max.z)/2;
+ assert(plan.roomAt(x,y,it.lvl),'person placed outside a room');
+ assert(!plan.roomAt(x,y,it.lvl).hall,'person blocks a circulation space');
+}
 // The production render path merges static meshes; new detail geometry must survive it.
 const {mergeStatic}=await import('../js/perf.js');
 for(const root of [building.root,equipment.root]){

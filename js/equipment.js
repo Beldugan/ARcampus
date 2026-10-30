@@ -1,5 +1,6 @@
 // Echipamente – modelate din primitive la dimensiuni reale; fiecare are o fișă (disciplină, lucrări, sursă)
 import * as THREE from 'three';
+import {buildVehicle} from './vehicles.js';
 import { T, labelTex, screenTex } from './textures.js';
 import { LEVEL_H, toWorld } from './plan-r06.js';
 import { GLTFLoader } from 'three/addons/GLTFLoader.js';
@@ -72,7 +73,12 @@ function plateTex(txt) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 }
 let plateN = 0;
-export function car(color = 0xc8ccd0) {
+let fleetIndex=0;
+export function car(color=0xc8ccd0,kind=null,options={}){
+ const type=kind||['mazda','golf','clio','logan','duster','electric'][fleetIndex++%6];
+ return type==='mazda'?mazdaCar(color):buildVehicle(type,color,options);
+}
+function mazdaCar(color = 0xc8ccd0) {
   const g = new THREE.Group();
   const proxy = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.45, 1.8), new THREE.MeshBasicMaterial()); proxy.position.y = 0.75; proxy.visible = false; g.add(proxy);
   CAR_MODEL.then(src => {
@@ -153,7 +159,7 @@ function itpDesk() {
 function playDetector() { const g = new THREE.Group(); for (const z of [-0.78, 0.78]) { B(g, 0.55, 0.05, 0.55, C(0x5c656c, { metalness: 0.6 }), 0, 0, z); B(g, 0.5, 0.005, 0.5, MAT.hazard, 0, 0.05, z); } return g; }
 
 // ------------------------------------------------------------------ service
-function twoPostLift(withCar = true, carColor = 0xe6e9ec) {
+function twoPostLift(withCar = true, carColor = 0xe6e9ec, model='duster') {
   // elevator cu 2 coloane (tip simetric, 4 t): coloanele de o parte și de alta a vehiculului (axa locală z),
   // vehiculul în lungul axei locale x, ridicat pe 4 brațe telescopice cu tampoane sub punctele de ridicare
   const g = new THREE.Group(); const lift = 1.55;            // înălțimea tampoanelor (vehicul ridicat)
@@ -176,7 +182,7 @@ function twoPostLift(withCar = true, carColor = 0xe6e9ec) {
   B(g, 0.22, 0.16, 3.6, blue, 0, 3.8, 0);                                         // traversa superioară
   B(g, 0.03, 0.03, 3.3, C(0x111111), 0.0, 3.75, 0);                               // cablu sincronizare
   plate(g, 'Elevator 2 coloane', '4 t', 0.28, 0.18, 1.85, 1.62, Math.PI / 2, '#1f5fa8');
-  if (withCar) { const c = car(carColor); c.position.y = lift - 0.19; g.add(c); }   // pragul caroseriei (y≈0,19 în model) pe tampoane
+  if (withCar) { const c = car(carColor,model); c.position.y = lift - 0.19; g.add(c); }   // pragul caroseriei (y≈0,19 în model) pe tampoane
   return g;
 }
 function workbench(len = 2.0, panelLen = len) { return workshopBench(len, panelLen, Math.round(len * 10)); }   // banc de atelier realist – vezi detail.js
@@ -1306,11 +1312,11 @@ export function buildEquipment(scene) {
  put(brakeTester(),22.5,4.3,90,0,'Stand de frânare',D.ITP,false);
  put(suspensionTester(),22.5,10.4,90,0,'Tester suspensie',D.ITP,false);
  put(sideSlip(),22.5,11.3,90,0,'Placă ripaj',D.ITP,false);
- put(car(0xb9bdc1),22.5,7.25,90,0,'Autoturism ITP didactic',D.ITP);
+ put(car(0xb9bdc1,'golf'),22.5,7.25,90,0,'Volkswagen Golf · ITP (model orientativ)',D.ITP);
  put(gasCart(),25.05,9.9,0,0,'Analizor gaze',D.ITP);
  put(headlightTester(),24.7,4.2,90,0,'Regloscop',D.ITP);
- put(twoPostLift(true),28.6,7.25,90,0,'Post 1 · elevator 2 coloane',D.PRA);
- put(car(0xeef0f1),33.1,7.25,90,0,'Post 2 · diagnoză la sol',D.DA);
+ put(twoPostLift(true,0x263039,'duster'),28.6,7.25,90,0,'Post 1 · Dacia Duster pe elevator (model orientativ)',D.PRA);
+ put(car(0xeef0f1,'clio',{openHood:true}),33.1,7.25,90,0,'Post 2 · Renault Clio, capotă deschisă (model orientativ)',D.DA);
  put(workbench(2.2),26.5,10.9,90,0,'Banc cu panou de scule · concept service',D.PRA);
  put(tireChanger(),34.1,3.5,90,0,'Mașină anvelope',D.PRA);
  put(wheelBalancer(),30.6,3.5,90,0,'Echilibror roți',D.PRA);
@@ -1369,12 +1375,18 @@ export function buildEquipment(scene) {
  for(const [u,v,kind]of [[10.7,12.12,'gear'],[19.3,12.12,'dyn'],[26.6,12.12,'car'],[36.4,.42,'chassis']])
   put(poster(kind,1.7),u,v,v>6?0:180,1,'Planșă tehnică de laborator','Suport didactic',false);
  put(tvDisplay(1.6,'cad',92),7.18,10.1,90,1,'Ecran de prezentare','Diagnosticare',false);
- let person=0;
- for(const it of items.filter(it=>it.lvl===1&&it.obj.userData.chairs&&it.obj.userData.plan.u<35)) {
-  if(person>=4)break;
-  if(!['Masă instrumentată','Post dublu CAD'].includes(it.info?.name))continue;
-  const [cx,cz]=it.obj.userData.chairs[0], student=seatedStudent(person+1);
-  student.position.set(cx,0,cz);student.rotation.y=Math.PI;it.obj.add(student);person++;
+ const occupied={};let person=0;
+ for(const it of items.filter(it=>it.lvl===1&&it.obj.userData.chairs)) {
+  const {u,v}=it.obj.userData.plan;
+  const room=v<6?(u<15?'seminar1':'seminar2'):u<15?'meca':u<23?'dynamics':u<31?'hev':'cad';
+  const quota=['meca','cad'].includes(room)?2:1;
+  if((occupied[room]||0)>=quota)continue;
+  const [cx,cz]=it.obj.userData.chairs[0],student=seatedStudent(person++%5);
+  student.position.set(cx,0,cz);student.rotation.y=Math.PI;it.obj.add(student);occupied[room]=(occupied[room]||0)+1;
+ }
+ // Small working groups, kept in the free side aisles instead of the vehicle gates.
+ for(const [u,v,angle,lvl,variant]of [[31.3,6.2,90,0,5],[31.3,8.1,90,0,6],[24.5,7.2,-90,0,5],[10.7,8.8,180,0,3],[25.6,10.05,180,1,6]]) {
+  const obj=put(standingStudent(variant,.3),u,v,angle,lvl,'Cursant la lucru','Activitate didactică',true);obj.userData.person=true;
  }
  return{root,items};
 }

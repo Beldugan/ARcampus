@@ -67,3 +67,7 @@ Autoturismele folosesc un model 3D real: „2020 Mazda 3 Hatchback” de OUTPIST
 ### Revizie vizuală după referințele încărcate
 
 `js/visual-detail.js` adaugă geometrie pentru tablă cutată, ferme metalice, suporturi și coliere de tubulatură, trasee de cabluri, lămpi suspendate P03, grile de tavan, ghidaje la porți și copertina S2. Betonul are relief și variație de rugozitate; plafonul nu mai funcționează ca o suprafață luminoasă uniformă. Au fost adăugate planșe tehnice și cursanți la mesele de laborator. Perspectiva inițială arată fațada lungă din curte, cu un câmp vizual de 58°. Forma clădirii și circulațiile sunt păstrate. Aspectul final WebGL nu a putut fi validat în mediul de lucru, unde accelerarea grafică este indisponibilă.
+
+### Flotă variată și cursanți
+
+Turul include modelul Mazda existent și cinci geometrii proprii simplificate în `js/vehicles.js`, inspirate de Volkswagen Golf, Renault Clio, Dacia Logan, Dacia Duster și Tesla Model 3. Nu sunt modele CAD oficiale ale producătorilor și nu reproduc toate detaliile unei anumite generații. Siluetele, ampatamentele, vitrajele, jantele și luminile diferă; service-ul include SUV pe elevator și hatchback cu capota deschisă. Modelul Mazda păstrează atribuirea și licența inițiale. Cursanții sunt distribuiți în laboratoare, seminare și pe laturile posturilor service/ITP.
