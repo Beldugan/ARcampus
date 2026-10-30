@@ -25,6 +25,9 @@ function noise(g, w, h, base, amp, n, seed = 1, size = 2) {
 }
 
 export const T = {
+  concreteRelief: rep => canvasTex('concrete-relief',512,512,(g,w,h)=>{
+    noise(g,w,h,'#aaaaaa',.1,16000,109,1.3);
+  },rep,false),
   concrete: rep => canvasTex('concept-concrete',512,512,(g,w,h)=>{
     noise(g,w,h,'#bdbcb6',.08,18000,87,1.3);
     const r=rnd(84);for(let i=0;i<90;i++){g.fillStyle='rgba(80,78,72,.025)';g.beginPath();g.ellipse(r()*w,r()*h,4+r()*25,1+r()*5,r()*3,0,7);g.fill();}

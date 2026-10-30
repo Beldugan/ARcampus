@@ -63,3 +63,7 @@ Acestea sunt adaptări 3D ale limbajului vizual, fără promisiunea unei reprodu
 ## Atribuire și active
 
 Autoturismele folosesc un model 3D real: „2020 Mazda 3 Hatchback” de OUTPISTON (Sketchfab), licență [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), în varianta fără sigle pregătită de proiectul freaxnx01/game-rhyflitzer (detalii în `models/hatchback.LICENSE.md`). Licența permite doar utilizare necomercială, cu atribuire. Cerul și reflexiile exterioare folosesc panorama HDR „Quarry 01” de la Poly Haven (CC0), iar gazonul folosește textura din exemplele three.js. Celelalte echipamente sunt modelate simplificat (volumetrie la scară reală, materiale PBR, lumină naturală și artificială). Nu sunt modele foto-realiste ale mărcilor concrete.
+
+### Revizie vizuală după referințele încărcate
+
+`js/visual-detail.js` adaugă geometrie pentru tablă cutată, ferme metalice, suporturi și coliere de tubulatură, trasee de cabluri, lămpi suspendate P03, grile de tavan, ghidaje la porți și copertina S2. Betonul are relief și variație de rugozitate; plafonul nu mai funcționează ca o suprafață luminoasă uniformă. Au fost adăugate planșe tehnice și cursanți la mesele de laborator. Perspectiva inițială arată fațada lungă din curte, cu un câmp vizual de 58°. Forma clădirii și circulațiile sunt păstrate. Aspectul final WebGL nu a putut fi validat în mediul de lucru, unde accelerarea grafică este indisponibilă.

@@ -1,3 +1,4 @@
+import { addVisualDetail } from './visual-detail.js';
 // Architectural simulation aligned with R06, metres.
 import * as THREE from 'three';
 import { T, labelTex } from './textures.js';
@@ -30,7 +31,7 @@ function mats() {
   M.sectional = new THREE.MeshStandardMaterial({ map: T.sandwich([1, 1], '#454b52'), roughness: 0.45, metalness: 0.4 });
   M.tile = new THREE.MeshStandardMaterial({ map: T.tiles([1, 1]), roughness: 0.35 });
   M.tileWall = new THREE.MeshStandardMaterial({ map: T.tiles([1, 1], '#f1f1ee'), roughness: 0.3 });
-  M.ceiling = new THREE.MeshStandardMaterial({ map: T.ceiling([1, 1]), roughness: 0.95, emissive: 0xffffff, emissiveIntensity: 0.32 });
+  M.ceiling = new THREE.MeshStandardMaterial({ map: T.ceiling([1, 1]), roughness: 0.95, emissive: 0xffffff, emissiveIntensity: 0.035 });
   M.led = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfffcf5, emissiveIntensity: 1.6 });
   M.stair = new THREE.MeshStandardMaterial({ color: 0x55606a, roughness: 0.55, metalness: 0.6 });
   M.grating = new THREE.MeshStandardMaterial({ color: 0x8d969d, roughness: 0.5, metalness: 0.7 });
@@ -38,7 +39,7 @@ function mats() {
 }
 function floorMat(kind, w, d) {
   const m = mats();
-  if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map:T.concrete([w/3,d/3]),roughness:.43,metalness:0,clearcoat:.25,clearcoatRoughness:.4 });
+  if (kind === 'epoxy') return new THREE.MeshPhysicalMaterial({ map:T.concrete([w/3,d/3]),bumpMap:T.concreteRelief([w/3,d/3]),bumpScale:.003,roughnessMap:T.concreteRelief([w/3,d/3]),roughness:.55,metalness:0,clearcoat:.22,clearcoatRoughness:.28 });
   if (kind === 'vinyl') return new THREE.MeshStandardMaterial({map:T.tiles([w/1.2,d/2.4],'#d8d5cc'),roughness:.52});
   if (kind === 'tile') return new THREE.MeshStandardMaterial({ map: T.tiles([w / 1.2, d / 1.2]), roughness: 0.3 });
   if (kind === 'parquet') return new THREE.MeshStandardMaterial({ map: T.wood([w / 1.4, d / 0.35]), color: 0xd9c3a5, roughness: 0.45 });
@@ -71,7 +72,7 @@ export function buildBuilding(scene){
   const fl=new THREE.Mesh(new THREE.PlaneGeometry(w,d),floorMat(rm.floor,w,d));fl.rotation.x=-Math.PI/2;fl.position.set((x0+x1)/2,base+.008,-(y0+y1)/2);add(fl,false);
   if(!rm.ceil)continue;
   const ce=new THREE.Mesh(new THREE.PlaneGeometry(w,d),rm.ceil==='deck'?m.deck:m.ceiling);ce.rotation.x=Math.PI/2;ce.position.set((x0+x1)/2,base+rm.h,-(y0+y1)/2);add(ce,false);
-  for(let x=x0+.8;x<x1-.5;x+=2.5)for(let y=y0+1;y<y1-.6;y+=3){
+  for(let x=x0+.8;rm.id!=='P03'&&x<x1-.5;x+=2.5)for(let y=y0+1;y<y1-.6;y+=3){
    const industrial=rm.ceil==='deck',le=new THREE.Mesh(new THREE.PlaneGeometry(industrial?.13:.58,industrial?1.55:.58),m.led);
    le.rotation.x=Math.PI/2;le.position.set(x,base+rm.h-(industrial?.45:.02),-y);add(le,false);
    if(industrial)boxXY(x-.1,y-.85,x+.1,y+.85,base+rm.h-.43,base+rm.h-.36,m.alu,false);
@@ -237,5 +238,6 @@ export function buildBuilding(scene){
  function sign(u,v,h,text,rot=0){const [x,y]=toWorld(u,v),q=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.28),new THREE.MeshStandardMaterial({map:labelTex([text],{bg:'#157c83'}),side:THREE.DoubleSide}));q.position.set(x,h,-y);q.rotation.y=rot;add(q,false);}
  sign(-.16,6.2,2.55,'AR CAMPUS · R06');sign(3.6,6.25,2.3,'S1 · SCARĂ',Math.PI/2);sign(3.6,6.25,H1+2.3,'S1 · SCARĂ',Math.PI/2);
  for(const h of [0,H1])sign(3.4,1.4,h+2.2,'LIFT · E',Math.PI/2);
+ addVisualDetail(root);
  return{root,colliders,doors};
 }

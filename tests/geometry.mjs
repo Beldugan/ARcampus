@@ -68,3 +68,11 @@ for(const external of[false,true]){
 assert(!plan.WALLS.some(w=>w[4]===1&&w[5]==='front'&&w[6].some(o=>o[4]==='door')),'phantom upper door');
 console.log(JSON.stringify({rooms:plan.ROOMS.length,doors:building.doors.length,equipment:equipment.items.length,routeFaults:faults.slice(0,25)},null,2));
 assert.equal(faults.length,0,'geometry access checks failed');
+// The production render path merges static meshes; new detail geometry must survive it.
+const {mergeStatic}=await import('../js/perf.js');
+for(const root of [building.root,equipment.root]){
+ const result=mergeStatic(root);
+ assert(result.made>0,'static scene preparation produced no merged meshes');
+ root.traverse(o=>{if(o.isMesh)assert([...o.matrixWorld.elements].every(Number.isFinite),'nonfinite merged transform');});
+}
+console.log('Static scene preparation passed.');

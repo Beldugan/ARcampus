@@ -19,7 +19,7 @@ const EYE = 1.65, RADIUS = 0.28;
 
 // ------------------------------------------------------------ randare
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: qs.has('cam') });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, /Mobi|Android/i.test(navigator.userAgent)?1.5:2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.94;
@@ -41,7 +41,7 @@ const SKY = new Promise(res => new RGBELoader().load('textures/sky.hdr', t => {
 let envInside = true;
 function updateEnv(inside) { if (inside === envInside) return; envInside = inside; scene.environment = inside ? ENV_IN : ENV_OUT; }
 
-const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 600);
+const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 0.05, 600);
 camera.rotation.order = 'YXZ';
 const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { samples: 4, type: THREE.HalfFloatType }));
 composer.addPass(new RenderPass(scene, camera));
@@ -104,7 +104,7 @@ let dirty = true;
 // ------------------------------------------------------------ control
 const controls = new PointerLockControls(camera, document.body);
 const player = { x: 10, y: -7.5, h: 0, yaw: 0, pitch: 0 };
-const START = { x: 6.25, y: -13, h: 0, yaw: 0, pitch: 0.08 };
+const START = { x: -22, y: -11, h: 0, yawDeg: -43, pitch: 0.06 };
 const keys = {};
 let lockMode = false, dragLook = false, lastX = 0, lastY = 0;
 

@@ -1365,5 +1365,16 @@ export function buildEquipment(scene) {
  put(biwShell(),36.5,2.7,0,1,'Caroserie în alb',D.CAR);
  put(doorStand(),32.2,1.3,0,1,'Ușă pe stand',D.CAR);
  put(measureArm(),33,3.4,0,1,'Braț de măsurare',D.CAR);
+ // Reference-room dressing: technical drawings, monitor and seated students.
+ for(const [u,v,kind]of [[10.7,12.12,'gear'],[19.3,12.12,'dyn'],[26.6,12.12,'car'],[36.4,.42,'chassis']])
+  put(poster(kind,1.7),u,v,v>6?0:180,1,'Planșă tehnică de laborator','Suport didactic',false);
+ put(tvDisplay(1.6,'cad',92),7.18,10.1,90,1,'Ecran de prezentare','Diagnosticare',false);
+ let person=0;
+ for(const it of items.filter(it=>it.lvl===1&&it.obj.userData.chairs&&it.obj.userData.plan.u<35)) {
+  if(person>=4)break;
+  if(!['Masă instrumentată','Post dublu CAD'].includes(it.info?.name))continue;
+  const [cx,cz]=it.obj.userData.chairs[0], student=seatedStudent(person+1);
+  student.position.set(cx,0,cz);student.rotation.y=Math.PI;it.obj.add(student);person++;
+ }
  return{root,items};
 }
