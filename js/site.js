@@ -1,4 +1,4 @@
-// Amplasament: corpul pe lotul 21, parcarea de 300 m² pe lotul 18 (spate), alee laterală de retur 4,00 m, platformă frontală 6,00 m
+// Amplasament: corpul pe lotul 21, parcarea de 300 m² din spate, parcarea lotului 18 la stânga clădirii (opus scării), alee laterală de retur 4,00 m, platformă frontală 6,00 m
 import * as THREE from 'three';
 import { T, labelTex } from './textures.js';
 import { car } from './equipment.js';
@@ -56,7 +56,7 @@ export function buildSite(scene) {
     p.position.set(x, 1.85, -y); p.rotation.y = rot; g.add(p);
   };
   sign('LOT 21', 'Corp Campus AR · P+1 · 500 m²', -5.4, -1.5);
-  sign('LOT 18', 'Parcare', 29.6, 22.0, -Math.PI / 2);
+  sign('PARCARE', 'acces ITP · service · personal', 29.6, 22.0, -Math.PI / 2);
   // arbori și stâlpi de iluminat
   const trunk = new THREE.MeshStandardMaterial({ color: 0x6b5139, roughness: 1 });
   const leaf = [0x4f7a32, 0x5d8a3a, 0x46702c].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
@@ -72,13 +72,13 @@ export function buildSite(scene) {
     }
   };
   for (let x = -40; x <= 60; x += 9) tree(x, -10.5, 0.9 + ((x * 7) % 5) / 20);
-  for (const [x, y] of [[31, 18], [31, 30], [-9, 8], [-9, 24], [8, 39], [16, 40], [32, 4]]) tree(x, y, 1.1);
+  for (const [x, y] of [[31, 18], [31, 30], [8, 39], [16, 40], [32, 4]]) tree(x, y, 1.1);
   const lampM = new THREE.MeshStandardMaterial({ color: 0x3b4248, metalness: 0.6, roughness: 0.4 });
   for (const [x, y] of [[-5.2, 5], [-5.2, 25], [10, 35.6], [29.4, 6], [29.4, 26]]) { box(x - 0.06, y - 0.06, x + 0.06, y + 0.06, 0, 5.5, lampM); box(x - 0.3, y - 0.1, x + 0.3, y + 0.1, 5.5, 5.6, lampM); }
   // vecinătăți (volumetrie simplificată, conform ilustrării PUZ)
   const nb = new THREE.MeshStandardMaterial({ map: T.sandwich([6, 4], '#e7e5df'), roughness: 0.7 });
   const nbw = new THREE.MeshStandardMaterial({ color: 0x8fb0c8, roughness: 0.1, metalness: 0.4 });
-  for (const [x0, y0, x1, y1, h] of [[-48, 2, -16, 18, 13], [36, 2, 70, 18, 16], [-20, 48, 40, 70, 18]]) {
+  for (const [x0, y0, x1, y1, h] of [[-66, 2, -34, 18, 13], [36, 2, 70, 18, 16], [-20, 48, 40, 70, 18]]) {
     box(x0, y0, x1, y1, 0, h, nb);
     for (let z = 1.5; z < h - 1; z += 3.3) box(x0 + 1, y0 - 0.05, x1 - 1, y0 + 0.02, z, z + 1.6, nbw, false);
   }
@@ -97,5 +97,24 @@ export function buildSite(scene) {
   for (let y = 23; y < 35; y += 1.2) shrub(24.9, y, 0.4);
   for (let x = 29.4; x < 33; x += 1.0) shrub(x, -1.0, 0.35);
   for (const [x, c] of [[2.56, 0xeceeef], [8.56, 0x3a3f45], [11.56, 0xb9bdc1], [17.56, 0x7a1f24]]) { const v = car(c); v.rotation.y = Math.PI / 2; v.position.set(x, 0.03, -32.0); v.traverse(o => { if (o.isMesh) o.castShadow = true; }); g.add(v); }
+  // ---- LOTUL 18 – parcare la stânga clădirii (latura opusă scării S1), dincolo de aleea laterală; acces din stradă
+  // 16,5 × 22 m ≈ 363 m²: două rânduri de locuri perpendiculare (5,0 × 2,5 m) și culoar de circulație de 5,5 m; 16 locuri, dintre care 2 adaptate
+  const L18 = { x0: -21.5, x1: -5.0, y0: -1.0, y1: 21.0 };
+  plane(L18.x0, L18.y0, L18.x1, L18.y1, mat(T.asphalt([5, 7])), 0.032);
+  plane(-16.0, -9.0, -10.5, L18.y0, mat(T.asphalt([2, 3])), 0.034);                                 // acces din stradă
+  for (const [xa, xb] of [[L18.x0 + 0.1, -16.5], [-10.5, L18.x1 - 0.6]]) {
+    for (let i = 0; i <= 8; i++) plane(xa, -0.06 + i * 2.5, xb, 0.06 + i * 2.5, white, 0.04);
+    plane(xa === L18.x0 + 0.1 ? xa : xb - 0.12, 0, xa === L18.x0 + 0.1 ? xa + 0.12 : xb, 20, white, 0.04);
+  }
+  for (const [x, y] of [[-19.0, 18.75], [-19.0, 16.25]]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 2.0), new THREE.MeshStandardMaterial({ map: labelTex(['♿'], { w: 256, h: 256, bg: '#1f5fa8', font: 'bold 180px Arial' }) })); p.rotation.x = -Math.PI / 2; p.position.set(x, 0.045, -y); g.add(p); }
+  for (const [x, y, r] of [[-13.25, 2.0, 0], [-13.25, 14.0, Math.PI]]) { const s = new THREE.Shape(); s.moveTo(0, 1.2); s.lineTo(0.6, 0.2); s.lineTo(0.2, 0.2); s.lineTo(0.2, -1.0); s.lineTo(-0.2, -1.0); s.lineTo(-0.2, 0.2); s.lineTo(-0.6, 0.2); const a = new THREE.Mesh(new THREE.ShapeGeometry(s), white); a.rotation.x = -Math.PI / 2; a.rotation.z = r; a.position.set(x, 0.042, -y); g.add(a); }
+  box(L18.x0 - 0.15, L18.y0, L18.x0, L18.y1 + 0.15, 0, 0.15, curb); box(L18.x0, L18.y1, L18.x1, L18.y1 + 0.15, 0, 0.15, curb);   // borduri
+  for (let y = 0.5; y < 21; y += 1.2) shrub(L18.x0 - 0.7, y, 0.4); for (let x = L18.x0; x < L18.x1; x += 1.2) shrub(x, L18.y1 + 0.7, 0.4);
+  for (const [x, y] of [[-24.0, 4], [-24.0, 14], [-18, 23.5], [-9, 23.5]]) tree(x, y, 1.05);
+  for (const y of [2, 12]) { box(L18.x0 - 0.4, y - 0.06, L18.x0 - 0.28, y + 0.06, 0, 5.5, lampM); box(L18.x0 - 0.4, y - 0.1, L18.x0 + 0.3, y + 0.1, 5.5, 5.6, lampM); }
+  sign('LOT 18', 'Parcare · 16 locuri (2 adaptate)', -10.0, -1.6);
+  const L18CARS = [[-19.0, 1.25, 0xd9dcdf], [-19.0, 6.25, 0x2b3a55], [-19.0, 8.75, 0x8a1c22], [-19.0, 13.75, 0x3a3f45], [-8.0, 1.25, 0x5d6a72], [-8.0, 3.75, 0xeceeef], [-8.0, 11.25, 0x1d2228], [-8.0, 16.25, 0x9aa3a8], [-8.0, 18.75, 0x2d4f3a]];
+  for (const [x, y, c] of L18CARS) { const v = car(c); v.rotation.y = x < -13 ? 0 : Math.PI; v.position.set(x, 0.03, -y); v.traverse(o => { if (o.isMesh) o.castShadow = true; }); g.add(v); }
   return g;
 }
+export const LOT18_CARS = [[-19.0, 1.25], [-19.0, 6.25], [-19.0, 8.75], [-19.0, 13.75], [-8.0, 1.25], [-8.0, 3.75], [-8.0, 11.25], [-8.0, 16.25], [-8.0, 18.75]];

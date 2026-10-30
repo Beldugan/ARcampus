@@ -1,4 +1,4 @@
-# Corp Campus AR – explorare 3D (lot 21 + lot 18)
+# Corp Campus AR – explorare 3D (lot 21 + parcarea lotului 18)
 
 Aplicație web 3D la persoana întâi pentru clădirea Corp Campus AR (25 × 20 m = 500 m², P+1) a Universității „Ovidius” din Constanța. Clădirea e amplasată pe lotul 21, cu parcarea pe lotul 18, la capătul opus față de stradă și lac. Se pot explora:
 
@@ -50,6 +50,11 @@ Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor di
 | E04 Caroserii | 64,4 m² | 10,8 m² | 53,6 m² | 4 | 13 | 13 |
 | E05 HeV | 64,4 m² | 6,8 m² | 57,6 m² | 4 | 14 | 13 |
 | E12 Sală CAD | 41,7 m² | 0 | 41,7 m² | 2,5 | 16 | 12 |
+
+### Parcări
+
+* **Lotul 18** – la stânga clădirii (latura opusă scării S1), dincolo de aleea laterală, cu acces direct din stradă: ≈ 16,5 × 22 m, 16 locuri perpendiculare (2 adaptate), culoar de 5,5 m.
+* **Parcarea din spate** – 300 m², deservește porțile stației ITP și ale service-ului.
 
 ### Trasee din stradă
 

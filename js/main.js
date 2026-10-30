@@ -9,7 +9,7 @@ import { OutputPass } from '../lib/three/jsm/postprocessing/OutputPass.js';
 import { T } from './textures.js';
 import { buildBuilding, surfacesAt, ROOMS, LEVEL_H, LIFT, STAIR, H1, BW, BD } from './building.js';
 import { buildEquipment, CAR_MODEL } from './equipment.js';
-import { buildSite } from './site.js';
+import { buildSite, LOT18_CARS } from './site.js';
 
 const qs = new URLSearchParams(location.search);
 const EYE = 1.65, RADIUS = 0.28;
@@ -79,8 +79,9 @@ function placeLights() {
 // ------------------------------------------------------------ conținut
 buildSite(scene);
 const { colliders, doors } = buildBuilding(scene);
-// autoturisme parcate pe lotul 18 (obstacole)
+// autoturisme parcate în parcarea din spate și pe lotul 18 (obstacole)
 for (const x of [2.56, 8.56, 11.56, 17.56]) colliders[0].push({ x0: x - 0.95, y0: 29.85, x1: x + 0.95, y1: 34.15 });
+for (const [x, y] of LOT18_CARS) colliders[0].push({ x0: x - 2.15, y0: y - 0.95, x1: x + 2.15, y1: y + 0.95 });
 const { items } = buildEquipment(scene);
 const eqBoxes = [[], []];
 const tmpBox = new THREE.Box3();
@@ -153,7 +154,8 @@ const TP = [
   { name: 'E13 · Sală de protocol', x: 22.0, y: 12.2, h: H1, yaw: 0 },
   { name: 'Scara S1 (de la fațadă)', x: 26.0, y: -3.5, h: 0, yaw: 0 },
   { name: 'Porțile ITP / service (parcare)', x: 8.0, y: 27, h: 0, yaw: 180 },
-  { name: 'Parcarea · lotul 18', x: 10, y: 33, h: 0, yaw: 180 },
+  { name: 'Parcarea din spate', x: 10, y: 33, h: 0, yaw: 180 },
+  { name: 'Parcarea · lotul 18 (stânga)', x: -13.25, y: -0.5, h: 0, yaw: 0 },
 ];
 const tpList = document.getElementById('tplist');
 TP.forEach((t, i) => { const b = document.createElement('button'); b.textContent = (i < 9 ? (i + 1) + '. ' : '') + t.name; b.onclick = () => teleport(t); tpList.appendChild(b); });
@@ -255,7 +257,8 @@ function currentRoom() {
   const lvl = player.h > 2.6 ? 1 : 0;
   for (const r of ROOMS) if (r.lvl === lvl && player.x >= r.r[0] && player.x <= r.r[2] && player.y >= r.r[1] && player.y <= r.r[3]) return r.name;
   if (player.x > 24.9 && player.x < 28 && player.y > -1 && player.y < 13.6) return 'Scara exterioară acoperită S1 · lift PMR';
-  if (player.y > 20) return 'Lotul 18 · parcare 300 m²';
+  if (player.x > -21.6 && player.x < -5 && player.y > -1 && player.y < 21) return 'Lotul 18 · parcare (stânga clădirii) · 16 locuri';
+  if (player.y > 20) return 'Parcare spate · 300 m² (acces ITP / service)';
   if (player.y < 0) return 'Platforma frontală · strada · lacul';
   return 'Lotul 21 · exterior';
 }
