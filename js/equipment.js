@@ -917,6 +917,23 @@ function strut() {   // amortizor McPherson complet: suport superior cu rulment 
   B(g, 0.055, 0.09, 0.06, MAT.red, 0.095, 0.08, 0.12);                                                       // etrier
   return g;
 }
+function cardanShaft() {   // arbore cardanic în două tronsoane cu lagăr intermediar, articulații cardanice cu cruci, flanșe; alături o planetară cu articulații homocinetice și burdufuri
+  const g = new THREE.Group(), y = 0.12, tb = C(0x3a3f44, { metalness: 0.6, roughness: 0.4 });
+  for (const [x0, x1] of [[-0.68, -0.08], [0.06, 0.6]]) Cy(g, 0.032, x1 - x0, tb, (x0 + x1) / 2, y, 0, 'x', 20);
+  const uj = (x) => { for (const s of [-1, 1]) { B(g, 0.04, 0.03, 0.06, GEARM, x + s * 0.025, y - 0.015, 0); } const c1 = Cy(g, 0.008, 0.07, MAT.steel, x, y, 0, 'z', 8); Cy(g, 0.008, 0.07, MAT.steel, x, y, 0, 'y', 8).position.y = y - 0.035; };
+  for (const x of [-0.7, -0.06, 0.62]) uj(x); for (const x of [-0.76, 0.68]) Cy(g, 0.05, 0.015, GEARM, x, y, 0, 'x', 20);
+  B(g, 0.08, 0.06, 0.1, C(0x1a1a1a), 0.0, y - 0.07, 0); Cy(g, 0.045, 0.04, C(0x1a1a1a), 0.0, y, 0, 'x', 20);                  // lagăr intermediar
+  const z = 0.2; Cy(g, 0.012, 0.5, GEARM, 0, y - 0.04, z, 'x', 12);                                                            // planetară
+  for (const s of [-1, 1]) { for (let i = 0; i < 7; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(0.035 - Math.abs(i - 3) * 0.004, 0.009, 6, 16), C(0x111214)); t.rotation.y = Math.PI / 2; t.position.set(s * (0.22 + i * 0.013), y - 0.04, z); g.add(t); } Cy(g, 0.045, 0.06, GEARM, s * 0.34, y - 0.04, z, 'x', 20); }
+  for (const x of [-0.5, 0.0, 0.5]) B(g, 0.04, y - 0.04, 0.3, C(0x2b2f33), x, 0, 0.1);
+  return g;
+}
+function wheelHub() {   // roată completă (jantă de aliaj + anvelopă) pe suport, cu butucul și rulmentul alături
+  const g = new THREE.Group(); B(g, 0.3, 0.02, 0.2, C(0x2b2f33), 0, 0, 0); B(g, 0.04, 0.05, 0.2, C(0x2b2f33), -0.12, 0.02, 0); B(g, 0.04, 0.05, 0.2, C(0x2b2f33), 0.12, 0.02, 0);
+  realWheel(g, 0, 0.31, 0, 0, 0.62);
+  Cy(g, 0.05, 0.05, GEARM, 0.22, 0.025, 0.08, 'y', 24); for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2; Cy(g, 0.005, 0.03, GEARM, 0.22 + Math.cos(a) * 0.035, 0.065, 0.08 + Math.sin(a) * 0.035, 'y', 6); }
+  return g;
+}
 let brakeN = 0;
 function brakeKit() {   // alternativ: frână disc (disc ventilat, etrier flotant cu plăcuțe și furtun) / cilindru de frână pneumatic cu acumulator (tip 24/24) + levier de reglare + ax S
   const g = new THREE.Group(), n = brakeN++ % 2, y = 0.17;
@@ -1251,14 +1268,14 @@ export function buildEquipment(scene) {
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
   // ===================== E02 CCA (x 6.78–13.22, y 0.2–8.8)
-  put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 2.6, 180, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));
-  put(displayTable([axle], 'Punte motoare · diferențial'), 11.6, 2.6, 180, 1, info('Punte motoare cu diferențial', D.CCA, ['Transmisia principală și diferențialul'], 'Fișa CCA'));
-  put(displayTable([strut, strut, steeringRack], 'Suspensie · direcție'), 8.4, 5.6, 180, 1, info('Mecanisme de ghidare, suspensie McPherson, casetă de direcție', D.CCA, ['Mecanisme de ghidare a roților', 'Suspensie – elemente elastice și amortizoare', 'Sisteme de direcție'], 'Fișa CCA II (Mitroi) – lucrările 1–4'));
-  put(displayTable([brakeKit, brakeKit], 'Frâne hidraulice · pneumatice'), 11.6, 5.6, 180, 1, info('Sisteme de frânare hidraulice și pneumatice', D.CCA, ['Frânare cu acționare hidraulică', 'Frânare cu acționare pneumatică (autocamion)'], 'Fișa CCA II – lucrările 5–6'));
-  // câte 6 taburete la fiecare masă de expunere (3 pe fiecare latură lungă)
-  for (const [tx, ty] of [[8.4, 2.6], [11.6, 2.6], [8.4, 5.6], [11.6, 5.6]]) for (const dy of [-0.72, 0.72]) for (const dx of [-0.65, 0, 0.65]) put(stool(), tx + dx, ty + dy, 0, 1, null).userData.seat = true;
-  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
-  // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
+  put(displayTable([gearboxCut, clutch, clutch], 'Ambreiaje · cutii de viteze'), 8.4, 1.75, 180, 1, info('Ambreiaje mono/bidisc și cutie de viteze Dacia (secționate)', D.CCA, ['Ambreiaje – cursa de decuplare/cuplare', 'Cutii de viteze cu axe paralele și planetare – rapoarte de transmitere', 'Demontare / montare cutie Dacia 5 trepte'], 'Fișa CCA (Mitroi) – lucrări 1–2'));
+  put(displayTable([axle], 'Punte motoare · diferențial'), 11.6, 1.75, 180, 1, info('Punte motoare cu diferențial', D.CCA, ['Transmisia principală și diferențialul'], 'Fișa CCA'));
+  put(displayTable([strut, strut, steeringRack], 'Suspensie · direcție'), 8.4, 4.15, 180, 1, info('Mecanisme de ghidare, suspensie McPherson, casetă de direcție', D.CCA, ['Mecanisme de ghidare a roților', 'Suspensie – elemente elastice și amortizoare', 'Sisteme de direcție'], 'Fișa CCA II (Mitroi) – lucrările 1–4'));
+  put(displayTable([brakeKit, brakeKit], 'Frâne hidraulice · pneumatice'), 11.6, 4.15, 180, 1, info('Sisteme de frânare hidraulice și pneumatice', D.CCA, ['Frânare cu acționare hidraulică', 'Frânare cu acționare pneumatică (autocamion)'], 'Fișa CCA II – lucrările 5–6'));
+  put(displayTable([cardanShaft], 'Transmisie longitudinală · cardan'), 8.4, 6.55, 180, 1, info('Arbori cardanici și articulații (cardanică, homocinetică)', D.CCA, ['Transmisia longitudinală – arbori și articulații', 'Articulații homocinetice ale roților motoare'], 'Fișa CCA'));
+  put(displayTable([wheelHub, wheelHub], 'Roți · pneuri · butuci'), 11.6, 6.55, 180, 1, info('Roți, pneuri și butuci de roată', D.CCA, ['Construcția roților și a pneurilor – marcaje, dimensiuni', 'Butuci și rulmenți de roată'], 'Fișa CCA'));
+  // 6 mese mari, fiecare cu câte 6 taburete (3 pe fiecare latură lungă)
+  for (const [tx, ty] of [[8.4, 1.75], [11.6, 1.75], [8.4, 4.15], [11.6, 4.15], [8.4, 6.55], [11.6, 6.55]]) for (const dy of [-0.72, 0.72]) for (const dx of [-0.65, 0, 0.65]) put(stool(), tx + dx, ty + dy, 0, 1, null).userData.seat = true;
   put(poster('gear', 1.2), 10.6, 8.77, 0, 1, null, false); put(poster('susp', 1.2), 12.2, 8.77, 0, 1, null, false);
   put(whiteboard(2.4), 10.0, 0.25, 0, 1, null, false);
 
@@ -1291,7 +1308,6 @@ export function buildEquipment(scene) {
   put(wallbox(), 19.7, 15.5, -90, 1, info('Stație de încărcare AC (demo)', D.HEV, ['Încărcarea vehiculelor electrice, protocoale'], 'Program HeV'), false);
   put(hvCabinet(), 19.55, 13.95, -90, 1, info('Dulap echipament de protecție HV', D.HEV + ' · ' + D.DA, ['Lucru în siguranță: mănuși electroizolante, ecran facial, aparatură CAT III 1000 V'], 'Îndrumar Diagnosticare 2026-2027 – lucrul la vehicule HV'));
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
-  put(hvToolMat(), 17.6, 13.95, 0, 1, null, false, 0.85); put(steelTable(1.2, 0.7, 0.85), 17.6, 13.95, 180, 1, info('Scule izolate VDE 1000 V, multimetru CAT III, mănuși electroizolante', D.HEV + ' · ' + D.DA, ['Lucru în siguranță la sisteme de înaltă tensiune'], 'Imagine concept „HeV”; îndrumar Diagnosticare – vehicule HV'), false, 0.77);
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
   // (mesele și scaunele se amplasează automat – vezi seatLabs() la final)
 
@@ -1330,17 +1346,16 @@ export function buildEquipment(scene) {
   pupil(5, 9.75, 13.6, -90, 0, 0.4); pupil(6, 9.75, 15.9, -90, 0, 0.4); pupil(2, 7.35, 9.5, -90, 0, 0.45);   // service: la autoturismul de pe elevator, la banc
   pupil(0, 17.4, 7.2, 90, 0, 0.4); pupil(3, 17.4, 10.9, 90, 0, 0.4); pupil(4, 14.0, 2.75, 180, 0, 0.35);   // P03: la standurile de motor, la bancul cu chiulase
   for (const [x, y, v] of [[9.3, 2.3, 1], [11.1, 3.9, 2]]) { const st = seatedStudent(v); put(st, x - 0.4, y - 0.57, 180, 0, null, false); }   // P03: 2 la bănci
-  for (const [x, y, r, v] of [[8.4, 1.88, 180, 3], [11.6, 6.32, 0, 4], [11.0, 1.88, 180, 0]]) put(seatedStudent(v, 0.17), x, y, r, 1, null, false);   // CCA: pe taburete, la mesele de expunere
+  for (const [x, y, r, v] of [[8.4, 1.03, 180, 3], [11.6, 4.87, 0, 4], [10.95, 5.83, 180, 0]]) put(seatedStudent(v, 0.17), x, y, r, 1, null, false);   // CCA: pe taburete, la mesele de expunere
   function seatLabs() {
     root.updateMatrixWorld(true);
     const CELL = 0.05, bb = new THREE.Box3();
     const SEAT = {
       E01: { mk: (k, n) => labDesk(k, k === 0 ? [0] : k === 3 ? [1] : k === 7 ? [3] : [], n), w: 1.6, d: 0.75, seats: 2, face: 0, gap: 0.3, fixed: [1.48, 2.98, 4.52].flatMap(y => [1.0, 2.7, 4.4].map(x => [x, y])), title: 'Masă de laborator – laptop, osciloscop de banc, multimetru', disc: D.DA + ' · ' + D.MAM1, luc: ['Achiziția și analiza semnalelor de la senzori și actuatori', 'Programare Arduino / STM32 (PlatformIO)'] },
-      E02: { mk: (k, n) => studentDesk(1.6, n), w: 1.6, d: 0.65, seats: 2, face: 0, gap: 0.3, title: 'Loc de lucru studenți (CCA)', disc: D.CCA || 'Calculul și construcția autovehiculelor', luc: ['Calcule, schițe, relevee pe subansamble'] },
       E03: { fixed: [1.15, 2.55, 3.95].flatMap(y => [14.4, 16.25].map(x => [x, y])), pc: true, mk: (k, n) => pcDesk2(30 + k, n, 'cad'), w: 1.6, d: 0.75, seats: 2, face: 0, gap: 0.3, title: 'Posturi PC de simulare dinamică', disc: D.DIN, luc: ['Vitezele pe trepte, momentele la roți, proiect Dinamica II'] },
       E04: { fixed: [[1.15, 13.73], [1.15, 15.23], [1.15, 16.73], [1.15, 18.23], [3.1, 18.43], [5.05, 18.43]], pc: true, mk: (k, n) => pcDesk2(40 + k, n, 'cad'), w: 1.6, d: 0.75, seats: 2, face: 180, gap: 0.3, title: 'Posturi CAD caroserie (CATIA / AutoCAD)', disc: D.CAR + ' · ' + D.CAD, luc: ['Proiect caroserii – forma și dimensiunile exterioare'] },
       E05: { fixed: [15.45, 16.95, 18.45].flatMap(y => [13.3, 14.5, 15.7, 17.7, 18.9].map(x => [x, y])), mk: k => pcDesk(k % 2 ? 'bms' : 'code', 50 + k, 1.2), w: 1.2, d: 0.75, seats: 1, face: 180, gap: 0.0, title: 'Posturi PC – achiziție și analiză date HeV (3 rânduri × 5)', disc: D.HEV, luc: ['Monitorizare BMS, date invertor', 'Simulare propulsie hibridă / electrică'] },
-      E12: { mk: k => pcDesk('cad', 70 + k, 1.2), w: 1.2, d: 0.75, seats: 1, face: 0, gap: 0.0, aisleEvery: 2, faces: [0], noAlt: true, back: 0.67, title: 'Sală CAD / seminar – posturi PC', disc: D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, luc: ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'] },
+      E12: { mk: k => pcDesk('cad', 70 + k, 1.2), w: 1.2, d: 0.75, seats: 1, face: 0, gap: 0.0, aisleEvery: 2, faces: [0], noAlt: true, back: 0.67, maxSeats: 12, title: 'Sală CAD / seminar – posturi PC', disc: D.CAD + ' · ' + D.PCMAI + ' · ' + D.CCMAI, luc: ['Proiecte PCMAI / CCMAI', 'Grafică asistată – CATIA / AutoCAD', 'Seminarii și referate'] },
     };
     // 3 cursanți așezați în fiecare laborator (E01 îi are deja pe mesele cu laptop): pe scaunele unor mese alese din loc în loc
     function seatStudents(id, desks) {
@@ -1371,8 +1386,8 @@ export function buildEquipment(scene) {
         fill(foot, ex0, ey0, ex1, ey1); eq.push([ex0, ey0, ex1, ey1]);
       }
       let fc = 0; for (let k = 0; k < foot.length; k++) if (foot[k] && inRoom[k]) fc++;
-      const F = fc * CELL * CELL, net = A - F, cap = Math.floor(net / norm + 1e-9);
-      stats[id] = { A, F, net, cap, norm, placed: 0, other: otherSeats };
+      const F = fc * CELL * CELL, net = A - F; let cap = Math.floor(net / norm + 1e-9), cap0 = cap;
+      stats[id] = { A, F, net, cap: cap0, norm, placed: 0, other: otherSeats };
       const cfg = SEAT[id]; if (!cfg) continue;
       // zone interzise: în afara încăperii / la < 0,15 m de pereți, standuri + 0,6 m spațiu de lucru, 1,3 m în fața ușilor
       for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) if (!inside(cx(i), cy(j), 0.1)) block[j * nx + i] = 1;
@@ -1381,9 +1396,9 @@ export function buildEquipment(scene) {
       for (const [a, b, c, d] of doorsOf(lvl)) fill(block, a, b, c, d);
       const free = (x0, y0, x1, y1) => { if (x0 < X0 || y0 < Y0 || x1 > X1 || y1 > Y1) return false; for (let j = Math.floor((y0 - Y0) / CELL); j < Math.ceil((y1 - Y0) / CELL); j++) for (let i = Math.floor((x0 - X0) / CELL); i < Math.ceil((x1 - X0) / CELL); i++) if (block[j * nx + i]) return false; return true; };
       // modul = masa + zona scaunului și trecerea din spatele lui (0,75 m); se umple rând cu rând, cu orientarea preferată, apoi rotit la 90° unde nu încape
-      let seats = 0, k = 0;
+      let seats = 0, k = 0; if (cfg.maxSeats) cap0 = cap, cap = Math.min(cap, cfg.maxSeats);
       const desks = [];
-      if (cfg.fixed) { for (const [xc, yc] of cfg.fixed) { desks.push(put(cfg.mk(k, cfg.seats), xc, yc, cfg.face, lvl, k === 0 ? info(cfg.title, cfg.disc, cfg.luc.concat(['ARACIS: ' + fmt(A) + ' m² − standuri și echipamente ' + fmt(F) + ' m² = ' + fmt(net) + ' m² → max. ' + cap + ' locuri (' + fmt(norm) + ' m²/loc)']), 'Metodologia ARACIS, partea I, std. 1.4.1.6 / 1.4.3.6') : null)); seats += cfg.seats; k++; } stats[id].placed = seats; seatStudents(id, desks); continue; }
+      if (cfg.fixed) { for (const [xc, yc] of cfg.fixed) { desks.push(put(cfg.mk(k, cfg.seats), xc, yc, cfg.face, lvl, k === 0 ? info(cfg.title, cfg.disc, cfg.luc.concat(['ARACIS: ' + fmt(A) + ' m² − standuri și echipamente ' + fmt(F) + ' m² = ' + fmt(net) + ' m² → max. ' + cap0 + ' locuri (' + fmt(norm) + ' m²/loc)']), 'Metodologia ARACIS, partea I, std. 1.4.1.6 / 1.4.3.6') : null)); seats += cfg.seats; k++; } stats[id].placed = seats; seatStudents(id, desks); continue; }
       const alt = cfg.alt || (cfg.seats === 2 ? { mk: (kk) => cfg.pc ? pcDesk('cad', 90 + kk, 1.0) : studentDesk(1.0, 1), w: 1.0, d: cfg.pc ? 0.75 : 0.65, seats: 1 } : { mk: kk => pcDesk('cad', 95 + kk, 1.0), w: 1.0, d: 0.75, seats: 1 });
       for (const P of cfg.noAlt ? [cfg] : [cfg, Object.assign({}, cfg, alt, { aisleEvery: 0 })]) {
       const back = P.back || 0.75, hd = P.d / 2; let inRow = 0, rowY = null;
@@ -1397,7 +1412,7 @@ export function buildEquipment(scene) {
             const n = Math.min(P.seats, cap - seats);
             const xc = f === 90 ? x + hd : f === -90 ? x + back + hd : x + mw / 2, yc = f === 0 ? y + back + hd : f === 180 ? y + hd : y + mh / 2;
             if (!rot && rowY !== y) { rowY = y; inRow = 0; }
-            desks.push(put(P.mk(k, n), xc, yc, f, lvl, k === 0 ? info(cfg.title, P.disc, cfg.luc.concat(['ARACIS: ' + fmt(A) + ' m² − standuri și echipamente ' + fmt(F) + ' m² = ' + fmt(net) + ' m² → max. ' + cap + ' locuri (' + fmt(norm) + ' m²/loc)']), 'Metodologia ARACIS, partea I, std. 1.4.1.6 / 1.4.3.6') : null));
+            desks.push(put(P.mk(k, n), xc, yc, f, lvl, k === 0 ? info(cfg.title, P.disc, cfg.luc.concat(['ARACIS: ' + fmt(A) + ' m² − standuri și echipamente ' + fmt(F) + ' m² = ' + fmt(net) + ' m² → max. ' + cap0 + ' locuri (' + fmt(norm) + ' m²/loc)']), 'Metodologia ARACIS, partea I, std. 1.4.1.6 / 1.4.3.6') : null));
             if (rot) fill(block, x, y - P.gap, x + mw - 0.001, y + mh + P.gap);
             else { inRow++; const aisle = P.aisleEvery && inRow % P.aisleEvery === 0 ? 0.8 : P.gap; fill(block, x - P.gap, y, x + mw + aisle, y + mh - 0.001); }
             seats += n; k++; done = true; break;

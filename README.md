@@ -32,7 +32,7 @@ Pe scară se urcă mergând pe trepte. Ușile se deschid singure când te apropi
   * **P02 Service student, 113 m² + magazie piese 5,5 m²:** 2 posturi marcate (elevator cu 2 coloane și post la sol), acces din parcare. Lucrările se pot urmări pe un monitor din holul de intrare, conform RNTR 9.
   * **P03 Laborator motoare, 176 m²:** în formă de L, cu vitrină mare spre stradă, aripă estică pentru standurile de motor și ușă de echipamente spre parcare.
   * **Fâșia de est:** hol de intrare din stradă, vestiar, WC-uri și cameră tehnică.
-* **Etaj:** E01–E05, E12 Sală CAD (15 posturi PC), E13 Sală de protocol (întâlniri oficiale, ședințe), grupuri sanitare.
+* **Etaj:** E01–E05, E12 Sală CAD (12 posturi PC), E13 Sală de protocol (întâlniri oficiale, ședințe), grupuri sanitare.
 * **Fațada:** e tratată ca o clădire universitară: fibrociment deschis și grafit, cadru alb în consolă, copertină la intrare, accente turcoaz. Scara S1 are ecran de lamele, balustradă din sticlă și trepte placate cu HPL.
 
 ### Capacitate maximă conform ARACIS și locuri amenajate
@@ -45,11 +45,11 @@ Suprafața netă = suprafața încăperii (din plan) − amprenta standurilor di
 | P02 Service student | 115,9 m² | 38,0 m² | 77,9 m² | 4 | 19 | – (fără mese) |
 | P03 Laborator motoare | 176,6 m² | 18,7 m² | 157,9 m² | 4 | 39 | – (fără mese) |
 | E01 Diagnosticare + Mecatronică | 55,3 m² | 8,5 m² | 46,8 m² | 4 | 11 | 11 |
-| E02 CCA | 55,4 m² | 8,7 m² | 46,6 m² | 4 | 11 | 11 |
+| E02 CCA | 55,4 m² | – | – | 4 | 10 | 36 taburete la 6 mese mari |
 | E03 Dinamică | 55,3 m² | 16,4 m² | 38,9 m² | 4 | 9 | 6 |
 | E04 Caroserii | 64,4 m² | 10,8 m² | 53,6 m² | 4 | 13 | 13 |
 | E05 HeV | 64,4 m² | 6,8 m² | 57,6 m² | 4 | 14 | 13 |
-| E12 Sală CAD | 41,7 m² | 0 | 41,7 m² | 2,5 | 16 | 15 |
+| E12 Sală CAD | 41,7 m² | 0 | 41,7 m² | 2,5 | 16 | 12 |
 
 ### Trasee din stradă
 
