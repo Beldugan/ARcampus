@@ -58,6 +58,28 @@ for(const it of eq[0]){
   if(u0<b&&u1>a&&v0<13.5&&v1>10.7)faults.push('gate approach obstructed by '+it.name);
  }
 }
+// R09 ergonomic layout: no seminars; six functions occupy five larger labs.
+const labs=plan.ROOMS.filter(r=>r.lvl===1&&!r.hall&&!r.wc);
+assert.deepEqual(labs.map(r=>r.id).sort(),['E01','E02','E04','E05','E12']);
+for(const r of labs)assert(r.area>47,'undersized laboratory '+r.id);
+// Primary working aisles are checked at 1.20m width, not just for a 0.56m avatar.
+for(const [a,b,v]of [[8,18.5,10.0],[20.2,28.6,10.0],[30.2,35.8,9.5],[21.2,29.3,2.6],[30.7,39.0,2.7]]){
+ for(let u=a;u<=b;u+=.05)assert(!blocked(u,v,1,.6),`1.20m lab aisle blocked at ${u.toFixed(2)},${v}`);
+}
+for(let v=8;v<=11.6;v+=.05)assert(!blocked(37.4,v,1,.6),'printing service aisle blocked');
+// Caroserii: continuous 1.20m perimeter route around the 4.4 x 1.8m shell.
+for(const[a,b]of [[[10.65,1.05],[16.35,1.05]],[[16.35,1.05],[16.35,4.15]],[[16.35,4.15],[10.65,4.15]],[[10.65,4.15],[10.65,1.05]]]){
+ const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.05);
+ for(let i=0;i<=n;i++)assert(!blocked(a[0]+(b[0]-a[0])*i/n,a[1]+(b[1]-a[1])*i/n,1,.6),'car body perimeter route obstructed');
+}
+// No free-standing floor object may protrude through the walls of its laboratory.
+for(const it of equipment.items.filter(it=>it.lvl===1&&it.collide)){
+ const b=new THREE.Box3().setFromObject(it.obj),u=(b.min.z+b.max.z)/-2,v=12.5-(b.min.x+b.max.x)/2;
+ const r=labs.find(r=>u>=r.plan[0]&&u<=r.plan[2]&&v>=r.plan[1]&&v<=r.plan[3]);
+ if(!r)continue;
+ const[a,b0,d,e]=r.plan;
+ assert(-b.max.z>=a-.03&&-b.min.z<=d+.03&&12.5-b.max.x>=b0-.03&&12.5-b.min.x<=e+.03,'floor object crosses lab wall: '+it.info?.name);
+}
 // Stair surfaces must connect continuously through both flights and intermediate landing.
 for(const external of[false,true]){
  const seq=external?[[44.1,5.84],[44.1,2.2],[42.4,2.2],[42.4,5.84]]:[[1,6.9],[1,10.54],[2.8,10.54],[2.8,6.9]];

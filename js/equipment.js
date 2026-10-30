@@ -1303,7 +1303,7 @@ export function buildEquipment(scene) {
  const put=(obj,u,v,angle,lvl,name='',disc='',collide=true,h=0)=>{
   const[x,y]=toWorld(u,v);obj.position.set(x,LEVEL_H[lvl]+h,-y);obj.rotation.y=THREE.MathUtils.degToRad(90+angle);
   obj.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
-  const info=name?{name,disc,lucrari:['Amplasare propusă în planul R06; verificare cu fișa utilajului.'],sursa:'AR_Campus_R06.pdf · A01/A02',desc:'Studiu conceptual, fără certificare de conformitate.'}:null;
+  const info=name?{name,disc,lucrari:['Amplasare propusă în planul R09; verificare cu fișa utilajului.'],sursa:'AR_Campus_Planuri_Memoriu_R09.pdf · A01/A02',desc:'Studiu conceptual, fără certificare de conformitate.'}:null;
   if(info)obj.userData.info=info;obj.userData.plan={u,v,angle};root.add(obj);items.push({obj,lvl,collide,info});return obj;
  };
  const table=(u,v,lvl,pc=false,seed=1)=>put(pc?pcDesk2(seed,2):studentDesk(1.6,2),u,v,0,lvl,pc?'Post dublu CAD':'Masă dublă de seminar',pc?D.CAD:'Seminar');
@@ -1343,49 +1343,43 @@ export function buildEquipment(scene) {
   // support rails at the adapted WC; no obstruction in the transfer zone
   const rail=new THREE.Group();Cy(rail,.018,.7,MAT.steel,0,0,0,'z',12);put(rail,.44,4.85,0,lvl,'Bară de sprijin','Accesibilitate',false,.75);
  }
- // Seminar rooms: nine double desks, 18 seats, an aisle and door approach kept open.
- for(const u0 of [7,15]){
-  for(const du of [1.1,2.9,6.6])for(const v of [1.3,2.55,3.8])table(u0+du,v,1);
-  put(whiteboard(2.2),u0+4.3,.45,0,1,'Tablă seminar','Seminar',false);
- }
- // E01 diagnostics and mechatronics: perimeter stands, four working tables.
- for(const [i,u]of[8.1,10.1,12.1,14.0].entries())put(standMobil('meca',i+1),u,11.7,0,1,'Stand mobil mecatronică '+(i+1),D.MAM1);
- for(const [i,u]of[8.3,10,11.7,13.4].entries())put(labDesk(i,[],2),u,9.35,0,1,'Masă instrumentată',D.DA);
- // E03 dynamics: demonstration stands at the perimeter, local PC workpoints.
- put(halfCarRig(),20.6,10.7,0,1,'Stand dinamic punte',D.DIN);
- put(shockTower(),15.7,11.6,0,1,'Stand amortizor',D.DIN);
- put(tireCage(),17.4,11.1,0,1,'Stand pneuri',D.DIN);
- for(const u of [16,18.3,20.6])table(u,9,1,true,20+u);
- // E05 teaching rigs are low-voltage demonstrators; no HV operation claimed.
- put(batteryMockup(),24.3,11.1,0,1,'Baterie didactică ≤60 V',D.HEV);
- put(emotorBench(),27,11.1,0,1,'Motor electric + invertor',D.HEV);
- put(displayTable([hybridCut],'Transmisie hibridă'),29.4,11,0,1,'Transmisie hibridă',D.HEV);
- for(const u of [24,26.3,28.6])table(u,9,1,true,40+u);
- // CAD and printing separated by a wall and a dedicated door.
- for(const [i,du]of[1.1,4].entries())for(const v of [9.3,10.95])table(31+du,v,1,true,70+i);
- put(bigPrinter3D(),38.25,10.2,0,1,'Imprimantă 3D FDM','Fabricație aditivă');
- put(gelPrinter3D(),38.65,8.5,0,1,'Imprimantă gel / UV','Fabricație aditivă');
- // CCA: three separate demonstrations, six working places.
- for(const [i,u]of[24.2,26.5,28.8].entries())put(displayTable(i===0?[gearboxCut,clutch]:i===1?[strut,steeringRack]:[brakeKit,wheelHub],'CCA',1.12),u,2.5,0,1,'Masă subansamble CCA',D.CCA);
- // E04 car body and measurement area, with a clear door approach.
- put(biwShell(),36.5,2.7,0,1,'Caroserie în alb',D.CAR);
- put(doorStand(),32.2,1.3,0,1,'Ușă pe stand',D.CAR);
- put(measureArm(),33,3.4,0,1,'Braț de măsurare',D.CAR);
- // Reference-room dressing: technical drawings, monitor and seated students.
- for(const [u,v,kind]of [[10.7,12.12,'gear'],[19.3,12.12,'dyn'],[26.6,12.12,'car'],[36.4,.42,'chassis']])
+ // R09: all first-floor academic space is assigned to laboratories.
+ // Diagnostic/mechatronics: instrumented benches on one side, stand zone on the other.
+ for(const [i,u]of[9.5,12.2,14.9,17.6].entries())put(labDesk(i,[],2),u,8.9,0,1,'Masă instrumentată',D.DA);
+ for(const [i,u]of[8.3,10.5,12.7,14.9].entries())put(standMobil(i===3?'diag':'meca',i+1),u,11.65,0,1,'Stand mobil diagnosticare / mecatronică '+(i+1),D.MAM1);
+ put(engineStandF1C(),17.9,11.1,0,1,'Motor F1C pe stand rotativ',D.DA);
+ // HeV: central working aisle between desk row and low-voltage teaching equipment.
+ for(const u of[21.9,24.5,27.1])table(u,8.9,1,true,40+u);
+ put(batteryMockup(),21,11.25,0,1,'Baterie didactică ≤60 V',D.HEV);
+ put(emotorBench(),24,11.25,0,1,'Motor electric + invertor',D.HEV);
+ put(displayTable([hybridCut],'Transmisie hibridă'),27.1,11.15,0,1,'Transmisie hibridă',D.HEV);
+ // CAD and printing are parts of the same laboratory; machines have an enclosed service zone.
+ for(const [i,u]of[30.5,32.2,33.9,35.6].entries())table(u,11.4,1,true,70+i);
+ put(bigPrinter3D(),38.9,10.8,0,1,'Imprimantă 3D FDM','Fabricație aditivă');
+ put(gelPrinter3D(),39.0,8.5,0,1,'Imprimantă gel / UV','Fabricație aditivă');
+ // Car body: full perimeter clearance around the shell and a separate measurement station.
+ put(biwShell(),13.5,2.6,0,1,'Caroserie în alb',D.CAR);
+ put(doorStand(),18.9,1.2,0,1,'Ușă pe stand',D.CAR);
+ put(measureArm(),17.25,2.6,0,1,'Braț de măsurare',D.CAR);
+ put(sheetParts(),9.1,1.2,0,1,'Masă cu elemente de caroserie',D.CAR);
+ put(draftingTableA0(),18.7,3.85,180,1,'Planșetă de desen A0',D.CAR);
+ // CCA and dynamics are zoned in one shared 92.9 m² room; the middle circulation band is kept free.
+ for(const [i,u]of[22,25,28].entries())put(displayTable(i===0?[gearboxCut,clutch]:i===1?[strut,steeringRack]:[brakeKit,wheelHub],'CCA',1.12),u,1.4,0,1,'Masă subansamble CCA',D.CCA);
+ for(const u of[22,25,28])table(u,4.3,1,true,20+u);
+ put(halfCarRig(),33.9,1.25,0,1,'Stand dinamic punte',D.DIN);
+ put(shockTower(),31.2,1.15,0,1,'Stand amortizor',D.DIN);
+ put(tireCage(),37.7,1.6,0,1,'Stand pneuri',D.DIN);
+ for(const u of[32.6,35.5,38.3])table(u,4.3,1,true,30+u);
+ for(const[u,v,kind]of[[12,12.12,'gear'],[24,12.12,'car'],[26,.42,'gear'],[35,.42,'dyn'],[13,.42,'chassis']])
   put(poster(kind,1.7),u,v,v>6?0:180,1,'Planșă tehnică de laborator','Suport didactic',false);
- put(tvDisplay(1.6,'cad',92),7.18,10.1,90,1,'Ecran de prezentare','Diagnosticare',false);
+ put(tvDisplay(1.6,'cad',92),7.18,10.2,90,1,'Ecran de prezentare','Diagnosticare',false);
  const occupied={};let person=0;
- for(const it of items.filter(it=>it.lvl===1&&it.obj.userData.chairs)) {
-  const {u,v}=it.obj.userData.plan;
-  const room=v<6?(u<15?'seminar1':'seminar2'):u<15?'meca':u<23?'dynamics':u<31?'hev':'cad';
-  const quota=['meca','cad'].includes(room)?2:1;
-  if((occupied[room]||0)>=quota)continue;
-  const [cx,cz]=it.obj.userData.chairs[0],student=seatedStudent(person++%5);
-  student.position.set(cx,0,cz);student.rotation.y=Math.PI;it.obj.add(student);occupied[room]=(occupied[room]||0)+1;
+ for(const it of items.filter(it=>it.lvl===1&&it.obj.userData.chairs)){
+  const{u,v}=it.obj.userData.plan,room=v<6?'cca-dyn':u<19.5?'meca':u<29.5?'hev':'cad';
+  if((occupied[room]||0)>=2)continue;
+  const[cx,cz]=it.obj.userData.chairs[0],student=seatedStudent(person++%5);student.position.set(cx,0,cz);student.rotation.y=Math.PI;it.obj.add(student);occupied[room]=(occupied[room]||0)+1;
  }
- // Small working groups, kept in the free side aisles instead of the vehicle gates.
- for(const [u,v,angle,lvl,variant]of [[31.3,6.2,90,0,5],[31.3,8.1,90,0,6],[24.5,7.2,-90,0,5],[10.7,8.8,180,0,3],[25.6,10.05,180,1,6]]) {
+ for(const[u,v,angle,lvl,variant]of[[31.3,6.2,90,0,5],[31.3,8.1,90,0,6],[24.5,7.2,-90,0,5],[10.7,8.8,180,0,3]]){
   const obj=put(standingStudent(variant,.3),u,v,angle,lvl,'Cursant la lucru','Activitate didactică',true);obj.userData.person=true;
  }
  return{root,items};

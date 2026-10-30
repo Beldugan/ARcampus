@@ -1,17 +1,24 @@
 # AR Campus · simulare arhitecturală R06
 
-Tur 3D al corpului P+1 de 12,50 × 40 m, actualizat după **AR_Campus_R06.pdf**, planșele A01/A02 și detaliile D01/D02. Studiu conceptual; nu reprezintă proiect autorizat sau verificare de conformitate.
+Tur 3D al corpului P+1 de 12,50 × 40 m, actualizat conform reviziei R09, planșele A01/A02 și detaliile nucleului. Studiu conceptual; nu reprezintă proiect autorizat sau verificare de conformitate.
 
-## Organizare
+## Organizare R09 - etaj pentru laboratoare
 
-- Nucleu frontal identic pe niveluri: scară interioară S1, lift cu acces lateral din galerie, WC adaptat și cabine separate F/B.
-- La parter, intrare dinspre stradă și coridor de personal pe latura estică, legat de distribuitorul anexelor. Nu se traversează ITP sau service-ul pentru acces la anexe.
-- La etaj, coridor central de 2 m și acces la toate sălile. Fațada spre stradă nu are ușă în gol.
-- Scara exterioară **S2** se leagă prin podestul superior de ușa din spate. Planșeul are gol real pentru scara interioară și lift.
-- Seminar: **18 locuri** în fiecare sală. CAD: **8 posturi**; fabricația aditivă se află separat în E15.
-- Suprafețele și locurile sunt propuneri geometrice, fără afirmații de acreditare ARACIS sau autorizare RAR/ISU.
+Seminarele au fost eliminate de la etaj. CCA și Dinamica împart o sală zonată, astfel încât cele șase funcțiuni folosesc cinci laboratoare mai mari.
 
-Geometria, camerele, golurile și suprafețele de mers sunt definite împreună în `js/plan-r06.js`. Pozițiile obiectelor sunt în coordonatele PDF: `u` = lungime, `v` = spre vest. Conversie în model: `x = 12.5 - v`, `y = u`.
+| Laborator | Suprafață nominală | Posturi propuse |
+|---|---:|---:|
+| Diagnosticare + Mecatronică | 59,3 m² | 8 |
+| HeV | 47,3 m² | 6 |
+| CAD + imprimare 3D | 49,7 m² | 8 CAD |
+| Caroserii | 64,1 m² | 8 |
+| CCA + Dinamică | 92,9 m² | 12 partajate |
+
+CAD include o incintă de imprimare de aproximativ 15,4 m², cu ventilare dedicată de proiectat. Coridorul central de 2,00 m, scările S1/S2, liftul și grupurile sanitare sunt păstrate. Parterul și accesele sale sunt păstrate.
+
+Mobilarea este reamplasată; testele verifică benzi principale de lucru de 1,20 m, accesul la imprimante și evitarea trecerii obiectelor prin pereții laboratoarelor. Aceasta este verificare geometrică, nu certificare ergonomică sau normativă. Efectivele, utilajele, vibrațiile și activitățile simultane se validează în proiectul de specialitate. CCA și Dinamica folosesc posturile în comun; lucrările zgomotoase se programează separat.
+
+Datele actuale sunt în `js/plan-r06.js` (nume păstrat pentru compatibilitate, revizie exportată R09).
 
 ## Utilizare
 
@@ -40,7 +47,7 @@ Din rădăcina repository-ului:
 node --experimental-loader ./tests/module-loader.mjs tests/geometry.mjs
 ```
 
-Verificarea construiește geometria Three.js și cele 102 obiecte, testează traseele către WC-uri/lift, coridoarele, accesibilitatea fiecărei încăperi prin propagare pe o grilă și continuitatea rampelor. Canvasul și încărcarea fișierelor GLB sunt înlocuite în test; acesta **nu verifică randarea WebGL**, aspectul texturilor sau încărcarea modelului auto. Pentru acestea este necesară verificarea în browser.
+Verificarea construiește geometria Three.js și echipamentele actuale, testează traseele către WC-uri/lift, coridoarele, accesibilitatea fiecărei încăperi prin propagare pe o grilă și continuitatea rampelor. Canvasul și încărcarea fișierelor GLB sunt înlocuite în test; acesta **nu verifică randarea WebGL**, aspectul texturilor sau încărcarea modelului auto. Pentru acestea este necesară verificarea în browser.
 
 În mediul în care s-a pregătit R06, serviciul de previzualizare nu era disponibil; verificarea vizuală în browser rămâne de efectuat înainte de publicare.
 

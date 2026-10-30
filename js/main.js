@@ -151,12 +151,11 @@ const tp=(name,u,v,h=0,yaw=0)=>{const[x,y]=toWorld(u,v);return{name,x,y,h,yaw};}
 const TP=[
  tp('Exterior · stradă',-8,6.2),tp('P01 · ITP didactic',20.3,7.5,0,90),tp('P02 · Service',27,5.3,0,90),
  tp('P03 · Motoare',7.6,8,0,0),tp('Nucleu parter / WC',4.9,5.7,0,-90),
- tp('E01 · Mecatronică',7.8,8.1,H1),tp('E02 · CCA',23.8,4,H1),tp('E03 · Dinamică',15.8,8,H1),
- tp('E04 · Caroserii',31.8,4,H1),tp('E05 · HeV',23.8,8,H1),tp('E12 · CAD · 8 posturi',31.8,8,H1),
- tp('E13 · Seminar · 18 locuri',19.9,4.4,H1),tp('E14 · Seminar · 18 locuri',11.9,4.4,H1),
+ tp('E01 · Diagnosticare + Mecatronică · 59 m²',8,10.3,H1),tp('E02 · CCA + Dinamică · 93 m²',21.7,2.9,H1),tp('Zona Dinamică',31,2.9,H1),
+ tp('E04 · Caroserii · 64 m²',8.1,3.8,H1),tp('E05 · HeV · 47 m²',20.7,10.2,H1),tp('E12 · CAD + imprimare 3D · 50 m²',30.5,8,H1),
  tp('Nucleu etaj / WC',5.3,6.25,H1,90),tp('WC adaptat parter',4.5,3.55,0,90),tp('WC adaptat etaj',4.5,3.55,H1,90),
  tp('S1 · Scara interioară',1,6.1,0,-90),tp('S2 · Scara exterioară',44.1,6.5,0,180),
- tp('E15 · Fabricație aditivă',37.4,8,H1),{name:'Curte ITP / service',x:-9,y:14,h:0,yaw:-90},{name:'Parcare lot 18',x:-24,y:4,h:0,yaw:0}
+ tp('E12 · Incintă imprimare 3D',37.4,8.6,H1),{name:'Curte ITP / service',x:-9,y:14,h:0,yaw:-90},{name:'Parcare lot 18',x:-24,y:4,h:0,yaw:0}
 ];
 const tpList = document.getElementById('tplist');
 TP.forEach((t, i) => { const b = document.createElement('button'); b.textContent = (i < 9 ? (i + 1) + '. ' : '') + t.name; b.onclick = () => teleport(t); tpList.appendChild(b); });
@@ -280,7 +279,7 @@ function setPlanView(level){
 for(const button of document.querySelectorAll('[data-view]'))button.addEventListener('click',()=>setPlanView(button.dataset.view==='tour'?null:Number(button.dataset.view)));
 
 function currentRoom() {
-  if(planView!==null)return 'PLAN '+(planView?'ETAJ +4,80':'PARTER ±0,00')+' · R06 · vedere secționată la +1,15 m';
+  if(planView!==null)return 'PLAN '+(planView?'ETAJ +4,80':'PARTER ±0,00')+' · R09 · vedere secționată la +1,15 m';
   const lvl = player.h > 2.6 ? 1 : 0;
   for (const r of ROOMS) if (r.lvl === lvl && player.x >= r.r[0] && player.x <= r.r[2] && player.y >= r.r[1] && player.y <= r.r[3]) return r.name;
   if (player.x > 4.8 && player.x < 13.6 && player.y > 39.9 && player.y < 44) return 'Scara exterioară S2 (R06)';
@@ -302,7 +301,7 @@ const CONCEPT = {
   SPATE: [['ext-spate', 'Fațada posterioară și parcarea – concept'], ['ext-fata', 'Fațada principală – concept']],
   P01: [['itp-1', 'Linie ITP · vedere de ansamblu'], ['itp-2', 'Linie ITP · echipamente de verificare'], ['itp-3', 'Linie ITP · intrare']],
   P02: [['srv-1', 'Service didactic · două posturi'], ['srv-2', 'Service didactic · bancuri și scule'], ['srv-3', 'Service didactic · elevator']],
-  P03: [['p03', 'PCMAI + CCMAI']], E12: [['sala', 'Sală cu posturi PC']], E01: [['e01', 'Diagnosticare + Mecatronică'], ['sala', 'Sală cu posturi PC']], E02: [['e02', 'CCA']], E03: [['e03', 'Dinamică']],
+  P03: [['p03', 'PCMAI + CCMAI']], E12: [['sala', 'Sală cu posturi PC']], E01: [['e01', 'Diagnosticare + Mecatronică'], ['sala', 'Sală cu posturi PC']], E02: [['e02', 'CCA'],['e03','Dinamică']], E03: [['e03', 'Dinamică']],
   E04: [['e04', 'Caroserii']], E05: [['e05', 'HeV – Hibrid / Electric'], ['e05-2', 'HeV – lucru la bateria de tracțiune']],
 };
 const cEl = document.getElementById('concept'), cImg = cEl.querySelector('img'), cCap = cEl.querySelector('.cap');

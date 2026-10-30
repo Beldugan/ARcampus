@@ -1,6 +1,6 @@
 // Source: AR_Campus_R06.pdf, A01/A02 and D01/D02. Metres, nominal geometry.
 // PDF coordinates: u along 40 m, v toward west. Model: x=12.5-v, y=u.
-export const REVISION = 'R06';
+export const REVISION = 'R09';
 export const BW=12.5, BD=40, H0=0, H1=4.8, ROOF=8.4, PARAPET=9.1;
 export const toWorld=(u,v)=>[BW-v,u];
 export const rectWorld=([u0,v0,u1,v1])=>[BW-v1,u0,BW-v0,u1];
@@ -25,8 +25,13 @@ room('P11','Cameră tehnică',0,[36.65,2.3,39.7,5.3],'tile');
 room('P10','Vestiar',0,[36.65,5.4,39.7,8.4],'tile');
 room('P12','Magazie piese',0,[36.65,8.5,39.7,12.2],'tile');
 room('E06','Coridor etaj',1,[7,5.25,39.75,7.25],'stone',{hall:true});
-for(const [u,w,id,name,seats] of [[7,8,'E01','Diagnosticare + Mecatronică',8],[15,8,'E03','Dinamică',6],[23,8,'E05','HeV',6],[31,5.5,'E12','CAD',8],[36.5,3.5,'E15','Fabricație aditivă',0]])room(id,name,1,[u,7.4,u+w-.15,12.2],'vinyl',{seats});
-for(const [u,w,id,name,seats] of [[7,8,'E14','Seminar',18],[15,8,'E13','Seminar / protocol',18],[23,8,'E02','CCA',6],[31,9,'E04','Caroserii',8]])room(id,name,1,[u,.3,u+w-.15,5.1],'vinyl',{seats});
+// R09: six academic functions in five generous laboratories; CCA and dynamics share space.
+for(const [u,w,id,name,seats] of [[7,12.5,'E01','Diagnosticare + Mecatronică',8],[19.5,10,'E05','HeV',6],[29.5,10.5,'E12','CAD + imprimare 3D',8]])room(id,name,1,[u,7.4,u+w-.15,12.2],'vinyl',{seats});
+room('E04','Caroserii',1,[7,.3,20.35,5.1],'vinyl',{seats:8});
+room('E02','CCA + Dinamică',1,[20.5,.3,39.85,5.1],'vinyl',{seats:12});
+export const SUBZONES=[{id:'E12-P',parent:'E12',name:'Imprimare 3D - incintă ventilată',plan:[36.65,7.4,39.85,12.2]},
+ {id:'E02-C',parent:'E02',name:'CCA',plan:[20.5,.3,29.8,5.1]},
+ {id:'E02-D',parent:'E02',name:'Dinamică',plan:[30,.3,39.85,5.1]}];
 export const ROOMS=PLAN_ROOMS;
 export const LEVEL_H=[H0,H1];
 export const ROOM_AREA={};
@@ -41,9 +46,9 @@ const wins=(a,b)=>{const r=[];for(let u=a;u+1.3<b;u+=3)r.push(opening(u,u+1.3,'w
 for(const lvl of [0,1]){
  wall(0,0,0,12.5,lvl,'front',lvl?[opening(1,2,'win',1.6,2.5),opening(8.5,9.5,'win',1.6,2.5)]:[opening(5.6,6.8),opening(1,2,'win',1.6,2.5)],.25);
  wall(40,0,40,12.5,lvl,'back',lvl?[opening(5.6,6.8),opening(1,2,'win'),opening(9,10.3,'win',.95,2.7)]:[opening(.55,1.65),opening(6,7,'win',1.7,2.7)],.25);
- wall(0,0,40,0,lvl,'right',lvl?[...wins(1,7),...[ [7.7,14.2],[15.7,22.2],[23.7,30.2],[31.7,39] ].map(([a,b])=>opening(a,b,'win',.95,2.65))]:wins(1,39),.25);
+ wall(0,0,40,0,lvl,'right',lvl?[...wins(1,7),...[[7.7,19.6],[21.2,29.3],[30.5,39]].map(([a,b])=>opening(a,b,'win',.95,2.65))]:wins(1,39),.25);
  const gateOps=[opening(20.8,24.2,'gate',0,3.7),opening(29.3,32.7,'gate',0,3.7)];
- wall(0,12.5,40,12.5,lvl,'left',lvl?[...wins(1,7),...[[7.7,14.2],[15.7,22.2],[23.7,30.2],[31.6,35.8],[37,39]].map(([a,b])=>opening(a,b,'win',.95,2.65))]:[...wins(1,7),opening(8.2,9.5,'win',.95,2.7),opening(10.8,12.1,'win',.95,2.7),opening(13.3,14.42,'door'),opening(15.4,16.7,'win',.95,2.7),opening(17.4,18.7,'win',.95,2.7),...gateOps,opening(37.4,38.7,'win',1.4,2.7)],.25);
+ wall(0,12.5,40,12.5,lvl,'left',lvl?[...wins(1,7),...[[7.7,18.7],[20.2,28.7],[30.2,39]].map(([a,b])=>opening(a,b,'win',.95,2.65))]:[...wins(1,7),opening(8.2,9.5,'win',.95,2.7),opening(10.8,12.1,'win',.95,2.7),opening(13.3,14.42,'door'),opening(15.4,16.7,'win',.95,2.7),opening(17.4,18.7,'win',.95,2.7),...gateOps,opening(37.4,38.7,'win',1.4,2.7)],.25);
  wall(6.925,.25,6.925,12.25,lvl,null,[opening(lvl?5.55:.55,lvl?6.95:1.95,'void')]);
  // WC and lift share gallery; no solid lining across openings
  wall(.3,2.65,3.375,2.65,lvl);wall(.3,5.45,3.45,5.45,lvl);
@@ -61,10 +66,12 @@ for(const u of [18.925,25.925])wall(u,2.2,u,12.25,0);
 wall(35.1,2.2,35.1,12.25,0);
 wall(36.625,2.2,36.625,12.25,0,null,[opening(2.6,3.6),opening(5.7,6.7),opening(8.8,9.8)]);
 for(const v of [2.2,5.35,8.45])wall(36.625,v,39.75,v,0);
-wall(7,5.175,39.75,5.175,1,null,[7.3,15.3,23.3,31.3].map(u=>opening(u,u+1)));
-wall(7,7.325,39.75,7.325,1,null,[7.3,15.3,23.3,31.3,36.8].map(u=>opening(u,u+1)));
-for(const u of [14.925,22.925,30.925]){wall(u,.25,u,5.175,1);wall(u,7.325,u,12.25,1);}
-wall(36.425,7.325,36.425,12.25,1);
+wall(7,5.175,39.75,5.175,1,null,[7.4,21.1,30.5].map(u=>opening(u,u+1.12)));
+wall(7,7.325,39.75,7.325,1,null,[7.4,20.0,30.1].map(u=>opening(u,u+1.12)));
+wall(20.425,.25,20.425,5.175,1);
+for(const u of[19.425,29.425])wall(u,7.325,u,12.25,1);
+// Printing remains inside the CAD laboratory, in a separate ventilated enclosure.
+wall(36.575,7.325,36.575,12.25,1,null,[opening(8.1,9.22,'slide')],.1);
 // Convert to the existing renderer's format. Along-axis openings use world x or world y.
 export const WALLS=PW.map(w=>{
  const r=rectWorld([Math.min(w.u0,w.u1)-w.t/2,Math.min(w.v0,w.v1)-w.t/2,Math.max(w.u0,w.u1)+w.t/2,Math.max(w.v0,w.v1)+w.t/2]);
