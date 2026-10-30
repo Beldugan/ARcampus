@@ -242,7 +242,7 @@ function extractionReel(len = 2.6, reel = MAT.red) {
 function studentDesk(w = 1.8, n = 2) {
   const g = new THREE.Group(); B(g, w, 0.04, 0.65, MAT.wood, 0, 0.73, 0);
   for (const x of [-w / 2 + 0.05, w / 2 - 0.05]) B(g, 0.05, 0.73, 0.6, MAT.grey, x, 0, 0);
-  g.userData.chairs = (n === 1 ? [0] : [-w / 4, w / 4]).map(x => [x, 0.55]);
+  g.userData.chairs = (n === 1 ? [0] : [-w / 4, w / 4]).map(x => [x, 0.55]); g.userData.desk = [w, 0.65];
   for (const x of (n === 1 ? [0] : [-w / 4, w / 4])) { const c = chair(); c.position.set(x, 0, 0.55); c.rotation.y = Math.PI; g.add(c); }
   return g;
 }
@@ -275,7 +275,7 @@ function pcDesk(kind = 'cad', seed = 1, w = 1.4) {
   monitor(g, kind, seed, 0, 0.765, -0.2);
   B(g, 0.44, 0.018, 0.14, C(0x2a2d31), 0, 0.765, 0.1); B(g, 0.06, 0.02, 0.1, C(0x2a2d31), 0.32, 0.765, 0.12);   // tastatură + mouse
   const tx = w / 2 - 0.18; B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), tx, 0, -0.1); Cy(g, 0.006, 0.01, C(0x3b82f6, { emissive: 0x3b82f6, emissiveIntensity: 1 }), tx, 0.38, 0.12, 'z', 8);   // unitate PC
-  const c = officeChair(); c.position.set(0, 0, 0.62); c.rotation.y = Math.PI; g.add(c); g.userData.chairs = [[0, 0.62]]; return g;
+  const c = officeChair(); c.position.set(0, 0, 0.62); c.rotation.y = Math.PI; g.add(c); g.userData.chairs = [[0, 0.62]]; g.userData.desk = [w, 0.75]; return g;
 }
 function pcDesk2(seed = 1, n = 2, kind = 'cad') {   // masă dublă 1,6 m cu 2 posturi PC (monitor, tastatură, mouse, unitate, scaun rotativ)
   const g = new THREE.Group(), w = 1.6; B(g, w, 0.035, 0.75, MAT.wood, 0, 0.73, 0); const lx = w / 2 - 0.03;
@@ -287,7 +287,7 @@ function pcDesk2(seed = 1, n = 2, kind = 'cad') {   // masă dublă 1,6 m cu 2 p
     B(g, 0.2, 0.42, 0.44, C(0x1f2226, { metalness: 0.3 }), x + (i ? 0.22 : -0.22), 0, -0.1);
     const c = officeChair(); c.position.set(x, 0, 0.62); c.rotation.y = Math.PI; g.add(c); (g.userData.chairs ||= []).push([x, 0.62]);
   }
-  return g;
+  g.userData.desk = [1.6, 0.75]; return g;
 }
 function labScope(seed = 1) { const g = new THREE.Group(); B(g, 0.34, 0.17, 0.13, C(0xd9dcdf, { roughness: 0.5 }), 0, 0, 0); screen(g, 0.17, 0.11, 'scope', seed, -0.06, 0.03, 0.066); for (let i = 0; i < 6; i++) Cy(g, 0.01, 0.01, C(0x333), 0.07 + (i % 2) * 0.05, 0.04 + Math.floor(i / 2) * 0.04, 0.07, 'z', 10); for (let i = 0; i < 4; i++) Cy(g, 0.007, 0.012, [MAT.yellow, C(0x22aaee), C(0xdd44aa), MAT.green][i], -0.12 + i * 0.045, 0.015, 0.07, 'z', 10); return g; }
 function benchPSU() { const g = new THREE.Group(); B(g, 0.22, 0.13, 0.25, C(0x2b2f33), 0, 0, 0); B(g, 0.09, 0.04, 0.005, C(0x0a0a0a), -0.05, 0.08, 0.126); plate(g, '12.00 V', '', 0.08, -0.05, 0.1, 0.13, 0, '#300'); Cy(g, 0.008, 0.012, MAT.red, 0.06, 0.03, 0.13, 'z', 8); Cy(g, 0.008, 0.012, MAT.black, 0.085, 0.03, 0.13, 'z', 8); return g; }
@@ -421,6 +421,7 @@ function labDesk(seed = 0, students = [], n = 2) {
   probeCable(g, [0.27, 0.79, -0.11], [0.6, 0.76, 0.3]); probeCable(g, [0.33, 0.79, -0.11], [0.7, 0.3, 0.38], 0x1a1a1a);
   for (const [c, dx] of [[MAT.red, 0], [C(0x111111), 0.02]]) { const cv = new THREE.CatmullRomCurve3([new THREE.Vector3(0.12 + dx, 0.765, 0.15), new THREE.Vector3(0.18 + dx, 0.77, 0.28), new THREE.Vector3(0.24 + dx, 0.74, 0.37), new THREE.Vector3(0.26 + dx, 0.35, 0.4), new THREE.Vector3(0.12 + dx, 0.05, 0.35)]); g.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 30, 0.0035, 6), c)); }
   // scaune; pe locul din stânga poate sta un cursant (cu fața spre laptop)
+  g.userData.desk = [1.6, 0.75]; g.userData.chairs = (n === 1 ? [-0.38] : [-0.38, 0.4]).map(x => [x, x < 0 && students.length ? 0.58 : 0.66]);
   for (const x of (n === 1 ? [-0.38] : [-0.38, 0.4])) {
     const occ = x < 0 && students.length; const zc = occ ? 0.58 : 0.66;
     const c = labChair(); c.position.set(x, 0, zc); c.rotation.y = Math.PI + (occ ? 0 : (seed % 2 ? 0.25 : -0.2)); g.add(c);
